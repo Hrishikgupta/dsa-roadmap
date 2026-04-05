@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#3 — Balancing the Warehouse Stock | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 1: Foundation</span>
+    <span class="problem-id">Problem #3 of 50</span>
+  </div>
+</div>
+
+<!-- Problem Progress -->
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #3: Balancing the Warehouse Stock</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#3 — Balancing the Warehouse Stock</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Prefix Sum</p>
+
+  <!-- SECTION 0: Real-World Scenario -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek warehouse manager ho. Tumhare paas 7 days ka stock data hai:</p>
+      <p><code>[3, 1, 4, 1, 5, 9, 2]</code> (units received each day)</p>
+      <p>Boss baar baar poochta hai:</p>
+      <ul>
+        <li>"Day 2 se Day 5 tak total kitna stock aaya?" → <code>1+4+1+5 = 11</code></li>
+        <li>"Day 0 se Day 3 tak?" → <code>3+1+4+1 = 9</code></li>
+        <li>"Day 4 se Day 6 tak?" → <code>5+9+2 = 16</code></li>
+      </ul>
+      <p style="margin-top:8px;">Har baar loop lagake sum karna padega? Agar boss 10,000 baar pooche toh?</p>
+      <p style="color:#4caf50;margin-top:8px;">💡 Kya hum ek baar pre-compute karke har query O(1) mein answer kar sakte hain?</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Problem Understanding -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given an array, answer multiple "range sum queries" efficiently</li>
+        <li>Each query: given <code>left</code> and <code>right</code> index, return sum of elements from <code>left</code> to <code>right</code> (inclusive)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Input → Output Clarity:</b></p>
+      <ul>
+        <li>Input: <code>int[] nums</code> + multiple queries <code>(left, right)</code></li>
+        <li>Output: <code>int</code> sum for each query</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Connection to previous problems:</b></p>
+      <ul>
+        <li>Problem #1: Track one value (minPrice) → avoid inner loop</li>
+        <li>Problem #2: Track multiple values (HashMap) → avoid inner loop</li>
+        <li>Problem #3: <b>Pre-compute cumulative data</b> → avoid repeated work across multiple queries</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Brute Force Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>First instinct:</b> For each query, loop from <code>left</code> to <code>right</code> and add up.</p>
+<pre><code><span class="comment">// Brute Force — O(n) per query, O(n × q) total</span>
+<span class="keyword">public int</span> <span class="type">rangeSum</span>(<span class="type">int</span>[] nums, <span class="type">int</span> left, <span class="type">int</span> right) {
+    <span class="type">int</span> sum = <span class="number">0</span>;
+    <span class="keyword">for</span> (<span class="type">int</span> i = left; i &lt;= right; i++) {
+        sum += nums[i];
+    }
+    <span class="keyword">return</span> sum;
+}</code></pre>
+      <p><b>Problem:</b></p>
+      <ul>
+        <li>Each query takes O(n) in worst case</li>
+        <li>If there are <code>q</code> queries → total = <code>O(n × q)</code></li>
+        <li>For n = 100,000 and q = 100,000 → 10 billion operations. TLE.</li>
+      </ul>
+      <p style="color:#ffc107;margin-top:8px;">🤔 Sochne ka point: Hum baar baar same elements add kar rahe hain. Kya yeh kaam pehle se kar sakte hain?</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Optimization Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Key Insight:</b> Agar tumhare paas "day 0 se day i tak ka total" pehle se stored ho, toh kisi bhi range ka sum ek subtraction mein mil jayega.</p>
+      <p style="margin-top:10px;"><b>Analogy — Odometer (car ka meter):</b></p>
+      <ul>
+        <li>Tumhari car ka odometer 500 km pe hai jab tum Delhi se nikle</li>
+        <li>Jaipur pahunchte ho toh odometer 780 km dikhata hai</li>
+        <li>Delhi → Jaipur distance = <code>780 - 500 = 280 km</code></li>
+        <li>Tumne beech ka har km count nahi kiya — sirf do readings ka difference liya</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Same idea with arrays:</b></p>
+      <ul>
+        <li>Build a "cumulative sum" array: <code>prefix[i] = sum of nums[0..i]</code></li>
+        <li>Range sum (left, right) = <code>prefix[right] - prefix[left - 1]</code></li>
+        <li>One subtraction instead of a loop → <b>O(1) per query</b></li>
+      </ul>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern identified: <b>Prefix Sum — pre-compute to answer queries in O(1)</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Final Approach -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach (Pattern-Based)</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Pattern Name:</b> Prefix Sum</p>
+      <p><b>Why this pattern fits:</b></p>
+      <ul>
+        <li>Multiple queries on the same static array</li>
+        <li>Each query asks for a "range aggregate" (sum, in this case)</li>
+        <li>Pre-computation cost is O(n) once, then every query is O(1)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Algorithm:</b></p>
+      <ol>
+        <li>Create <code>prefix[]</code> array of size <code>n + 1</code> (extra slot to avoid boundary checks)</li>
+        <li><code>prefix[0] = 0</code> (sum of zero elements)</li>
+        <li>For <code>i = 0</code> to <code>n-1</code>: <code>prefix[i+1] = prefix[i] + nums[i]</code></li>
+        <li>For query <code>(left, right)</code>: answer = <code>prefix[right+1] - prefix[left]</code></li>
+      </ol>
+      <p style="margin-top:10px;color:#888;font-size:11px;">💡 Size <code>n+1</code> trick: <code>prefix[0] = 0</code> means we never need to special-case <code>left == 0</code>. Clean formula works for all ranges.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Step-by-Step Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Input:</b> <code>nums = [3, 1, 4, 1, 5, 9, 2]</code></p>
+      <p style="margin-top:10px;"><b>Step 1: Build prefix array</b></p>
+      <table style="width:100%;font-size:12px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Index i</th>
+            <th style="background:#22223a;color:#888;padding:8px;">nums[i]</th>
+            <th style="background:#22223a;color:#888;padding:8px;">prefix[i+1] = prefix[i] + nums[i]</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Meaning</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#6c63ff;">prefix[0] = 0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Sum of 0 elements</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#6c63ff;">prefix[1] = 0+3 = 3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Sum of nums[0..0]</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#6c63ff;">prefix[2] = 3+1 = 4</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Sum of nums[0..1]</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#6c63ff;">prefix[3] = 4+4 = 8</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Sum of nums[0..2]</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#6c63ff;">prefix[4] = 8+1 = 9</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Sum of nums[0..3]</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#6c63ff;">prefix[5] = 9+5 = 14</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Sum of nums[0..4]</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">9</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#6c63ff;">prefix[6] = 14+9 = 23</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Sum of nums[0..5]</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">6</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#6c63ff;">prefix[7] = 23+2 = 25</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Sum of nums[0..6]</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;"><code>prefix = [0, 3, 4, 8, 9, 14, 23, 25]</code></p>
+
+      <p style="margin-top:16px;"><b>Step 2: Answer queries in O(1)</b></p>
+      <table style="width:100%;font-size:12px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Query</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Formula</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Calculation</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Answer</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">sum(2, 5)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">prefix[6] - prefix[2]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">23 - 4</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">19</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">sum(0, 3)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">prefix[4] - prefix[0]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">9 - 0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">9</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">sum(4, 6)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">prefix[7] - prefix[4]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">25 - 9</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">16</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;color:#4caf50;">✅ Verify: sum(2,5) = 4+1+5+9 = 19 ✓</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Internal Mechanics -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Why does subtraction work?</b></p>
+      <ul>
+        <li><code>prefix[right+1]</code> = sum of nums[0] + nums[1] + ... + nums[right]</li>
+        <li><code>prefix[left]</code> = sum of nums[0] + nums[1] + ... + nums[left-1]</li>
+        <li>Subtract → the overlapping part (0 to left-1) cancels out</li>
+        <li>What remains = nums[left] + nums[left+1] + ... + nums[right] ✓</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Visual:</b></p>
+<pre><code><span class="comment">// prefix[right+1] covers this:</span>
+[  3  1  <span style="color:#4caf50;">4  1  5  9</span>  2  ]
+ ←————————————————→
+
+<span class="comment">// prefix[left] covers this:</span>
+[  3  1  <span style="color:#888;">|</span>              ]
+ ←——→
+
+<span class="comment">// Difference = the green part only</span>
+         <span style="color:#4caf50;">4  1  5  9</span>  = <span class="number">19</span></code></pre>
+      <p style="margin-top:10px;"><b>Why size n+1?</b></p>
+      <ul>
+        <li>If we used size <code>n</code>, then for query <code>(0, right)</code> we'd need <code>prefix[-1]</code> which doesn't exist</li>
+        <li>Size <code>n+1</code> with <code>prefix[0] = 0</code> means the formula <code>prefix[right+1] - prefix[left]</code> works universally</li>
+        <li>No special cases, no if-else — clean math</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Complexity Analysis -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Pre-computation (building prefix array):</b></p>
+      <div class="complexity-row">
+        <div class="complexity-tag">
+          <span class="label">Time:</span>
+          <span class="value">O(n)</span>
+        </div>
+        <div class="complexity-tag">
+          <span class="label">Space:</span>
+          <span class="value">O(n)</span>
+        </div>
+      </div>
+      <p style="margin-top:12px;"><b>Each query:</b></p>
+      <div class="complexity-row">
+        <div class="complexity-tag">
+          <span class="label">Time:</span>
+          <span class="value">O(1)</span>
+        </div>
+      </div>
+      <p style="margin-top:12px;"><b>Total for q queries:</b></p>
+      <table style="width:100%;font-size:12px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Approach</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Total Time</th>
+            <th style="background:#22223a;color:#888;padding:8px;">n=100K, q=100K</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Brute Force</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">O(n × q)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">10,000,000,000</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Prefix Sum</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(n + q)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">200,000</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;color:#888;font-size:11px;">50,000x faster. Pre-computation is a superpower.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Java Implementation -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">public class</span> <span class="type">PrefixSum</span> {
+
+    <span class="keyword">private</span> <span class="type">int</span>[] prefix;
+
+    <span class="keyword">public</span> <span class="type">PrefixSum</span>(<span class="type">int</span>[] nums) {
+        prefix = <span class="keyword">new</span> <span class="type">int</span>[nums.length + <span class="number">1</span>];
+        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; nums.length; i++) {
+            prefix[i + <span class="number">1</span>] = prefix[i] + nums[i];
+        }
+    }
+
+    <span class="keyword">public int</span> <span class="type">rangeSum</span>(<span class="type">int</span> left, <span class="type">int</span> right) {
+        <span class="keyword">return</span> prefix[right + <span class="number">1</span>] - prefix[left];
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        <span class="type">int</span>[] stock = {<span class="number">3</span>, <span class="number">1</span>, <span class="number">4</span>, <span class="number">1</span>, <span class="number">5</span>, <span class="number">9</span>, <span class="number">2</span>};
+        PrefixSum ps = <span class="keyword">new</span> PrefixSum(stock);
+
+        System.out.println(ps.rangeSum(<span class="number">2</span>, <span class="number">5</span>)); <span class="comment">// 19</span>
+        System.out.println(ps.rangeSum(<span class="number">0</span>, <span class="number">3</span>)); <span class="comment">// 9</span>
+        System.out.println(ps.rangeSum(<span class="number">4</span>, <span class="number">6</span>)); <span class="comment">// 16</span>
+    }
+}</code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 Constructor does O(n) work once. Every <code>rangeSum()</code> call is O(1). This is the LeetCode "NumArray" problem (LC #303).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 9: Edge Cases -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Case</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Input</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Query</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Output</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Why</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single element</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[5]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">(0,0)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">prefix[1]-prefix[0] = 5-0</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Full range</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,2,3]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">(0,2)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">6</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">prefix[3]-prefix[0] = total sum</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All zeros</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[0,0,0]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">(0,2)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Works fine — prefix stays 0</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Negative numbers</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[-1,2,-3]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">(0,2)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">-2</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Prefix sum handles negatives naturally</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Integer overflow</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Large values</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Use <code>long[]</code> if sum can exceed int range</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 10: Common Mistakes -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Off-by-one error in the formula</b>
+          <p style="color:#e44d26;">❌ <code>prefix[right] - prefix[left]</code> → misses <code>nums[right]</code></p>
+          <p style="color:#4caf50;">✅ <code>prefix[right+1] - prefix[left]</code> → includes both endpoints</p>
+          <p style="color:#888;font-size:11px;">Dry run with a small example if you're ever confused about the +1</p>
+        </li>
+        <li style="margin-top:10px;"><b>Using size <code>n</code> instead of <code>n+1</code></b>
+          <p style="color:#e44d26;">❌ Then you need special handling for <code>left == 0</code></p>
+          <p style="color:#4caf50;">✅ Size <code>n+1</code> with <code>prefix[0] = 0</code> eliminates all edge cases</p>
+        </li>
+        <li style="margin-top:10px;"><b>Forgetting that prefix sum is for STATIC arrays only</b>
+          <p style="color:#e44d26;">❌ If array changes after building prefix → all answers become wrong</p>
+          <p style="color:#888;">For dynamic arrays (with updates), you need a Segment Tree or BIT (advanced topic)</p>
+        </li>
+        <li style="margin-top:10px;"><b>Integer overflow</b>
+          <p style="color:#e44d26;">❌ If elements are large, cumulative sum can overflow <code>int</code></p>
+          <p style="color:#4caf50;">✅ Use <code>long[]</code> for prefix array when values are large</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 11: When to Use This Pattern -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Signals to पहचान (identify) this pattern:</b></p>
+      <ul>
+        <li>✅ "Range sum query" / "Subarray sum"</li>
+        <li>✅ Multiple queries on the same array</li>
+        <li>✅ "Sum of elements between index i and j"</li>
+        <li>✅ "Number of subarrays with sum equal to K" (prefix sum + HashMap combo — advanced)</li>
+        <li>✅ 2D version: "Sum of submatrix" (2D prefix sum)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Variations you'll see:</b></p>
+      <ul>
+        <li>Prefix XOR — for range XOR queries</li>
+        <li>Prefix product — for range product (careful with zeros)</li>
+        <li>Difference array — inverse of prefix sum (for range updates)</li>
+        <li>2D prefix sum — for matrix region queries</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 12: When NOT to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ Array is being modified between queries (need Segment Tree / BIT)</li>
+        <li>❌ Only one query — just loop once, no need to pre-compute</li>
+        <li>❌ Range min/max queries — prefix sum doesn't help (need Sparse Table / Segment Tree)</li>
+        <li>❌ Non-associative operations — prefix trick only works for operations where order doesn't matter (sum, XOR, product)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 13: Key Takeaway -->
+  <div class="takeaway">
+    💡 "Jab same array pe baar baar range sum poochha jaaye — pehle prefix bana lo, phir har query O(1) mein answer karo."
+  </div>
+
+  <!-- SECTION 14: Bridge to Next Problem -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Ab tak humne seekha:</p>
+      <ul>
+        <li>Problem #1: Track one value → avoid inner loop</li>
+        <li>Problem #2: Track all values (HashMap) → O(1) lookup</li>
+        <li>Problem #3: Pre-compute cumulative data → O(1) range queries</li>
+      </ul>
+      <p style="margin-top:10px;">Next question: <b>"Agar tumhe array ko in-place modify karna ho — bina extra space ke — toh kaise?"</b></p>
+      <p style="margin-top:8px;">Problem #4: Rotating the Security Shift Schedule — the <b>Reversal Trick</b> for array rotation.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Pre-computation (prefix sum) → In-place manipulation (reversal trick)</p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem2.html">← Problem #2</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(3)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem4.html">Problem #4 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "dsa-roadmap-progress";
+const PROBLEM_NUM = 3;
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+
+function saveProgress(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function toggleDone(num) {
+  const prog = loadProgress();
+  if (prog[num] === "done") { delete prog[num]; }
+  else { prog[num] = "done"; }
+  saveProgress(prog);
+  updateUI();
+}
+
+function updateUI() {
+  const prog = loadProgress();
+  const btn = document.getElementById("mark-done-btn");
+  if (prog[PROBLEM_NUM] === "done") {
+    btn.textContent = "✔ Completed";
+    btn.classList.add("completed");
+  } else {
+    btn.textContent = "☐ Mark as Done";
+    btn.classList.remove("completed");
+  }
+  updateReadProgress();
+}
+
+function updateReadProgress() {
+  const prog = loadProgress();
+  if (prog[PROBLEM_NUM] === "done") {
+    document.getElementById("section-pct").textContent = "100%";
+    document.getElementById("section-bar").style.width = "100%";
+    return;
+  }
+  const sections = document.querySelectorAll(".section, .takeaway");
+  const total = sections.length;
+  if (total === 0) return;
+  let visible = 0;
+  sections.forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    if (rect.top < window.innerHeight) visible++;
+  });
+  const pct = Math.min(100, Math.round((visible / total) * 100));
+  document.getElementById("section-pct").textContent = pct + "%";
+  document.getElementById("section-bar").style.width = pct + "%";
+}
+
+window.addEventListener("scroll", updateReadProgress);
+updateUI();
+</script>
+</body>
+</html>

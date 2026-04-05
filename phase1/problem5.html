@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#5 — Merging Two Sorted Delivery Lists | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 1: Foundation</span>
+    <span class="problem-id">Problem #5 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #5: Merging Two Sorted Delivery Lists</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#5 — Merging Two Sorted Delivery Lists</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Two Pointer (Sorted Merge)</p>
+
+  <!-- SECTION 0: Real-World Scenario -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek delivery company mein kaam karte ho. Do warehouses se sorted delivery schedules aaye hain:</p>
+      <ul>
+        <li>Warehouse A (by time): <code>[9:00, 11:00, 14:00, 17:00]</code></li>
+        <li>Warehouse B (by time): <code>[8:30, 10:00, 13:00, 15:30, 18:00]</code></li>
+      </ul>
+      <p style="margin-top:8px;">Boss bola: <b>"Dono lists ko merge karke ek single sorted timeline banao."</b></p>
+      <p>Result: <code>[8:30, 9:00, 10:00, 11:00, 13:00, 14:00, 15:30, 17:00, 18:00]</code></p>
+      <p style="margin-top:8px;">In numbers: merge <code>[1, 3, 5, 7]</code> and <code>[2, 4, 6, 8, 10]</code> → <code>[1, 2, 3, 4, 5, 6, 7, 8, 10]</code></p>
+      <p style="color:#4caf50;margin-top:8px;">💡 Dono already sorted hain — kya hum bina re-sorting ke merge kar sakte hain?</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Problem Understanding -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given two sorted arrays, merge them into one sorted array</li>
+        <li>The result must also be sorted</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Input → Output:</b></p>
+      <ul>
+        <li>Input: <code>int[] a</code> (sorted), <code>int[] b</code> (sorted)</li>
+        <li>Output: <code>int[]</code> (merged, sorted)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Key observation:</b></p>
+      <ul>
+        <li>Both arrays are ALREADY sorted — this is a huge advantage</li>
+        <li>We don't need a general sorting algorithm (O(n log n))</li>
+        <li>We can exploit the sorted property to merge in O(n + m)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Connection to previous problems:</b></p>
+      <ul>
+        <li>Problem #4 ke <code>reverse()</code> mein humne two pointers use kiye (left & right moving inward)</li>
+        <li>Ab hum two pointers ka proper introduction karenge — but this time <b>two separate pointers on two separate arrays</b>, both moving forward</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Brute Force Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>First instinct:</b> Concatenate both arrays, then sort.</p>
+<pre><code><span class="comment">// Brute Force — O((n+m) log(n+m))</span>
+<span class="type">int</span>[] result = <span class="keyword">new</span> <span class="type">int</span>[a.length + b.length];
+System.arraycopy(a, <span class="number">0</span>, result, <span class="number">0</span>, a.length);
+System.arraycopy(b, <span class="number">0</span>, result, a.length, b.length);
+Arrays.sort(result);
+<span class="keyword">return</span> result;</code></pre>
+      <p><b>Problem:</b></p>
+      <ul>
+        <li>Time: O((n+m) log(n+m)) — we're throwing away the "already sorted" information</li>
+        <li>Sorting from scratch when data is already sorted = wasted work</li>
+      </ul>
+      <p style="color:#ffc107;margin-top:8px;">🤔 Dono sorted hain toh smallest element dono ke front mein se kisi ek pe hoga. Compare karo, chhota wala utha lo. Repeat.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Optimization Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Key Insight — The Card Deck Analogy:</b></p>
+      <p>Imagine two sorted stacks of cards face-up on a table. To merge them:</p>
+      <ol>
+        <li>Look at the top card of both stacks</li>
+        <li>Pick the smaller one, place it in the result pile</li>
+        <li>Repeat until both stacks are empty</li>
+      </ol>
+      <p style="margin-top:8px;">You never need to go back or re-sort. Each card is picked exactly once.</p>
+
+      <p style="margin-top:12px;"><b>Translated to code:</b></p>
+      <ul>
+        <li>Pointer <code>i</code> on array <code>a</code>, pointer <code>j</code> on array <code>b</code></li>
+        <li>Compare <code>a[i]</code> vs <code>b[j]</code></li>
+        <li>Smaller one goes into result, advance that pointer</li>
+        <li>When one array is exhausted, copy the rest of the other</li>
+      </ul>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern identified: <b>Two Pointer — one pointer per sorted input, both moving forward</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Final Approach -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach (Pattern-Based)</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Pattern Name:</b> Two Pointer (Sorted Merge)</p>
+      <p><b>Why this pattern fits:</b></p>
+      <ul>
+        <li>Both inputs are sorted — we can make progress by always picking the smaller front element</li>
+        <li>Each pointer only moves forward — no backtracking needed</li>
+        <li>Total work = n + m (each element touched exactly once)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Algorithm:</b></p>
+      <ol>
+        <li>Create result array of size <code>n + m</code></li>
+        <li>Initialize <code>i = 0</code>, <code>j = 0</code>, <code>k = 0</code></li>
+        <li>While both <code>i &lt; n</code> and <code>j &lt; m</code>:
+          <ul>
+            <li>If <code>a[i] &lt;= b[j]</code>: <code>result[k++] = a[i++]</code></li>
+            <li>Else: <code>result[k++] = b[j++]</code></li>
+          </ul>
+        </li>
+        <li>Copy remaining elements from whichever array isn't exhausted</li>
+      </ol>
+      <p style="margin-top:10px;color:#888;font-size:11px;">💡 Using <code>&lt;=</code> (not <code>&lt;</code>) ensures stability — equal elements from <code>a</code> come before those from <code>b</code>.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Step-by-Step Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Input:</b> <code>a = [1, 3, 5, 7]</code>, <code>b = [2, 4, 6, 8, 10]</code></p>
+      <table style="width:100%;font-size:11px;margin-top:10px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">Step</th>
+            <th style="background:#22223a;color:#888;padding:7px;">a[i]</th>
+            <th style="background:#22223a;color:#888;padding:7px;">b[j]</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Pick</th>
+            <th style="background:#22223a;color:#888;padding:7px;">result so far</th>
+            <th style="background:#22223a;color:#888;padding:7px;">i, j</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#6c63ff;">1</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">1 (from a)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">[1]</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">i=1, j=0</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#6c63ff;">2</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">2 (from b)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">[1, 2]</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">i=1, j=1</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#6c63ff;">3</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">3 (from a)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">[1, 2, 3]</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">i=2, j=1</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#6c63ff;">4</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">4 (from b)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">[1, 2, 3, 4]</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">i=2, j=2</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#6c63ff;">5</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">6</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">5 (from a)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">[1, 2, 3, 4, 5]</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">i=3, j=2</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">6</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">7</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#6c63ff;">6</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">6 (from b)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">[1, 2, 3, 4, 5, 6]</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">i=3, j=3</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">7</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#6c63ff;">7</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">8</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">7 (from a)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">[1, 2, 3, 4, 5, 6, 7]</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">i=4 ✗, j=3</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;" colspan="6" style="color:#ffc107;">⬇ Array <code>a</code> exhausted — copy remaining from <code>b</code>: [8, 10]</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#4caf50;"><b>Result: [1, 2, 3, 4, 5, 6, 7, 8, 10]</b> ✓</p>
+      <p style="margin-top:6px;color:#888;font-size:11px;">Total comparisons: 7. Total elements: 9. Each element touched exactly once.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Internal Mechanics -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Why two pointers work on sorted data:</b></p>
+      <ul>
+        <li>Sorted = smallest is always at the front of what's remaining</li>
+        <li>So the global smallest among all remaining elements is either <code>a[i]</code> or <code>b[j]</code></li>
+        <li>Pick the smaller → it's guaranteed to be the next element in the merged result</li>
+        <li>Advance that pointer → the new front is the next smallest from that array</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Why we never go back:</b></p>
+      <ul>
+        <li>Once we pick <code>a[i]</code>, everything before <code>i</code> in <code>a</code> was already picked (smaller)</li>
+        <li>Everything after <code>i</code> in <code>a</code> is larger (sorted property)</li>
+        <li>So moving forward is always correct — no need to revisit</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Two Pointer family — three flavors you'll see:</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">Type</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Pointers</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Movement</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Example</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Opposite ends</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">left, right</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Move inward</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Reverse (#4), Pair Sum (#6)</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Two arrays</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">i on a, j on b</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Both forward</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Merge sorted (this problem)</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Fast & slow</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">slow, fast</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Different speeds</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Cycle detection, middle of list</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;color:#888;font-size:11px;">This problem introduces the "two arrays" flavor. Phase 2 will explore all three deeply.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Complexity Analysis -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag">
+          <span class="label">Time:</span>
+          <span class="value">O(n + m)</span>
+        </div>
+        <div class="complexity-tag">
+          <span class="label">Space:</span>
+          <span class="value">O(n + m)</span>
+        </div>
+      </div>
+      <p style="margin-top:12px;"><b>Comparison:</b></p>
+      <table style="width:100%;font-size:12px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Approach</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Time</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Uses sorted property?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Concat + Sort</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">O((n+m) log(n+m))</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">No — wastes info</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Two Pointer Merge</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(n + m)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Yes — exploits it</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;color:#888;font-size:11px;">Space is O(n+m) for the result array — unavoidable since we need to store the merged output.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Java Implementation -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">import</span> java.util.Arrays;
+
+<span class="keyword">public class</span> <span class="type">MergeSortedArrays</span> {
+
+    <span class="keyword">public static int</span>[] <span class="type">merge</span>(<span class="type">int</span>[] a, <span class="type">int</span>[] b) {
+        <span class="type">int</span> n = a.length, m = b.length;
+        <span class="type">int</span>[] result = <span class="keyword">new</span> <span class="type">int</span>[n + m];
+        <span class="type">int</span> i = <span class="number">0</span>, j = <span class="number">0</span>, k = <span class="number">0</span>;
+
+        <span class="keyword">while</span> (i &lt; n &amp;&amp; j &lt; m) {
+            <span class="keyword">if</span> (a[i] &lt;= b[j]) {
+                result[k++] = a[i++];
+            } <span class="keyword">else</span> {
+                result[k++] = b[j++];
+            }
+        }
+
+        <span class="keyword">while</span> (i &lt; n) result[k++] = a[i++];
+        <span class="keyword">while</span> (j &lt; m) result[k++] = b[j++];
+
+        <span class="keyword">return</span> result;
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        <span class="type">int</span>[] a = {<span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>, <span class="number">7</span>};
+        <span class="type">int</span>[] b = {<span class="number">2</span>, <span class="number">4</span>, <span class="number">6</span>, <span class="number">8</span>, <span class="number">10</span>};
+        System.out.println(Arrays.toString(merge(a, b)));
+        <span class="comment">// [1, 2, 3, 4, 5, 6, 7, 8, 10]</span>
+    }
+}</code></pre>
+
+      <p style="margin-top:14px;"><b>Variant: Merge Sorted Array In-Place (LeetCode #88)</b></p>
+      <p style="color:#888;font-size:12px;">Array <code>a</code> has extra space at the end to hold <code>b</code>. Merge without extra array.</p>
+      <p style="color:#ffc107;font-size:12px;margin-top:4px;">💡 Trick: Start from the END (largest elements) and fill backwards. Avoids overwriting.</p>
+<pre><code><span class="comment">// a has size n+m, first n elements filled, last m are 0</span>
+<span class="keyword">public static void</span> <span class="type">mergeInPlace</span>(<span class="type">int</span>[] a, <span class="type">int</span> n, <span class="type">int</span>[] b, <span class="type">int</span> m) {
+    <span class="type">int</span> i = n - <span class="number">1</span>, j = m - <span class="number">1</span>, k = n + m - <span class="number">1</span>;
+
+    <span class="keyword">while</span> (i &gt;= <span class="number">0</span> &amp;&amp; j &gt;= <span class="number">0</span>) {
+        <span class="keyword">if</span> (a[i] &gt;= b[j]) {
+            a[k--] = a[i--];
+        } <span class="keyword">else</span> {
+            a[k--] = b[j--];
+        }
+    }
+
+    <span class="keyword">while</span> (j &gt;= <span class="number">0</span>) a[k--] = b[j--];
+}</code></pre>
+      <p style="margin-top:6px;color:#888;font-size:11px;">No need to copy remaining <code>a</code> elements — they're already in place.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 9: Edge Cases -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Case</th>
+            <th style="background:#22223a;color:#888;padding:8px;">a</th>
+            <th style="background:#22223a;color:#888;padding:8px;">b</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Result</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Why</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">One empty</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,2,3]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,2,3]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Copy b entirely</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Both empty</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Nothing to merge</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No overlap</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,2]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[5,6]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,2,5,6]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">a exhausted first, b appended</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Duplicates</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,3,3]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[3,4]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,3,3,3,4]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>&lt;=</code> keeps stability</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Very different sizes</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[2,3,4,5,6]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,2,3,4,5,6]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Works fine — a exhausted after 1 step</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 10: Common Mistakes -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Forgetting to copy remaining elements</b>
+          <p style="color:#e44d26;">❌ Only the main while loop — misses the tail of the longer array</p>
+          <p style="color:#4caf50;">✅ Always add two cleanup loops (or use <code>System.arraycopy</code>)</p>
+        </li>
+        <li style="margin-top:10px;"><b>Using <code>&lt;</code> instead of <code>&lt;=</code></b>
+          <p style="color:#888;">Functionally both work for correctness, but <code>&lt;=</code> ensures stability (equal elements from <code>a</code> come first). Important in real-world sorting.</p>
+        </li>
+        <li style="margin-top:10px;"><b>In-place variant: filling from the front</b>
+          <p style="color:#e44d26;">❌ Overwrites elements in <code>a</code> that haven't been processed yet</p>
+          <p style="color:#4caf50;">✅ Fill from the back (largest first) — safe because the back is empty space</p>
+        </li>
+        <li style="margin-top:10px;"><b>Assuming both arrays are same size</b>
+          <p style="color:#4caf50;">✅ Always handle different sizes — the cleanup loops take care of this</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 11: When to Use This Pattern -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Signals to पहचान (identify) this pattern:</b></p>
+      <ul>
+        <li>✅ "Merge two sorted ___" (arrays, lists, streams)</li>
+        <li>✅ "Intersection of two sorted arrays"</li>
+        <li>✅ "Union of two sorted arrays"</li>
+        <li>✅ Input is sorted and you need to combine/compare two sequences</li>
+        <li>✅ Merge step of Merge Sort (Problem #24 will use this exact logic)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>This merge logic appears in:</b></p>
+      <ul>
+        <li>Merge Sort algorithm (divide & conquer)</li>
+        <li>External sorting (merging sorted files from disk)</li>
+        <li>Database merge joins</li>
+        <li>Merging k sorted lists (using heap — advanced)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 12: When NOT to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ Arrays are NOT sorted — two pointer merge won't produce sorted output</li>
+        <li>❌ You need to merge and remove duplicates — need extra check (<code>if result[k-1] != current</code>)</li>
+        <li>❌ Merging more than 2 arrays — use a min-heap for k-way merge (O(N log k))</li>
+        <li>❌ Arrays are sorted in different orders (one ascending, one descending) — reverse one first</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 13: Key Takeaway -->
+  <div class="takeaway">
+    💡 "Sorted input = free information. Two pointers exploit it — compare fronts, pick smaller, move forward. Never look back."
+  </div>
+
+  <!-- SECTION 14: Bridge to Next Problem -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>🎉 Phase 1 Complete!</b></p>
+      <p style="margin-top:8px;">Recap of what you've built:</p>
+      <ul>
+        <li>#1: Single tracking variable → O(n) scan</li>
+        <li>#2: HashMap → O(1) lookup for "seen before?"</li>
+        <li>#3: Prefix Sum → O(1) range queries via pre-computation</li>
+        <li>#4: Reversal Trick → O(1) space in-place manipulation</li>
+        <li>#5: Two Pointer Merge → exploit sorted property</li>
+      </ul>
+      <p style="margin-top:12px;">Ab Phase 2 shuru hota hai — <b>Core Patterns</b>.</p>
+      <p style="margin-top:8px;">Problem #5 mein humne two pointers ka "two arrays" flavor dekha. Problem #6 mein hum dekhenge <b>"opposite ends" flavor</b> — two pointers on a SINGLE sorted array to find a pair that sums to a target.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Two pointers on two arrays (merge) → Two pointers on one array (pair sum) — Phase 2 begins!</p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem4.html">← Problem #4</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(5)">☐ Mark as Done</button>
+    <a class="nav-btn" href="../phase2/problem6.html">Problem #6 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "dsa-roadmap-progress";
+const PROBLEM_NUM = 5;
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+
+function saveProgress(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function toggleDone(num) {
+  const prog = loadProgress();
+  if (prog[num] === "done") { delete prog[num]; }
+  else { prog[num] = "done"; }
+  saveProgress(prog);
+  updateUI();
+}
+
+function updateUI() {
+  const prog = loadProgress();
+  const btn = document.getElementById("mark-done-btn");
+  if (prog[PROBLEM_NUM] === "done") {
+    btn.textContent = "✔ Completed";
+    btn.classList.add("completed");
+  } else {
+    btn.textContent = "☐ Mark as Done";
+    btn.classList.remove("completed");
+  }
+  updateReadProgress();
+}
+
+function updateReadProgress() {
+  const prog = loadProgress();
+  if (prog[PROBLEM_NUM] === "done") {
+    document.getElementById("section-pct").textContent = "100%";
+    document.getElementById("section-bar").style.width = "100%";
+    return;
+  }
+  const sections = document.querySelectorAll(".section, .takeaway");
+  const total = sections.length;
+  if (total === 0) return;
+  let visible = 0;
+  sections.forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    if (rect.top < window.innerHeight) visible++;
+  });
+  const pct = Math.min(100, Math.round((visible / total) * 100));
+  document.getElementById("section-pct").textContent = pct + "%";
+  document.getElementById("section-bar").style.width = pct + "%";
+}
+
+window.addEventListener("scroll", updateReadProgress);
+updateUI();
+</script>
+</body>
+</html>

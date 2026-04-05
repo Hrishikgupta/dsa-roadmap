@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#12 — Smallest Window Containing All Keywords | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 2: Core Patterns</span>
+    <span class="problem-id">Problem #12 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #12: Smallest Window Containing All Keywords</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#12 — Smallest Window Containing All Keywords</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Sliding Window (Min Window Substring)</p>
+
+  <!-- SECTION 0: Real-World Scenario -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek search engine bana rahe ho. User ne search kiya: <b>"ABC"</b></p>
+      <p>Document text: <code>"ADOBECODEBANC"</code></p>
+      <p>Tumhe document mein <b>sabse chhota snippet</b> dikhana hai jismein search ke saare keywords (A, B, C) present hon.</p>
+      <p style="margin-top:8px;">Possible windows containing A, B, C:</p>
+      <ul>
+        <li>"ADOBEC" (index 0-5, length 6) ✓</li>
+        <li>"ADOBECODEB<b>ANC</b>" — wait, "BANC" (index 9-12, length 4) ✓</li>
+      </ul>
+      <p style="color:#4caf50;margin-top:8px;">Answer: <b>"BANC"</b> — smallest window containing all of A, B, C.</p>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #76 — Minimum Window Substring. Considered one of the hardest sliding window problems. Top FAANG interview question.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Problem Understanding -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given string <code>s</code> and string <code>t</code>, find the minimum-length substring of <code>s</code> that contains ALL characters of <code>t</code> (including duplicates)</li>
+        <li>If t = "AAB", the window must contain at least 2 A's and 1 B</li>
+        <li>If no such window exists, return ""</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Input → Output:</b></p>
+      <ul>
+        <li>Input: <code>String s</code>, <code>String t</code></li>
+        <li>Output: <code>String</code> — minimum window substring (or "")</li>
+      </ul>
+      <p style="margin-top:10px;"><b>This combines THREE patterns we've learned:</b></p>
+      <table style="width:100%;font-size:12px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">From Problem</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Pattern</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Role Here</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">#9</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Variable Sliding Window</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Expand/shrink to find minimum window</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">#11</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Frequency Comparison</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Track required vs found character counts</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">#2</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">HashMap</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Store frequency maps for both t and window</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Brute Force Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>First instinct:</b> Check every substring of s, see if it contains all chars of t.</p>
+<pre><code><span class="comment">// Brute Force — O(n² × m)</span>
+<span class="keyword">for</span> each start i:
+  <span class="keyword">for</span> each end j &gt;= i:
+    <span class="keyword">if</span> substring(i,j) contains all chars of t:
+      update minWindow</code></pre>
+      <p>O(n²) substrings × O(m) containment check = O(n² × m). Way too slow.</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 Problem #9 mein humne seekha: variable window expand karo jab condition not met, shrink karo jab met. Same idea — but condition is "all chars of t are present in window".</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Optimization Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Key Insight — The "Shopping List" Analogy:</b></p>
+      <p>Imagine you're in a supermarket aisle (string s). You have a shopping list (string t): need 1 Apple, 1 Banana, 1 Cherry.</p>
+      <ul>
+        <li>Walk forward (expand right), picking up items as you see them</li>
+        <li>Once your cart has everything on the list → you've found a valid window</li>
+        <li>Now try to drop items from the back of your path (shrink left) to find the shortest valid stretch</li>
+        <li>Keep walking and shrinking to find the overall shortest</li>
+      </ul>
+
+      <p style="margin-top:12px;"><b>The clever trick — a "formed" counter:</b></p>
+      <ul>
+        <li>Instead of comparing two full frequency maps every time (expensive), track a single number: <code>formed</code></li>
+        <li><code>formed</code> = how many UNIQUE characters in t have their required count met in the window</li>
+        <li>When <code>formed == required</code> (total unique chars in t) → window is valid</li>
+        <li>This turns the "is window valid?" check from O(m) to O(1)</li>
+      </ul>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>Variable Sliding Window + Two Frequency Maps + Formed Counter</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Final Approach -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach (Pattern-Based)</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Data structures needed:</b></p>
+      <ul>
+        <li><code>tFreq</code> — frequency map of t (what we need)</li>
+        <li><code>windowFreq</code> — frequency map of current window (what we have)</li>
+        <li><code>required</code> — number of unique chars in t</li>
+        <li><code>formed</code> — how many unique chars currently meet their required count</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Algorithm:</b></p>
+      <ol>
+        <li>Build <code>tFreq</code> from t. Set <code>required = tFreq.size()</code></li>
+        <li><code>left = 0</code>, <code>formed = 0</code>, track best window (start, length)</li>
+        <li>For <code>right = 0</code> to <code>s.length() - 1</code>:
+          <ul>
+            <li>Add <code>s.charAt(right)</code> to <code>windowFreq</code></li>
+            <li>If this char is in tFreq AND <code>windowFreq[char] == tFreq[char]</code> → <code>formed++</code></li>
+            <li>While <code>formed == required</code> (window is valid):
+              <ul>
+                <li>Update best window if current is smaller</li>
+                <li>Remove <code>s.charAt(left)</code> from <code>windowFreq</code></li>
+                <li>If this char is in tFreq AND <code>windowFreq[char] &lt; tFreq[char]</code> → <code>formed--</code></li>
+                <li><code>left++</code></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>Return best window substring (or "" if never found)</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Step-by-Step Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Input:</b> <code>s = "ADOBECODEBANC"</code>, <code>t = "ABC"</code></p>
+      <p><code>tFreq = {A:1, B:1, C:1}</code>, <code>required = 3</code></p>
+
+      <table style="width:100%;font-size:10px;margin-top:10px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">R</th>
+            <th style="background:#22223a;color:#888;padding:5px;">char</th>
+            <th style="background:#22223a;color:#888;padding:5px;">windowFreq (relevant)</th>
+            <th style="background:#22223a;color:#888;padding:5px;">formed</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Valid?</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Shrink action</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Best</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">A</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">{A:1}</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">1</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">No</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">—</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">D</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">{A:1}</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">No</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">—</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">B</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">{A:1, B:1}</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">2</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">No</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">—</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">C</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">{A:1, B:1, C:1}</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">3 ✓</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">YES</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#ffc107;">L=0→5: "ADOBEC" len=6. Shrink: remove A→formed=2</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">"ADOBEC" (6)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">...</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;" colspan="6" style="color:#888;">Expanding continues... (D,E,B,A added, skipping non-t chars for formed)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">10</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">A</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">{A:1, B:1, ...}</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">3 ✓</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">YES</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#ffc107;">Shrink from L=6... "CODEBA" len=5</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">"CODEBA" (5)? No — keep shrinking...</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">12</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">C</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">{A:1, B:1, C:1}</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">3 ✓</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">YES</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#ffc107;">Shrink aggressively... L reaches 9: "BANC" len=4!</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">"BANC" (4) ✓</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#4caf50;"><b>Result: "BANC"</b> (index 9 to 12, length 4)</p>
+      <p style="color:#888;font-size:11px;">The key moment: at R=12 (C found), we can shrink left all the way to index 9 (B) because BANC still contains A, B, C.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Internal Mechanics -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Why the "formed" counter is genius:</b></p>
+      <ul>
+        <li>Without it: every time we add/remove a char, we'd compare all 26+ entries in both maps → O(m) per step</li>
+        <li>With it: we only update <code>formed</code> when a specific char's count crosses the threshold → O(1) per step</li>
+        <li><code>formed++</code> when <code>windowFreq[c] == tFreq[c]</code> (just met the requirement)</li>
+        <li><code>formed--</code> when <code>windowFreq[c] &lt; tFreq[c]</code> (just lost the requirement)</li>
+      </ul>
+
+      <p style="margin-top:12px;"><b>Handling duplicates in t:</b></p>
+      <ul>
+        <li>If t = "AABC", then tFreq = {A:2, B:1, C:1}, required = 3 (3 unique chars)</li>
+        <li>Window needs at least 2 A's for the A requirement to be "formed"</li>
+        <li>The frequency comparison handles this naturally — <code>windowFreq[A] == tFreq[A]</code> means 2 == 2</li>
+      </ul>
+
+      <p style="margin-top:12px;"><b>Evolution of sliding window problems in this roadmap:</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:6px;">#</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Window Type</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Condition</th>
+            <th style="background:#22223a;color:#888;padding:6px;">State Tracking</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">8</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Fixed</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Size = k</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Single sum variable</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">9</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Variable (shortest)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Sum ≥ target</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Single sum variable</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">10</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Variable (longest)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">All unique</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">HashMap (last index)</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">12</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Variable (shortest)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Contains all of t</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Two freq maps + formed counter</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Complexity Analysis -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag">
+          <span class="label">Time:</span>
+          <span class="value">O(|s| + |t|)</span>
+        </div>
+        <div class="complexity-tag">
+          <span class="label">Space:</span>
+          <span class="value">O(|s| + |t|)</span>
+        </div>
+      </div>
+      <p style="margin-top:10px;"><b>Breakdown:</b></p>
+      <ul>
+        <li>Building tFreq: O(|t|)</li>
+        <li>Sliding window: each char in s is added once and removed at most once → O(2|s|) = O(|s|)</li>
+        <li>Space: two HashMaps, each at most O(|s| + |t|) entries</li>
+      </ul>
+      <p style="margin-top:8px;color:#888;font-size:11px;">In practice, if charset is fixed (e.g., 128 ASCII), space is O(1). The formed counter keeps the per-step work O(1).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Java Implementation -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">import</span> java.util.HashMap;
+
+<span class="keyword">public class</span> <span class="type">MinWindowSubstring</span> {
+
+    <span class="keyword">public static</span> String <span class="type">minWindow</span>(String s, String t) {
+        <span class="keyword">if</span> (s.length() &lt; t.length()) <span class="keyword">return</span> <span class="string">""</span>;
+
+        <span class="comment">// Build frequency map for t</span>
+        HashMap&lt;Character, Integer&gt; tFreq = <span class="keyword">new</span> HashMap&lt;&gt;();
+        <span class="keyword">for</span> (<span class="type">char</span> c : t.toCharArray()) {
+            tFreq.put(c, tFreq.getOrDefault(c, <span class="number">0</span>) + <span class="number">1</span>);
+        }
+
+        <span class="type">int</span> required = tFreq.size();
+        <span class="type">int</span> formed = <span class="number">0</span>;
+        HashMap&lt;Character, Integer&gt; windowFreq = <span class="keyword">new</span> HashMap&lt;&gt;();
+
+        <span class="type">int</span> left = <span class="number">0</span>;
+        <span class="type">int</span> minLen = Integer.MAX_VALUE;
+        <span class="type">int</span> minStart = <span class="number">0</span>;
+
+        <span class="keyword">for</span> (<span class="type">int</span> right = <span class="number">0</span>; right &lt; s.length(); right++) {
+            <span class="type">char</span> c = s.charAt(right);
+            windowFreq.put(c, windowFreq.getOrDefault(c, <span class="number">0</span>) + <span class="number">1</span>);
+
+            <span class="comment">// Check if this char's requirement is now met</span>
+            <span class="keyword">if</span> (tFreq.containsKey(c) &amp;&amp;
+                windowFreq.get(c).intValue() == tFreq.get(c).intValue()) {
+                formed++;
+            }
+
+            <span class="comment">// Shrink window while valid</span>
+            <span class="keyword">while</span> (formed == required) {
+                <span class="keyword">if</span> (right - left + <span class="number">1</span> &lt; minLen) {
+                    minLen = right - left + <span class="number">1</span>;
+                    minStart = left;
+                }
+
+                <span class="type">char</span> leftChar = s.charAt(left);
+                windowFreq.put(leftChar, windowFreq.get(leftChar) - <span class="number">1</span>);
+
+                <span class="keyword">if</span> (tFreq.containsKey(leftChar) &amp;&amp;
+                    windowFreq.get(leftChar) &lt; tFreq.get(leftChar)) {
+                    formed--;
+                }
+                left++;
+            }
+        }
+
+        <span class="keyword">return</span> minLen == Integer.MAX_VALUE
+            ? <span class="string">""</span>
+            : s.substring(minStart, minStart + minLen);
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        System.out.println(minWindow(<span class="string">"ADOBECODEBANC"</span>, <span class="string">"ABC"</span>)); <span class="comment">// "BANC"</span>
+        System.out.println(minWindow(<span class="string">"a"</span>, <span class="string">"a"</span>));               <span class="comment">// "a"</span>
+        System.out.println(minWindow(<span class="string">"a"</span>, <span class="string">"aa"</span>));              <span class="comment">// ""</span>
+    }
+}</code></pre>
+      <p style="margin-top:8px;color:#e44d26;font-size:11px;">⚠️ Critical: Use <code>.intValue()</code> for Integer comparison, not <code>==</code>. Java caches Integer objects only for -128 to 127. Beyond that, <code>==</code> compares references, not values.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 9: Edge Cases -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Case</th>
+            <th style="background:#22223a;color:#888;padding:8px;">s</th>
+            <th style="background:#22223a;color:#888;padding:8px;">t</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Output</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Why</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">t longer than s</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>"a"</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>"aa"</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>""</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Impossible — not enough chars</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Exact match</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>"abc"</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>"abc"</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>"abc"</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Entire string is the window</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Duplicates in t</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>"aab"</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>"aa"</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>"aa"</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Need 2 a's, not just 1</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No valid window</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>"abc"</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>"d"</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>""</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">d not in s at all</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single char</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>"a"</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>"a"</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>"a"</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Trivial match</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 10: Common Mistakes -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Using <code>==</code> to compare Integer objects</b>
+          <p style="color:#e44d26;">❌ <code>windowFreq.get(c) == tFreq.get(c)</code> — fails for values > 127</p>
+          <p style="color:#4caf50;">✅ <code>windowFreq.get(c).intValue() == tFreq.get(c).intValue()</code> or <code>.equals()</code></p>
+        </li>
+        <li style="margin-top:10px;"><b>Incrementing formed for every matching char (not just when threshold is crossed)</b>
+          <p style="color:#e44d26;">❌ <code>if (tFreq.containsKey(c)) formed++</code> — formed goes way above required</p>
+          <p style="color:#4caf50;">✅ Only increment when <code>windowFreq[c] == tFreq[c]</code> (exact threshold crossing)</p>
+        </li>
+        <li style="margin-top:10px;"><b>Not handling duplicates in t</b>
+          <p style="color:#e44d26;">❌ Using HashSet for t — loses frequency info. t="AAB" needs 2 A's.</p>
+          <p style="color:#4caf50;">✅ Always use frequency map for t</p>
+        </li>
+        <li style="margin-top:10px;"><b>Forgetting to track minStart</b>
+          <p style="color:#e44d26;">❌ Only tracking minLen — can't reconstruct the actual substring</p>
+          <p style="color:#4caf50;">✅ Track both <code>minStart</code> and <code>minLen</code></p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 11: When to Use This Pattern -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Signals to पहचान (identify) this pattern:</b></p>
+      <ul>
+        <li>✅ "Minimum window containing all characters of T"</li>
+        <li>✅ "Smallest substring with all required elements"</li>
+        <li>✅ "Find all anagram substrings" (LC #438 — fixed window variant)</li>
+        <li>✅ "Permutation in string" (LC #567 — is any permutation of t a substring of s?)</li>
+        <li>✅ Any "find substring containing all of X" problem</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 12: When NOT to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ Order of characters matters — "ABC" must appear in that order → use two pointers or DP, not this</li>
+        <li>❌ Subsequence, not substring — non-contiguous matching needs different approach</li>
+        <li>❌ Pattern matching (regex-like) — different problem entirely</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 13: Key Takeaway -->
+  <div class="takeaway">
+    💡 "Min window substring = Variable sliding window + two frequency maps + a 'formed' counter that turns O(m) validity checks into O(1)."
+  </div>
+
+  <!-- SECTION 14: Bridge to Next Problem -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Ab tum sliding window ke master ho — fixed, variable (shortest), variable (longest), and frequency-based.</p>
+      <p style="margin-top:10px;">Ab hum wapas <b>Two Pointer</b> pe aate hain — but this time a much harder variant:</p>
+      <p style="margin-top:8px;"><b>"Trapping Rainwater Between Buildings"</b> — two pointers from opposite ends, but with pre-computation of left-max and right-max.</p>
+      <p style="margin-top:8px;">This combines:</p>
+      <ul>
+        <li>Two Pointer (opposite ends, like #6)</li>
+        <li>Prefix-style thinking (like #3 — pre-compute max from left and right)</li>
+      </ul>
+      <p style="color:#6c63ff;margin-top:12px;">→ Sliding Window mastery complete → Back to Two Pointer (advanced) with pre-computation</p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem11.html">← Problem #11</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(12)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem13.html">Problem #13 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "dsa-roadmap-progress";
+const PROBLEM_NUM = 12;
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+
+function saveProgress(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function toggleDone(num) {
+  const prog = loadProgress();
+  if (prog[num] === "done") { delete prog[num]; }
+  else { prog[num] = "done"; }
+  saveProgress(prog);
+  updateUI();
+}
+
+function updateUI() {
+  const prog = loadProgress();
+  const btn = document.getElementById("mark-done-btn");
+  if (prog[PROBLEM_NUM] === "done") {
+    btn.textContent = "✔ Completed";
+    btn.classList.add("completed");
+  } else {
+    btn.textContent = "☐ Mark as Done";
+    btn.classList.remove("completed");
+  }
+  updateReadProgress();
+}
+
+function updateReadProgress() {
+  const prog = loadProgress();
+  if (prog[PROBLEM_NUM] === "done") {
+    document.getElementById("section-pct").textContent = "100%";
+    document.getElementById("section-bar").style.width = "100%";
+    return;
+  }
+  const sections = document.querySelectorAll(".section, .takeaway");
+  const total = sections.length;
+  if (total === 0) return;
+  let visible = 0;
+  sections.forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    if (rect.top < window.innerHeight) visible++;
+  });
+  const pct = Math.min(100, Math.round((visible / total) * 100));
+  document.getElementById("section-pct").textContent = pct + "%";
+  document.getElementById("section-bar").style.width = pct + "%";
+}
+
+window.addEventListener("scroll", updateReadProgress);
+updateUI();
+</script>
+</body>
+</html>

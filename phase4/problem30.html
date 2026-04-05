@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#30 — Right Side View of a Building | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 4: Advanced</span>
+    <span class="problem-id">Problem #30 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #30: Right Side View of a Building</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#30 — Right Side View of a Building</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Tree BFS (Level Order)</p>
+
+  <!-- SECTION 0: Scenario -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Imagine tum ek building ke RIGHT side se khade ho aur andar dekh rahe ho — har floor pe sirf rightmost room dikhega:</p>
+<pre><code><span class="comment">Tree:           Right side view:
+     1          →  1
+    / \
+   2   3        →  3
+    \   \
+     5   4      →  4</span>
+
+<span style="color:#4caf50;">Answer: [1, 3, 4]</span></code></pre>
+      <p style="margin-top:8px;">Har level ka <b>last node</b> = right side se visible node.</p>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #199 — Binary Tree Right Side View.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Understanding -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given a binary tree, return the values of nodes visible from the right side</li>
+        <li>Visible = the last node at each level (rightmost)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Input → Output:</b></p>
+      <ul>
+        <li>Input: <code>TreeNode root</code></li>
+        <li>Output: <code>List&lt;Integer&gt;</code> — one value per level (rightmost)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Two approaches:</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">Approach</th>
+            <th style="background:#22223a;color:#888;padding:7px;">How</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Complexity</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">BFS (level-order)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Process level by level, take last node of each level</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">O(n) / O(w)</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">DFS (right-first)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">DFS visiting right child first, track first node at each depth</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">O(n) / O(h)</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;">BFS is more intuitive — it naturally processes levels. Same template as #29.</p>
+      <p style="margin-top:10px;"><b>Connection to #29:</b> #29 processed ALL nodes per level. #30 only keeps the LAST node per level.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Brute Force -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Naive:</b> Do a full level-order traversal, store all levels, then pick the last element of each level.</p>
+      <p>Works but stores all nodes. We can optimize: during BFS, just track the last node of each level — no need to store entire levels.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Optimization -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Key Insight — BFS with level size tracking:</b></p>
+      <ul>
+        <li>At the start of each level, <code>queue.size()</code> = number of nodes in this level</li>
+        <li>Process exactly that many nodes (inner loop)</li>
+        <li>The LAST node processed in the inner loop = rightmost of this level</li>
+      </ul>
+<pre><code><span class="keyword">while</span> (!queue.isEmpty()) {
+    <span class="type">int</span> levelSize = queue.size();  <span class="comment">// nodes in this level</span>
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; levelSize; i++) {
+        TreeNode node = queue.poll();
+        <span class="keyword">if</span> (i == levelSize - <span class="number">1</span>) result.add(node.val); <span class="comment">// last = rightmost</span>
+        <span class="keyword">if</span> (node.left != <span class="keyword">null</span>) queue.add(node.left);
+        <span class="keyword">if</span> (node.right != <span class="keyword">null</span>) queue.add(node.right);
+    }
+}</code></pre>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>BFS with level-size loop — process exactly one level per outer iteration, pick last node</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Final Approach -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach (Pattern-Based)</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Algorithm:</b></p>
+      <ol>
+        <li>If root is null → return empty list</li>
+        <li>Add root to queue</li>
+        <li>While queue not empty:
+          <ul>
+            <li><code>levelSize = queue.size()</code></li>
+            <li>For i = 0 to levelSize-1: dequeue, enqueue children</li>
+            <li>If <code>i == levelSize - 1</code> → add to result (rightmost)</li>
+          </ul>
+        </li>
+      </ol>
+      <p style="margin-top:10px;"><b>This "level-size BFS" template solves many problems:</b></p>
+      <ul>
+        <li>Right side view: last node per level</li>
+        <li>Left side view: first node per level</li>
+        <li>Level averages: sum/count per level</li>
+        <li>Zigzag traversal: alternate left-right per level</li>
+        <li>Max width: max level size</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Tree:</b></p>
+<pre><code><span class="comment">       1
+      / \
+     2   3
+      \   \
+       5   4</span></code></pre>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:6px;">Level</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Queue at start</th>
+            <th style="background:#22223a;color:#888;padding:6px;">levelSize</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Nodes processed</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Last (rightmost)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[1]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">1 ✓</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[2, 3]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2, 3</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">3 ✓</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[5, 4]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">5, 4</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">4 ✓</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#4caf50;"><b>Result: [1, 3, 4]</b> ✓</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Mechanics -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Why <code>queue.size()</code> at the start of each iteration works:</b></p>
+      <ul>
+        <li>Before the inner loop, queue contains ONLY nodes from the current level</li>
+        <li>Inner loop dequeues exactly <code>levelSize</code> nodes (current level) and enqueues their children (next level)</li>
+        <li>After inner loop, queue contains ONLY next level's nodes</li>
+        <li>This cleanly separates levels without any extra data structure</li>
+      </ul>
+      <p style="margin-top:12px;"><b>DFS alternative (right-first DFS):</b></p>
+<pre><code><span class="keyword">void</span> dfs(TreeNode node, <span class="type">int</span> depth, List&lt;Integer&gt; result) {
+    <span class="keyword">if</span> (node == <span class="keyword">null</span>) <span class="keyword">return</span>;
+    <span class="keyword">if</span> (depth == result.size()) result.add(node.val); <span class="comment">// first node at this depth</span>
+    dfs(node.right, depth + <span class="number">1</span>, result); <span class="comment">// right FIRST</span>
+    dfs(node.left, depth + <span class="number">1</span>, result);
+}</code></pre>
+      <p style="color:#888;font-size:11px;">Visit right child first → first node encountered at each depth = rightmost. O(h) space vs O(w) for BFS.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Complexity -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag"><span class="label">Time:</span><span class="value">O(n)</span></div>
+        <div class="complexity-tag"><span class="label">Space:</span><span class="value">O(w)</span></div>
+      </div>
+      <p style="margin-top:10px;">Visit every node once. Queue holds at most one level = max width w. For balanced tree: w ≈ n/2.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Java -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">import</span> java.util.*;
+
+<span class="keyword">public class</span> <span class="type">RightSideView</span> {
+
+    <span class="keyword">public static</span> List&lt;Integer&gt; <span class="type">rightSideView</span>(TreeNode root) {
+        List&lt;Integer&gt; result = <span class="keyword">new</span> ArrayList&lt;&gt;();
+        <span class="keyword">if</span> (root == <span class="keyword">null</span>) <span class="keyword">return</span> result;
+
+        Queue&lt;TreeNode&gt; queue = <span class="keyword">new</span> LinkedList&lt;&gt;();
+        queue.add(root);
+
+        <span class="keyword">while</span> (!queue.isEmpty()) {
+            <span class="type">int</span> levelSize = queue.size();
+            <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; levelSize; i++) {
+                TreeNode node = queue.poll();
+                <span class="keyword">if</span> (i == levelSize - <span class="number">1</span>) result.add(node.val);
+                <span class="keyword">if</span> (node.left != <span class="keyword">null</span>) queue.add(node.left);
+                <span class="keyword">if</span> (node.right != <span class="keyword">null</span>) queue.add(node.right);
+            }
+        }
+        <span class="keyword">return</span> result;
+    }
+}</code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 Change <code>i == levelSize - 1</code> to <code>i == 0</code> → left side view. Change to collect all → level-order traversal. Same template.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 9-12 + Takeaway + Bridge + Nav + Script -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead><tr><th style="background:#22223a;color:#888;padding:8px;">Case</th><th style="background:#22223a;color:#888;padding:8px;">Output</th><th style="background:#22223a;color:#888;padding:8px;">Note</th></tr></thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">null</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">[]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Empty tree</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single node [1]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">[1]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Root is the only visible node</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Left-skewed 1→2→3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">[1,2,3]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Left nodes visible (no right siblings to block)</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Right-skewed 1→2→3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">[1,2,3]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Right nodes naturally visible</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Left subtree deeper</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Includes left-side deep nodes</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Right side view ≠ right subtree only!</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:6px;color:#e44d26;font-size:11px;">⚠️ Common misconception: "right side view = right subtree." Wrong! If left subtree is deeper, its deep nodes ARE visible from the right.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Only traversing the right subtree</b>
+          <p style="color:#e44d26;">❌ Misses left-subtree nodes that are visible when right subtree is shorter</p>
+          <p style="color:#4caf50;">✅ BFS processes ALL nodes per level — naturally handles this</p>
+        </li>
+        <li style="margin-top:10px;"><b>Not using <code>levelSize</code> to separate levels</b>
+          <p style="color:#e44d26;">❌ Without level separation, can't identify "last node of level"</p>
+          <p style="color:#4caf50;">✅ Capture <code>queue.size()</code> BEFORE the inner loop starts</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>✅ "Right/Left side view" of a tree</li>
+        <li>✅ "Level-order traversal" / "Level averages" / "Zigzag traversal"</li>
+        <li>✅ Any problem needing per-level processing</li>
+        <li>✅ "Maximum width of binary tree"</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ "Max depth" / "Is balanced" — DFS is simpler for these</li>
+        <li>❌ "Path sum" / "LCA" — DFS is more natural for path-based problems</li>
+        <li>❌ Space-constrained and tree is very wide — BFS queue can hold O(n/2) nodes for balanced tree</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="takeaway">
+    💡 "Level-order BFS: capture queue.size() before inner loop = level boundary. Last node of inner loop = rightmost. Change 'last' to 'first' = left view. Same template, different pick."
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tree chapter complete! You've mastered:</p>
+      <ul>
+        <li>#26-28: Tree DFS — depth, balanced, LCA</li>
+        <li>#29-30: Tree BFS — serialize, right view</li>
+      </ul>
+      <p style="margin-top:10px;">Now we move from <b>trees to graphs</b>. A tree is actually a special graph (connected, no cycles). Graphs are more general — they can have cycles, multiple paths, disconnected components.</p>
+      <p style="margin-top:8px;">Problem #31: <b>Number of Islands on a Map</b> — your first graph problem. A 2D grid where you count connected components using DFS/BFS.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Trees (special graphs) → Graphs (general) — same DFS/BFS tools, new challenges (cycles, multiple components)!</p>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem29.html">← Problem #29</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(30)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem31.html">Problem #31 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY="dsa-roadmap-progress";const PROBLEM_NUM=30;
+function loadProgress(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{};}catch{return{};}}
+function saveProgress(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}
+function toggleDone(n){const p=loadProgress();if(p[n]==="done")delete p[n];else p[n]="done";saveProgress(p);updateUI();}
+function updateUI(){const p=loadProgress(),btn=document.getElementById("mark-done-btn");if(p[PROBLEM_NUM]==="done"){btn.textContent="✔ Completed";btn.classList.add("completed");}else{btn.textContent="☐ Mark as Done";btn.classList.remove("completed");}updateReadProgress();}
+function updateReadProgress(){const p=loadProgress();if(p[PROBLEM_NUM]==="done"){document.getElementById("section-pct").textContent="100%";document.getElementById("section-bar").style.width="100%";return;}const s=document.querySelectorAll(".section, .takeaway"),t=s.length;if(t===0)return;let v=0;s.forEach(sec=>{if(sec.getBoundingClientRect().top<window.innerHeight)v++;});const pct=Math.min(100,Math.round((v/t)*100));document.getElementById("section-pct").textContent=pct+"%";document.getElementById("section-bar").style.width=pct+"%";}
+window.addEventListener("scroll",updateReadProgress);updateUI();
+</script>
+</body>
+</html>

@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#15 — Validating Nested Code Brackets | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 3: Intermediate</span>
+    <span class="problem-id">Problem #15 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #15: Validating Nested Code Brackets</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#15 — Validating Nested Code Brackets</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Stack (Matching Pairs)</p>
+
+  <!-- SECTION 0: Real-World Scenario -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek code editor bana rahe ho (like VS Code). User code likhta hai with brackets:</p>
+<pre><code><span class="comment">// Valid examples:</span>
+<span style="color:#4caf50;">"()"        → ✓
+"()[]{}"    → ✓
+"{[()]}"    → ✓  (nested)
+"({[]})"   → ✓  (deeply nested)</span>
+
+<span class="comment">// Invalid examples:</span>
+<span style="color:#e44d26;">"(]"        → ✗  (wrong type)
+"([)]"      → ✗  (wrong order — interleaved)
+"((("       → ✗  (unclosed)
+"}"         → ✗  (no opener)</span></code></pre>
+      <p>Editor ko real-time batana hai: <b>"Are all brackets properly matched and nested?"</b></p>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #20 — Valid Parentheses. The gateway problem to understanding Stacks.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Problem Understanding -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given a string containing only <code>(){}[]</code>, determine if it's valid</li>
+        <li>Valid means: every opening bracket has a matching closing bracket of the same type, in the correct order</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Rules for validity:</b></p>
+      <ol>
+        <li>Every opening bracket must be closed by the same type: <code>(→)</code>, <code>{→}</code>, <code>[→]</code></li>
+        <li>Brackets must close in the correct order: innermost first (LIFO — Last In, First Out)</li>
+        <li>Every closing bracket must have a corresponding opening bracket</li>
+      </ol>
+      <p style="margin-top:10px;"><b>Why is this a NEW paradigm?</b></p>
+      <ul>
+        <li>Phase 1-2: Arrays, pointers, windows — all about <b>sequential processing</b></li>
+        <li>Phase 3 starts with <b>Stack</b> — a data structure that processes things in <b>reverse order (LIFO)</b></li>
+        <li>Brackets are inherently LIFO: the LAST opened bracket must be the FIRST one closed</li>
+      </ul>
+      <p style="margin-top:8px;color:#6c63ff;font-size:12px;">💡 <code>{[()]}</code> — the <code>(</code> was opened last, so it must close first with <code>)</code>. That's LIFO = Stack.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Brute Force Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>First instinct:</b> Repeatedly find and remove matching adjacent pairs until nothing is left.</p>
+<pre><code><span class="comment">// Brute Force — O(n²)</span>
+<span class="keyword">while</span> (s.contains(<span class="string">"()"</span>) || s.contains(<span class="string">"[]"</span>) || s.contains(<span class="string">"{}"</span>)) {
+    s = s.replace(<span class="string">"()"</span>, <span class="string">""</span>);
+    s = s.replace(<span class="string">"[]"</span>, <span class="string">""</span>);
+    s = s.replace(<span class="string">"{}"</span>, <span class="string">""</span>);
+}
+<span class="keyword">return</span> s.isEmpty();</code></pre>
+      <p>Works! But O(n²) — each replace scans the string, and we might need n/2 rounds.</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 The key observation: when we see a closing bracket, we need to check what was the MOST RECENT unmatched opening bracket. That's exactly what a Stack does — peek at the top.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Optimization Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Key Insight — The Stack of Plates Analogy:</b></p>
+      <p>Imagine stacking plates. You can only add to the top and remove from the top.</p>
+      <ul>
+        <li>See <code>(</code> → push a plate labeled "(" on top</li>
+        <li>See <code>[</code> → push a plate labeled "[" on top</li>
+        <li>See <code>]</code> → check top plate. Is it "["? Yes → match! Pop it. No → invalid.</li>
+        <li>See <code>)</code> → check top plate. Is it "("? Yes → match! Pop it. No → invalid.</li>
+      </ul>
+      <p style="margin-top:8px;">At the end, if the stack is empty → all brackets matched. If not → some brackets are unclosed.</p>
+
+      <p style="margin-top:12px;"><b>What is a Stack?</b></p>
+      <ul>
+        <li><b>LIFO</b> — Last In, First Out</li>
+        <li><code>push(x)</code> — add to top: O(1)</li>
+        <li><code>pop()</code> — remove from top: O(1)</li>
+        <li><code>peek()</code> — look at top without removing: O(1)</li>
+        <li><code>isEmpty()</code> — check if empty: O(1)</li>
+        <li>In Java: <code>Deque&lt;Character&gt; stack = new ArrayDeque&lt;&gt;()</code></li>
+      </ul>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 Use <code>ArrayDeque</code> not <code>Stack</code> class in Java. The <code>Stack</code> class is legacy, synchronized, and slower.</p>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>Stack for matching pairs — push openers, pop and match on closers</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Final Approach -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach (Pattern-Based)</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Pattern:</b> Stack — Push Openers, Match Closers</p>
+      <p style="margin-top:10px;"><b>Algorithm:</b></p>
+      <ol>
+        <li>Create an empty stack</li>
+        <li>For each character in string:
+          <ul>
+            <li>If it's an opening bracket <code>( [ {</code> → push onto stack</li>
+            <li>If it's a closing bracket <code>) ] }</code>:
+              <ul>
+                <li>If stack is empty → no matching opener → return false</li>
+                <li>Pop the top. If it doesn't match the closer → return false</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>After processing all chars: return <code>stack.isEmpty()</code></li>
+      </ol>
+      <p style="margin-top:10px;color:#888;font-size:11px;">💡 Trick: Instead of pushing the opener and checking later, push the EXPECTED closer. Then on a closer, just check if top == current char. Cleaner code.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Step-by-Step Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Input:</b> <code>s = "{[()]}"</code></p>
+      <table style="width:100%;font-size:12px;margin-top:10px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Step</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Char</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Action</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Stack (top → bottom)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">{</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Push <code>}</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[}]</code></td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">[</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Push <code>]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[], }]</code></td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">(</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Push <code>)</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[), ], }]</code></td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Pop → <code>)</code> == <code>)</code> ✓</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[], }]</code></td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Pop → <code>]</code> == <code>]</code> ✓</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[}]</code></td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">6</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">}</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Pop → <code>}</code> == <code>}</code> ✓</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[]</code> (empty)</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;">Stack empty → <span style="color:#4caf50;"><b>true (valid)</b></span></p>
+
+      <p style="margin-top:16px;"><b>Invalid example:</b> <code>s = "([)]"</code></p>
+      <table style="width:100%;font-size:12px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Step</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Char</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Action</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Stack</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">(</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Push <code>)</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[)]</code></td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">[</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Push <code>]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[], )]</code></td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">Pop → <code>]</code> ≠ <code>)</code> ✗</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">MISMATCH → return false</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;color:#e44d26;"><b>false</b> — <code>]</code> was expected but <code>)</code> came. Interleaved brackets are invalid.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Internal Mechanics -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Why Stack is the perfect data structure here:</b></p>
+      <ul>
+        <li>Brackets are <b>nested</b> — innermost must close first</li>
+        <li>That's LIFO: the Last opened bracket is the First one that needs closing</li>
+        <li>Stack naturally maintains this order — top = most recent unmatched opener</li>
+      </ul>
+
+      <p style="margin-top:12px;"><b>The "push expected closer" trick:</b></p>
+      <ul>
+        <li>Instead of: push <code>(</code>, then later check if <code>)</code> matches <code>(</code> (needs a mapping)</li>
+        <li>Do: push <code>)</code> when you see <code>(</code>. Then on closer, just check <code>stack.pop() == currentChar</code></li>
+        <li>Eliminates the need for a separate mapping lookup during the matching step</li>
+      </ul>
+
+      <p style="margin-top:12px;"><b>Three failure modes:</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">Failure</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Example</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Detection</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Type mismatch</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;"><code>(]</code></td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Pop ≠ current closer</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Extra closer</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;"><code>}</code></td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Stack empty when closer arrives</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Unclosed opener</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;"><code>((</code></td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Stack not empty at the end</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Complexity Analysis -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag">
+          <span class="label">Time:</span>
+          <span class="value">O(n)</span>
+        </div>
+        <div class="complexity-tag">
+          <span class="label">Space:</span>
+          <span class="value">O(n)</span>
+        </div>
+      </div>
+      <p style="margin-top:10px;">Each character is pushed at most once and popped at most once → O(n). Stack can hold at most n/2 openers → O(n) space.</p>
+      <table style="width:100%;font-size:12px;margin-top:10px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Approach</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Time</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Space</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Replace pairs repeatedly</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">O(n²)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">O(n)</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Stack</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(n)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">O(n)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Java Implementation -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">import</span> java.util.ArrayDeque;
+<span class="keyword">import</span> java.util.Deque;
+
+<span class="keyword">public class</span> <span class="type">ValidParentheses</span> {
+
+    <span class="keyword">public static boolean</span> <span class="type">isValid</span>(String s) {
+        Deque&lt;Character&gt; stack = <span class="keyword">new</span> ArrayDeque&lt;&gt;();
+
+        <span class="keyword">for</span> (<span class="type">char</span> c : s.toCharArray()) {
+            <span class="keyword">if</span> (c == <span class="string">'('</span>) stack.push(<span class="string">')'</span>);
+            <span class="keyword">else if</span> (c == <span class="string">'['</span>) stack.push(<span class="string">']'</span>);
+            <span class="keyword">else if</span> (c == <span class="string">'{'</span>) stack.push(<span class="string">'}'</span>);
+            <span class="keyword">else</span> {
+                <span class="keyword">if</span> (stack.isEmpty() || stack.pop() != c) {
+                    <span class="keyword">return false</span>;
+                }
+            }
+        }
+
+        <span class="keyword">return</span> stack.isEmpty();
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        System.out.println(isValid(<span class="string">"{[()]}"</span>));  <span class="comment">// true</span>
+        System.out.println(isValid(<span class="string">"([)]"</span>));   <span class="comment">// false</span>
+        System.out.println(isValid(<span class="string">"(("</span>));     <span class="comment">// false</span>
+    }
+}</code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 The "push expected closer" trick makes the matching logic a single <code>stack.pop() != c</code> check. No HashMap needed for mapping.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 9: Edge Cases -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Case</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Input</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Output</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Why</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Empty string</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>""</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">true</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Nothing to mismatch</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single opener</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>"("</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">false</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Stack not empty at end</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single closer</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>")"</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">false</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Stack empty when closer arrives</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Odd length</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>"(()"</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">false</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Odd length can never be valid (quick check)</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Deeply nested</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>"(((())))""</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">true</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Stack grows to n/2 then shrinks to 0</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Interleaved</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>"([)]"</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">false</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">] expected but ) came</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 10: Common Mistakes -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Forgetting to check <code>stack.isEmpty()</code> before popping</b>
+          <p style="color:#e44d26;">❌ <code>stack.pop()</code> on empty stack → EmptyStackException</p>
+          <p style="color:#4caf50;">✅ Always check <code>stack.isEmpty()</code> first when a closer arrives</p>
+        </li>
+        <li style="margin-top:10px;"><b>Forgetting the final <code>stack.isEmpty()</code> check</b>
+          <p style="color:#e44d26;">❌ Input "((" → no mismatches during scan, but stack has 2 unmatched openers</p>
+          <p style="color:#4caf50;">✅ Return <code>stack.isEmpty()</code> at the end, not just <code>true</code></p>
+        </li>
+        <li style="margin-top:10px;"><b>Using Java's <code>Stack</code> class</b>
+          <p style="color:#ffc107;">⚠️ <code>java.util.Stack</code> is legacy, extends Vector (synchronized = slow)</p>
+          <p style="color:#4caf50;">✅ Use <code>Deque&lt;Character&gt; stack = new ArrayDeque&lt;&gt;()</code></p>
+        </li>
+        <li style="margin-top:10px;"><b>Only counting brackets instead of matching types</b>
+          <p style="color:#e44d26;">❌ Counting ( and ) separately → "(]" would pass (1 open, 1 close)</p>
+          <p style="color:#4caf50;">✅ Must match TYPE, not just count</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 11: When to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Signals to पहचान (identify):</b></p>
+      <ul>
+        <li>✅ "Valid parentheses" / "Balanced brackets"</li>
+        <li>✅ "Matching pairs" — anything that opens and closes</li>
+        <li>✅ "Nested structure" — HTML tags, function calls, expressions</li>
+        <li>✅ "Most recent unmatched" — LIFO = Stack</li>
+        <li>✅ "Undo" operations — last action undone first</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Stack problems family (upcoming in this roadmap):</b></p>
+      <ul>
+        <li>#15: Matching pairs (this problem)</li>
+        <li>#16: Next greater element (Monotonic Stack)</li>
+        <li>#17: Stock span (Monotonic Stack variant)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 12: When NOT to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ "Minimum number of bracket removals to make valid" — needs counting, not just stack</li>
+        <li>❌ "Generate all valid bracket combinations" — that's recursion/backtracking (#21-23)</li>
+        <li>❌ FIFO order needed — use Queue instead of Stack</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 13: Key Takeaway -->
+  <div class="takeaway">
+    💡 "Jab bhi 'most recent unmatched' dhundhna ho — Stack lagao. Push openers, pop and match closers. End mein stack empty = valid."
+  </div>
+
+  <!-- SECTION 14: Bridge to Next Problem -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Ab tum Stack ka basic use samajh gaye — matching pairs.</p>
+      <p style="margin-top:10px;">Next problem mein Stack ka ek powerful variant aata hai: <b>Monotonic Stack</b>.</p>
+      <p style="margin-top:8px;">Question: <b>"Har day ke liye, next warmer day kab aayega?"</b></p>
+      <ul>
+        <li>Temperatures: [73, 74, 75, 71, 69, 72, 76, 73]</li>
+        <li>For 73°: next warmer = 74° (1 day later)</li>
+        <li>For 75°: next warmer = 76° (4 days later)</li>
+      </ul>
+      <p style="margin-top:8px;">Stack mein hum "waiting for a warmer day" elements rakhenge. Jab warmer aaye → pop and answer.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Stack for matching (pairs) → Monotonic Stack (next greater/smaller element) — new power unlocked!</p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons">
+    <a class="nav-btn" href="../phase2/problem14.html">← Problem #14</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(15)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem16.html">Problem #16 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "dsa-roadmap-progress";
+const PROBLEM_NUM = 15;
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+
+function saveProgress(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function toggleDone(num) {
+  const prog = loadProgress();
+  if (prog[num] === "done") { delete prog[num]; }
+  else { prog[num] = "done"; }
+  saveProgress(prog);
+  updateUI();
+}
+
+function updateUI() {
+  const prog = loadProgress();
+  const btn = document.getElementById("mark-done-btn");
+  if (prog[PROBLEM_NUM] === "done") {
+    btn.textContent = "✔ Completed";
+    btn.classList.add("completed");
+  } else {
+    btn.textContent = "☐ Mark as Done";
+    btn.classList.remove("completed");
+  }
+  updateReadProgress();
+}
+
+function updateReadProgress() {
+  const prog = loadProgress();
+  if (prog[PROBLEM_NUM] === "done") {
+    document.getElementById("section-pct").textContent = "100%";
+    document.getElementById("section-bar").style.width = "100%";
+    return;
+  }
+  const sections = document.querySelectorAll(".section, .takeaway");
+  const total = sections.length;
+  if (total === 0) return;
+  let visible = 0;
+  sections.forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    if (rect.top < window.innerHeight) visible++;
+  });
+  const pct = Math.min(100, Math.round((visible / total) * 100));
+  document.getElementById("section-pct").textContent = pct + "%";
+  document.getElementById("section-bar").style.width = pct + "%";
+}
+
+window.addEventListener("scroll", updateReadProgress);
+updateUI();
+</script>
+</body>
+</html>

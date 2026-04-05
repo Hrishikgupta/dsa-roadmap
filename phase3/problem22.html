@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#22 — All Permutations of a Lock Code | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 3: Intermediate</span>
+    <span class="problem-id">Problem #22 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #22: All Permutations of a Lock Code</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#22 — All Permutations of a Lock Code</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Recursion (Permutation via Swap / Used-Array)</p>
+
+  <!-- SECTION 0: Real-World Scenario -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum apna phone lock bhool gaye. Code mein digits <code>[1, 2, 3]</code> hain — but order yaad nahi.</p>
+      <p>Saare possible orders try karne hain:</p>
+<pre><code><span class="comment">[1,2,3]  [1,3,2]  [2,1,3]  [2,3,1]  [3,1,2]  [3,2,1]</span></code></pre>
+      <p>Total: <b>3! = 6 permutations</b></p>
+      <p style="margin-top:8px;"><b>Key difference from Subsets (#21):</b></p>
+      <ul>
+        <li>Subsets: [1,2] and [2,1] are the SAME subset → order doesn't matter → 2ⁿ results</li>
+        <li>Permutations: [1,2,3] and [3,2,1] are DIFFERENT → order matters → n! results</li>
+      </ul>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #46 — Permutations. Core recursion pattern for interviews.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Problem Understanding -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given an array of distinct integers, return all possible permutations</li>
+        <li>Every element must appear exactly once in each permutation</li>
+        <li>All permutations must be unique</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Input → Output:</b></p>
+      <ul>
+        <li>Input: <code>int[] nums</code> (distinct)</li>
+        <li>Output: <code>List&lt;List&lt;Integer&gt;&gt;</code> — all n! permutations</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Subsets vs Permutations — the decision tree difference:</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">Aspect</th>
+            <th style="background:#22223a;color:#888;padding:7px;">#21 Subsets</th>
+            <th style="background:#22223a;color:#888;padding:7px;">#22 Permutations</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Decision at each step</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Include or exclude (2 choices)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Which unused element goes here? (n, n-1, n-2... choices)</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Result size</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Variable (0 to n elements)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Always n elements</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Total results</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">2ⁿ</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">n!</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Branching factor</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">2 (binary tree)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">n, n-1, n-2... (decreasing)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Brute Force Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Thinking process:</b></p>
+      <ul>
+        <li>Position 0: can be filled by any of n elements → n choices</li>
+        <li>Position 1: can be filled by any of remaining n-1 elements → n-1 choices</li>
+        <li>Position 2: n-2 choices... and so on</li>
+        <li>Total: n × (n-1) × (n-2) × ... × 1 = n!</li>
+      </ul>
+      <p style="margin-top:8px;">This naturally maps to recursion: at each position, try every unused element.</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 But how do we track "which elements are already used"? Two approaches:</p>
+      <ol>
+        <li><b>Used boolean array</b> — mark elements as used/unused</li>
+        <li><b>Swap technique</b> — swap elements into position, recurse, swap back</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Optimization Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Approach A: Used Array + Build Current List</b></p>
+<pre><code><span class="type">permute</span>(current, used):
+    <span class="keyword">if</span> current.size() == n → add to result
+    <span class="keyword">for</span> i = <span class="number">0</span> to n-<span class="number">1</span>:
+        <span class="keyword">if</span> !used[i]:
+            used[i] = <span class="keyword">true</span>
+            current.add(nums[i])
+            <span class="type">permute</span>(current, used)
+            current.removeLast()    <span class="comment">// backtrack</span>
+            used[i] = <span class="keyword">false</span>         <span class="comment">// backtrack</span></code></pre>
+      <p style="margin-top:8px;">Clear and intuitive. Extra O(n) space for <code>used[]</code> array.</p>
+
+      <p style="margin-top:14px;"><b>Approach B: Swap Technique (in-place) ⭐</b></p>
+<pre><code><span class="type">permute</span>(start):
+    <span class="keyword">if</span> start == n → add nums copy to result
+    <span class="keyword">for</span> i = start to n-<span class="number">1</span>:
+        swap(nums[start], nums[i])   <span class="comment">// try element i at position start</span>
+        <span class="type">permute</span>(start + <span class="number">1</span>)
+        swap(nums[start], nums[i])   <span class="comment">// backtrack (undo swap)</span></code></pre>
+      <p style="margin-top:8px;">No extra <code>used[]</code> array needed. Elements to the left of <code>start</code> are "placed", elements from <code>start</code> onward are "available".</p>
+
+      <p style="margin-top:12px;"><b>The Swap Analogy — Seating Arrangement:</b></p>
+      <ul>
+        <li>You have n chairs in a row and n people standing</li>
+        <li>For chair 0: try each person → seat them (swap into position) → arrange remaining chairs → unseat (swap back)</li>
+        <li>For chair 1: try each remaining person → same process</li>
+        <li>When all chairs filled → one complete arrangement</li>
+      </ul>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>Permutation recursion — at each position, try every available element, backtrack after exploring</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Final Approach -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach (Pattern-Based)</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Pattern:</b> Permutation via Swap (in-place backtracking)</p>
+      <p style="margin-top:10px;"><b>Algorithm:</b></p>
+      <ol>
+        <li>Start with <code>start = 0</code></li>
+        <li>If <code>start == n</code> → add copy of nums to result (base case)</li>
+        <li>For each <code>i</code> from <code>start</code> to <code>n-1</code>:
+          <ul>
+            <li>Swap <code>nums[start]</code> with <code>nums[i]</code> (place element i at position start)</li>
+            <li>Recurse with <code>start + 1</code></li>
+            <li>Swap back (backtrack)</li>
+          </ul>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Step-by-Step Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Input:</b> <code>nums = [1, 2, 3]</code></p>
+<pre><code><span class="comment">Call tree (swap approach):</span>
+
+<span style="color:#6c63ff;">permute(0, [1,2,3])</span>
+├── swap(0,0) → <span style="color:#4caf50;">permute(1, [1,2,3])</span>
+│   ├── swap(1,1) → permute(2, [1,2,3])
+│   │   └── swap(2,2) → <span style="color:#ffc107;">BASE: [1,2,3] ✓</span>
+│   └── swap(1,2) → permute(2, [1,3,2])
+│       └── swap(2,2) → <span style="color:#ffc107;">BASE: [1,3,2] ✓</span>
+├── swap(0,1) → <span style="color:#4caf50;">permute(1, [2,1,3])</span>
+│   ├── swap(1,1) → <span style="color:#ffc107;">BASE: [2,1,3] ✓</span>
+│   └── swap(1,2) → <span style="color:#ffc107;">BASE: [2,3,1] ✓</span>
+└── swap(0,2) → <span style="color:#4caf50;">permute(1, [3,2,1])</span>
+    ├── swap(1,1) → <span style="color:#ffc107;">BASE: [3,2,1] ✓</span>
+    └── swap(1,2) → <span style="color:#ffc107;">BASE: [3,1,2] ✓</span></code></pre>
+      <p style="margin-top:10px;color:#4caf50;"><b>Result: [1,2,3], [1,3,2], [2,1,3], [2,3,1], [3,2,1], [3,1,2]</b> — all 6 permutations ✓</p>
+      <p style="color:#888;font-size:11px;">Level 0: 3 branches (which element at position 0). Level 1: 2 branches. Level 2: 1 branch. Total leaves = 3×2×1 = 6 = 3!</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Internal Mechanics -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>How the swap technique partitions the array:</b></p>
+<pre><code><span class="comment">nums = [1, 2, 3], start = 1</span>
+         <span style="color:#4caf50;">↑placed</span>  <span style="color:#ffc107;">↑↑ available</span>
+
+<span class="comment">Elements [0..start-1] = already placed (fixed)</span>
+<span class="comment">Elements [start..n-1] = available to place at position 'start'</span></code></pre>
+      <ul>
+        <li>Swapping <code>nums[start]</code> with <code>nums[i]</code> = "choosing element i for position start"</li>
+        <li>After recursion, swapping back = "unchoosing" (backtrack)</li>
+        <li>No extra <code>used[]</code> array needed — the array itself tracks what's placed vs available</li>
+      </ul>
+
+      <p style="margin-top:14px;"><b>Approach A vs B comparison:</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Aspect</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Used Array (A)</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Swap (B)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Extra space</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">O(n) for used[] + current[]</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(1) — in-place</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Readability</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">More intuitive</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Trickier to understand</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Handles duplicates</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Easier (sort + skip)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Harder (need HashSet per level)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Interview</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Good default choice</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Shows deeper understanding</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:6px;color:#888;font-size:11px;">💡 Know both. Start with Used Array in interviews (clearer), mention Swap as optimization.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Complexity Analysis -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag">
+          <span class="label">Time:</span>
+          <span class="value">O(n × n!)</span>
+        </div>
+        <div class="complexity-tag">
+          <span class="label">Space:</span>
+          <span class="value">O(n)</span>
+        </div>
+      </div>
+      <p style="margin-top:10px;"><b>Time:</b> n! permutations × O(n) to copy each into result.</p>
+      <p><b>Space:</b> O(n) recursion depth. Output O(n × n!) not counted.</p>
+      <p style="margin-top:6px;color:#888;font-size:11px;">n! grows FAST: 10! = 3.6M, 12! = 479M, 13! = 6.2B. Permutation problems are limited to small n (≤ ~10-12).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Java Implementation -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Approach A: Used Array (clearer for interviews)</b></p>
+<pre><code><span class="keyword">import</span> java.util.*;
+
+<span class="keyword">public class</span> <span class="type">Permutations</span> {
+
+    <span class="keyword">public static</span> List&lt;List&lt;Integer&gt;&gt; <span class="type">permute</span>(<span class="type">int</span>[] nums) {
+        List&lt;List&lt;Integer&gt;&gt; result = <span class="keyword">new</span> ArrayList&lt;&gt;();
+        <span class="type">boolean</span>[] used = <span class="keyword">new boolean</span>[nums.length];
+        backtrack(nums, used, <span class="keyword">new</span> ArrayList&lt;&gt;(), result);
+        <span class="keyword">return</span> result;
+    }
+
+    <span class="keyword">private static void</span> <span class="type">backtrack</span>(<span class="type">int</span>[] nums, <span class="type">boolean</span>[] used,
+                                    List&lt;Integer&gt; current,
+                                    List&lt;List&lt;Integer&gt;&gt; result) {
+        <span class="keyword">if</span> (current.size() == nums.length) {
+            result.add(<span class="keyword">new</span> ArrayList&lt;&gt;(current));
+            <span class="keyword">return</span>;
+        }
+        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; nums.length; i++) {
+            <span class="keyword">if</span> (used[i]) <span class="keyword">continue</span>;
+            used[i] = <span class="keyword">true</span>;
+            current.add(nums[i]);
+            backtrack(nums, used, current, result);
+            current.remove(current.size() - <span class="number">1</span>);
+            used[i] = <span class="keyword">false</span>;
+        }
+    }
+}</code></pre>
+
+      <p style="margin-top:14px;"><b>Approach B: Swap (in-place)</b></p>
+<pre><code><span class="keyword">public static</span> List&lt;List&lt;Integer&gt;&gt; <span class="type">permuteSwap</span>(<span class="type">int</span>[] nums) {
+    List&lt;List&lt;Integer&gt;&gt; result = <span class="keyword">new</span> ArrayList&lt;&gt;();
+    swapBacktrack(nums, <span class="number">0</span>, result);
+    <span class="keyword">return</span> result;
+}
+
+<span class="keyword">private static void</span> <span class="type">swapBacktrack</span>(<span class="type">int</span>[] nums, <span class="type">int</span> start,
+                                    List&lt;List&lt;Integer&gt;&gt; result) {
+    <span class="keyword">if</span> (start == nums.length) {
+        List&lt;Integer&gt; perm = <span class="keyword">new</span> ArrayList&lt;&gt;();
+        <span class="keyword">for</span> (<span class="type">int</span> num : nums) perm.add(num);
+        result.add(perm);
+        <span class="keyword">return</span>;
+    }
+    <span class="keyword">for</span> (<span class="type">int</span> i = start; i &lt; nums.length; i++) {
+        swap(nums, start, i);
+        swapBacktrack(nums, start + <span class="number">1</span>, result);
+        swap(nums, start, i); <span class="comment">// backtrack</span>
+    }
+}
+
+<span class="keyword">private static void</span> <span class="type">swap</span>(<span class="type">int</span>[] a, <span class="type">int</span> i, <span class="type">int</span> j) {
+    <span class="type">int</span> tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+}</code></pre>
+    </div>
+  </div>
+
+  <!-- SECTION 9: Edge Cases -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Case</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Input</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Output count</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">[[1]] — only one arrangement</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Two elements</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,2]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">[[1,2],[2,1]]</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">With duplicates</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,1,2]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3 (not 6)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Needs Permutations II (LC #47) — sort + skip</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Negative numbers</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[-1,0,1]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">6</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Works fine — values don't matter, just positions</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 10: Common Mistakes -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Forgetting to reset <code>used[i] = false</code></b>
+          <p style="color:#e44d26;">❌ Element stays "used" for all subsequent branches → missing permutations</p>
+          <p style="color:#4caf50;">✅ Always backtrack: <code>used[i] = false</code> after recursive call returns</p>
+        </li>
+        <li style="margin-top:10px;"><b>Swap approach: forgetting to swap back</b>
+          <p style="color:#e44d26;">❌ Array stays modified → subsequent iterations use wrong state</p>
+          <p style="color:#4caf50;">✅ Always swap back: <code>swap(nums, start, i)</code> after recursion</p>
+        </li>
+        <li style="margin-top:10px;"><b>Confusing subsets with permutations</b>
+          <p style="color:#888;">Subsets: loop from <code>index</code> to n (avoid revisiting earlier elements)</p>
+          <p style="color:#888;">Permutations: loop from <code>0</code> to n (any unused element can go at any position)</p>
+        </li>
+        <li style="margin-top:10px;"><b>Not copying the result</b>
+          <p style="color:#4caf50;">✅ Same as #21: <code>new ArrayList&lt;&gt;(current)</code> — always copy before adding to result</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 11: When to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Signals to पहचान (identify):</b></p>
+      <ul>
+        <li>✅ "Generate all permutations" / "All arrangements"</li>
+        <li>✅ "Order matters" — [1,2] ≠ [2,1]</li>
+        <li>✅ "Try every possible ordering"</li>
+        <li>✅ n is small (≤ 10-12) — n! grows extremely fast</li>
+      </ul>
+      <p style="margin-top:10px;"><b>The recursion family so far:</b></p>
+<pre><code><span class="comment">#20: Trust the function (Hanoi)     — foundation</span>
+<span class="comment">#21: Include/Exclude (Subsets)      — 2 choices per element</span>
+<span style="color:#4caf50;">#22: Permutation (this)             — n choices at each position</span>
+<span class="comment">#23: Multi-branch (Phone keypad)    — variable choices per step</span></code></pre>
+    </div>
+  </div>
+
+  <!-- SECTION 12: When NOT to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ n > 12 — n! explodes (13! = 6.2 billion)</li>
+        <li>❌ "Next permutation" (LC #31) — doesn't need to generate all, just find the next one in lexicographic order</li>
+        <li>❌ Order doesn't matter — use subsets/combinations instead</li>
+        <li>❌ "Count permutations" without listing them — use math (n!), not recursion</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 13: Key Takeaway -->
+  <div class="takeaway">
+    💡 "Permutations = at each position, try every unused element. Backtrack after each try. n choices × (n-1) × ... × 1 = n! results."
+  </div>
+
+  <!-- SECTION 14: Bridge to Next Problem -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Ab tak recursion mein:</p>
+      <ul>
+        <li>#21: 2 choices per step (include/exclude) → 2ⁿ results</li>
+        <li>#22: n choices per step (which element) → n! results</li>
+      </ul>
+      <p style="margin-top:10px;">Next problem mein choices <b>variable</b> hain — har step pe alag number of options:</p>
+      <p style="margin-top:8px;"><b>"Phone Keypad Letter Combinations"</b> — digit 2 maps to "abc" (3 choices), digit 7 maps to "pqrs" (4 choices).</p>
+      <ul>
+        <li>Input: "23" → output: ["ad","ae","af","bd","be","bf","cd","ce","cf"]</li>
+        <li>Each digit = a branching point with 3-4 options</li>
+        <li>This is "multi-branch recursion" — the most general form</li>
+      </ul>
+      <p style="color:#6c63ff;margin-top:12px;">→ Fixed 2 branches (subsets) → Fixed n branches (permutations) → Variable branches (phone keypad) — recursion mastery!</p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem21.html">← Problem #21</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(22)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem23.html">Problem #23 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "dsa-roadmap-progress";
+const PROBLEM_NUM = 22;
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+
+function saveProgress(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function toggleDone(num) {
+  const prog = loadProgress();
+  if (prog[num] === "done") { delete prog[num]; }
+  else { prog[num] = "done"; }
+  saveProgress(prog);
+  updateUI();
+}
+
+function updateUI() {
+  const prog = loadProgress();
+  const btn = document.getElementById("mark-done-btn");
+  if (prog[PROBLEM_NUM] === "done") {
+    btn.textContent = "✔ Completed";
+    btn.classList.add("completed");
+  } else {
+    btn.textContent = "☐ Mark as Done";
+    btn.classList.remove("completed");
+  }
+  updateReadProgress();
+}
+
+function updateReadProgress() {
+  const prog = loadProgress();
+  if (prog[PROBLEM_NUM] === "done") {
+    document.getElementById("section-pct").textContent = "100%";
+    document.getElementById("section-bar").style.width = "100%";
+    return;
+  }
+  const sections = document.querySelectorAll(".section, .takeaway");
+  const total = sections.length;
+  if (total === 0) return;
+  let visible = 0;
+  sections.forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    if (rect.top < window.innerHeight) visible++;
+  });
+  const pct = Math.min(100, Math.round((visible / total) * 100));
+  document.getElementById("section-pct").textContent = pct + "%";
+  document.getElementById("section-bar").style.width = pct + "%";
+}
+
+window.addEventListener("scroll", updateReadProgress);
+updateUI();
+</script>
+</body>
+</html>

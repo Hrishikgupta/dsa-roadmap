@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#27 — Is This a Balanced Team Structure? | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 4: Advanced</span>
+    <span class="problem-id">Problem #27 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #27: Is This a Balanced Team Structure?</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#27 — Is This a Balanced Team Structure?</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Tree DFS (Height + Validation)</p>
+
+  <!-- SECTION 0: Real-World Scenario -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>HR ne bola: <b>"Check karo ki company ka org chart balanced hai ya nahi."</b></p>
+      <p style="margin-top:8px;">Balanced = kisi bhi manager ke neeche, left team aur right team ki depth mein zyada se zyada 1 ka difference ho.</p>
+<pre><code><span class="comment">Balanced ✓:          Unbalanced ✗:</span>
+<span class="comment">     3                    1</span>
+<span class="comment">    / \                    \</span>
+<span class="comment">   9   20                  2</span>
+<span class="comment">      /  \                  \</span>
+<span class="comment">     15   7                  3</span>
+<span class="comment">                              \</span>
+<span class="comment"> |L-R| ≤ 1 at every node      4  (skewed = unbalanced)</span></code></pre>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #110 — Balanced Binary Tree.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Problem Understanding -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>A binary tree is <b>height-balanced</b> if for EVERY node, the heights of left and right subtrees differ by at most 1</li>
+        <li>Not just the root — EVERY node must satisfy this condition</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Input → Output:</b></p>
+      <ul>
+        <li>Input: <code>TreeNode root</code></li>
+        <li>Output: <code>boolean</code></li>
+      </ul>
+      <p style="margin-top:10px;"><b>Connection to #26:</b></p>
+      <ul>
+        <li>#26: compute height → <code>1 + max(L, R)</code></li>
+        <li>#27: compute height + validate → same computation, but also check <code>|L - R| ≤ 1</code> at every node</li>
+        <li>If any node fails → return "unbalanced" signal immediately</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Brute Force Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Naive approach — O(n²):</b></p>
+<pre><code><span class="keyword">boolean</span> isBalanced(TreeNode root) {
+    <span class="keyword">if</span> (root == <span class="keyword">null</span>) <span class="keyword">return true</span>;
+    <span class="type">int</span> leftH  = maxDepth(root.left);   <span class="comment">// O(n) each call</span>
+    <span class="type">int</span> rightH = maxDepth(root.right);  <span class="comment">// O(n) each call</span>
+    <span class="keyword">return</span> Math.abs(leftH - rightH) &lt;= <span class="number">1</span>
+        &amp;&amp; isBalanced(root.left)          <span class="comment">// recurse</span>
+        &amp;&amp; isBalanced(root.right);         <span class="comment">// recurse</span>
+}</code></pre>
+      <p>For each node, we call <code>maxDepth</code> which traverses the subtree → O(n) per node × n nodes = <b>O(n²)</b>.</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 We're computing height repeatedly. Can we compute height AND check balance in a single pass?</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Optimization Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Key Insight — Return height, but use -1 as "unbalanced" signal:</b></p>
+      <ul>
+        <li>Normal height function returns 0, 1, 2, 3... (always ≥ 0)</li>
+        <li>If we detect imbalance at any node → return <b>-1</b> (special sentinel)</li>
+        <li>If any child returns -1 → propagate -1 upward (don't bother computing further)</li>
+        <li>At the end: if root's height is -1 → unbalanced. Otherwise → balanced.</li>
+      </ul>
+<pre><code><span class="type">int</span> checkHeight(TreeNode node):
+    <span class="keyword">if</span> node == <span class="keyword">null</span> → <span class="keyword">return</span> <span class="number">0</span>
+
+    <span class="type">int</span> leftH = checkHeight(node.left)
+    <span class="keyword">if</span> leftH == -<span class="number">1</span> → <span class="keyword">return</span> -<span class="number">1</span>          <span class="comment">// left subtree unbalanced — abort</span>
+
+    <span class="type">int</span> rightH = checkHeight(node.right)
+    <span class="keyword">if</span> rightH == -<span class="number">1</span> → <span class="keyword">return</span> -<span class="number">1</span>         <span class="comment">// right subtree unbalanced — abort</span>
+
+    <span class="keyword">if</span> |leftH - rightH| &gt; <span class="number">1</span> → <span class="keyword">return</span> -<span class="number">1</span> <span class="comment">// THIS node unbalanced — abort</span>
+
+    <span class="keyword">return</span> <span class="number">1</span> + max(leftH, rightH)        <span class="comment">// balanced — return real height</span></code></pre>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>DFS with sentinel return value — compute height normally, return -1 to signal failure. One pass, O(n).</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Final Approach -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach (Pattern-Based)</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Pattern:</b> Tree DFS — Height computation with early termination via sentinel (-1)</p>
+      <p style="margin-top:10px;"><b>Algorithm:</b></p>
+      <ol>
+        <li>Define <code>checkHeight(node)</code> that returns height or -1</li>
+        <li>Base: null → 0</li>
+        <li>Get left height. If -1 → return -1 (early abort)</li>
+        <li>Get right height. If -1 → return -1 (early abort)</li>
+        <li>If <code>|leftH - rightH| > 1</code> → return -1 (this node fails)</li>
+        <li>Else → return <code>1 + max(leftH, rightH)</code></li>
+      </ol>
+      <p style="margin-top:8px;"><code>isBalanced(root)</code> = <code>checkHeight(root) != -1</code></p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Step-by-Step Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Balanced tree:</b> <code>[3, 9, 20, null, null, 15, 7]</code></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:6px;">Node</th>
+            <th style="background:#22223a;color:#888;padding:6px;">leftH</th>
+            <th style="background:#22223a;color:#888;padding:6px;">rightH</th>
+            <th style="background:#22223a;color:#888;padding:6px;">|diff|</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Return</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">9</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">0 ≤ 1 ✓</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">15</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">0 ≤ 1 ✓</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">7</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">0 ≤ 1 ✓</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">20</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">0 ≤ 1 ✓</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">3 (root)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">1 ≤ 1 ✓</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">3 (≠ -1 → balanced!)</td></tr>
+        </tbody>
+      </table>
+
+      <p style="margin-top:14px;"><b>Unbalanced tree:</b> <code>[1, 2, 2, 3, 3, null, null, 4, 4]</code></p>
+<pre><code><span class="comment">       1
+      / \
+     2   2
+    / \
+   3   3
+  / \
+ 4   4</span></code></pre>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:6px;">Node</th>
+            <th style="background:#22223a;color:#888;padding:6px;">leftH</th>
+            <th style="background:#22223a;color:#888;padding:6px;">rightH</th>
+            <th style="background:#22223a;color:#888;padding:6px;">|diff|</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Return</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">4,4 (leaves)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0 ✓</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3 (left)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0 ✓</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3 (right, leaf)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0 ✓</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2 (left)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1 ✓</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2 (right, leaf)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0 ✓</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#e44d26;">1 (root)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#e44d26;">2 > 1 ✗</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#e44d26;">-1 (unbalanced!)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Internal Mechanics -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>The sentinel pattern — returning extra info through the return value:</b></p>
+      <ul>
+        <li>Normal return: height (0, 1, 2, ...) → everything is fine</li>
+        <li>Sentinel return: -1 → something went wrong (unbalanced)</li>
+        <li>This avoids needing a separate boolean + height (two return values)</li>
+        <li>Same technique used in many tree problems: return -1 for invalid, real value for valid</li>
+      </ul>
+      <p style="margin-top:12px;"><b>O(n²) vs O(n) comparison:</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">Approach</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Time</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Why</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Naive (height per node)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#e44d26;">O(n²)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Recomputes height at every node</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Sentinel (-1)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(n)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Computes height once, validates during same pass</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Complexity -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag"><span class="label">Time:</span><span class="value">O(n)</span></div>
+        <div class="complexity-tag"><span class="label">Space:</span><span class="value">O(h)</span></div>
+      </div>
+      <p style="margin-top:10px;">Each node visited once. Space = recursion depth = tree height.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Java Implementation -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">public class</span> <span class="type">BalancedTree</span> {
+
+    <span class="keyword">public static boolean</span> <span class="type">isBalanced</span>(TreeNode root) {
+        <span class="keyword">return</span> checkHeight(root) != -<span class="number">1</span>;
+    }
+
+    <span class="keyword">private static int</span> <span class="type">checkHeight</span>(TreeNode node) {
+        <span class="keyword">if</span> (node == <span class="keyword">null</span>) <span class="keyword">return</span> <span class="number">0</span>;
+
+        <span class="type">int</span> leftH = checkHeight(node.left);
+        <span class="keyword">if</span> (leftH == -<span class="number">1</span>) <span class="keyword">return</span> -<span class="number">1</span>;
+
+        <span class="type">int</span> rightH = checkHeight(node.right);
+        <span class="keyword">if</span> (rightH == -<span class="number">1</span>) <span class="keyword">return</span> -<span class="number">1</span>;
+
+        <span class="keyword">if</span> (Math.abs(leftH - rightH) &gt; <span class="number">1</span>) <span class="keyword">return</span> -<span class="number">1</span>;
+
+        <span class="keyword">return</span> <span class="number">1</span> + Math.max(leftH, rightH);
+    }
+}</code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 Same as #26's maxDepth, plus 3 lines of early-abort checks. The sentinel -1 does all the heavy lifting.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 9: Edge Cases -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead><tr><th style="background:#22223a;color:#888;padding:8px;">Case</th><th style="background:#22223a;color:#888;padding:8px;">Result</th><th style="background:#22223a;color:#888;padding:8px;">Why</th></tr></thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">null</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">true</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Empty tree is balanced</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single node</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">true</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">|0-0| = 0 ≤ 1</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Left-skewed (1→2→3)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">false</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Root: |2-0| = 2 > 1</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Perfect tree</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">true</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All levels full → perfectly balanced</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Balanced at root, unbalanced deeper</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">false</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">EVERY node must be balanced, not just root</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 10: Common Mistakes -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Only checking root balance</b>
+          <p style="color:#e44d26;">❌ Root might be balanced but a subtree isn't</p>
+          <p style="color:#4caf50;">✅ The sentinel -1 propagates from ANY unbalanced node upward</p>
+        </li>
+        <li style="margin-top:10px;"><b>Using the O(n²) approach in interviews</b>
+          <p style="color:#ffc107;">⚠️ Works but interviewer will ask "can you do it in one pass?" → sentinel approach</p>
+        </li>
+        <li style="margin-top:10px;"><b>Not early-aborting on -1</b>
+          <p style="color:#e44d26;">❌ Computing right height even when left returned -1 → wasted work</p>
+          <p style="color:#4caf50;">✅ Check <code>if (leftH == -1) return -1</code> BEFORE computing right</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 11-12: When to Use / Not -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>✅ "Is the tree balanced / symmetric / same?"</li>
+        <li>✅ Any tree validation that needs height + condition at every node</li>
+        <li>✅ "Validate BST" — same DFS + range validation pattern</li>
+        <li>✅ Whenever you need to return a value AND a boolean from DFS → use sentinel</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ "Balance the tree" (restructure it) — that's AVL/Red-Black tree rotation, different problem</li>
+        <li>❌ "Is the tree complete?" — needs BFS level-order check, not DFS height</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 13: Key Takeaway -->
+  <div class="takeaway">
+    💡 "DFS + sentinel: compute height normally, return -1 on failure. One pass, O(n). The -1 propagates upward like an alarm — if any node fails, the whole tree fails."
+  </div>
+
+  <!-- SECTION 14: Bridge -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>#26 computed a value (depth). #27 computed + validated (balanced).</p>
+      <p style="margin-top:8px;">Next: <b>"Find the Lowest Common Ancestor (LCA) of two employees"</b> — DFS that searches for two targets and finds where their paths meet.</p>
+      <p style="margin-top:8px;">This is the most asked tree problem in FAANG interviews. Same DFS template, but the COMBINE logic is: "if left found one target and right found the other → I'm the LCA."</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ DFS compute (#26) → DFS validate (#27) → DFS search (#28 LCA) — tree DFS mastery!</p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem26.html">← Problem #26</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(27)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem28.html">Problem #28 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "dsa-roadmap-progress";
+const PROBLEM_NUM = 27;
+function loadProgress() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; } }
+function saveProgress(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+function toggleDone(n) { const p = loadProgress(); if (p[n]==="done") delete p[n]; else p[n]="done"; saveProgress(p); updateUI(); }
+function updateUI() {
+  const p=loadProgress(), btn=document.getElementById("mark-done-btn");
+  if(p[PROBLEM_NUM]==="done"){btn.textContent="✔ Completed";btn.classList.add("completed");}
+  else{btn.textContent="☐ Mark as Done";btn.classList.remove("completed");}
+  updateReadProgress();
+}
+function updateReadProgress() {
+  const p=loadProgress();
+  if(p[PROBLEM_NUM]==="done"){document.getElementById("section-pct").textContent="100%";document.getElementById("section-bar").style.width="100%";return;}
+  const s=document.querySelectorAll(".section, .takeaway"),t=s.length;if(t===0)return;
+  let v=0;s.forEach(sec=>{if(sec.getBoundingClientRect().top<window.innerHeight)v++;});
+  const pct=Math.min(100,Math.round((v/t)*100));
+  document.getElementById("section-pct").textContent=pct+"%";document.getElementById("section-bar").style.width=pct+"%";
+}
+window.addEventListener("scroll",updateReadProgress);updateUI();
+</script>
+</body>
+</html>

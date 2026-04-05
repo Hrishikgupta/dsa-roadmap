@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#40 — Minimum Cost to Reach Home | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 5: Mastery</span>
+    <span class="problem-id">Problem #40 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #40: Minimum Cost to Reach Home</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#40 — Minimum Cost to Reach Home</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: DP (Min Cost Path — 2D Grid)</p>
+
+  <!-- SECTION 0 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek city grid mein ho. Har intersection pe toll hai. Top-left se bottom-right (home) tak jaana hai with minimum toll cost. Only move right or down.</p>
+<pre><code><span class="comment">Toll grid:
+  1  3  1
+  1  5  1
+  4  2  1</span>
+
+<span class="comment">Cheapest path: 1→3→1→1→1 = 7</span>
+<span style="color:#4caf50;">1 → 3 → 1</span>
+              <span style="color:#4caf50;">↓</span>
+              <span style="color:#4caf50;">1</span>
+              <span style="color:#4caf50;">↓</span>
+              <span style="color:#4caf50;">1</span>  = total cost 7</code></pre>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #64 — Minimum Path Sum. Classic 2D DP introduction.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given an m×n grid with non-negative costs, find the path from top-left to bottom-right with minimum total cost</li>
+        <li>Can only move <b>right</b> or <b>down</b></li>
+      </ul>
+      <p style="margin-top:10px;"><b>Applying the DP recipe from #39:</b></p>
+      <ol>
+        <li><b>State:</b> <code>dp[i][j]</code> = minimum cost to reach cell (i,j)</li>
+        <li><b>Recurrence:</b> <code>dp[i][j] = grid[i][j] + min(dp[i-1][j], dp[i][j-1])</code> — came from above or left</li>
+        <li><b>Base cases:</b> First row: can only come from left. First column: can only come from above.</li>
+        <li><b>Order:</b> Fill row by row, left to right (each cell depends on top and left)</li>
+        <li><b>Answer:</b> <code>dp[m-1][n-1]</code></li>
+      </ol>
+      <p style="margin-top:10px;"><b>Connection to #39:</b></p>
+      <ul>
+        <li>#39: 1D DP — <code>dp[i] = f(dp[i-1], dp[i-2])</code></li>
+        <li>#40: 2D DP — <code>dp[i][j] = f(dp[i-1][j], dp[i][j-1])</code> — same idea, two dimensions</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Recursion:</b> At each cell, try going right and going down. Take the minimum.</p>
+<pre><code><span class="type">int</span> minPath(grid, i, j) {
+    <span class="keyword">if</span> (i == <span class="number">0</span> &amp;&amp; j == <span class="number">0</span>) <span class="keyword">return</span> grid[<span class="number">0</span>][<span class="number">0</span>];
+    <span class="keyword">if</span> (i &lt; <span class="number">0</span> || j &lt; <span class="number">0</span>) <span class="keyword">return</span> Integer.MAX_VALUE;
+    <span class="keyword">return</span> grid[i][j] + Math.min(minPath(grid,i-<span class="number">1</span>,j), minPath(grid,i,j-<span class="number">1</span>));
+}</code></pre>
+      <p>O(2^(m+n)) — exponential. Overlapping subproblems: cell (1,1) is reached from (0,1) and (1,0), computed twice.</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 Same fix as #39: memoize or build bottom-up.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Bottom-up DP:</b></p>
+<pre><code><span class="comment">// Fill first row (can only come from left)</span>
+<span class="keyword">for</span> j = <span class="number">1</span> to n-<span class="number">1</span>: dp[<span class="number">0</span>][j] = dp[<span class="number">0</span>][j-<span class="number">1</span>] + grid[<span class="number">0</span>][j]
+
+<span class="comment">// Fill first column (can only come from above)</span>
+<span class="keyword">for</span> i = <span class="number">1</span> to m-<span class="number">1</span>: dp[i][<span class="number">0</span>] = dp[i-<span class="number">1</span>][<span class="number">0</span>] + grid[i][<span class="number">0</span>]
+
+<span class="comment">// Fill rest (min of top and left)</span>
+<span class="keyword">for</span> i = <span class="number">1</span> to m-<span class="number">1</span>:
+  <span class="keyword">for</span> j = <span class="number">1</span> to n-<span class="number">1</span>:
+    dp[i][j] = grid[i][j] + min(dp[i-<span class="number">1</span>][j], dp[i][j-<span class="number">1</span>])</code></pre>
+      <p style="margin-top:10px;"><b>Space optimization:</b> Since each row only depends on the current and previous row, we can use a 1D array and update in-place (left to right). But the 2D version is clearer for interviews.</p>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>2D Grid DP — each cell = cost + min(top, left). Fill row by row.</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Can modify grid in-place</b> (no extra dp array needed):</p>
+      <ul>
+        <li>grid[i][j] += min(grid[i-1][j], grid[i][j-1])</li>
+        <li>After processing, grid[m-1][n-1] = answer</li>
+        <li>O(m×n) time, O(1) extra space</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Grid:</b> [[1,3,1],[1,5,1],[4,2,1]]</p>
+      <p style="margin-top:8px;"><b>After filling dp (in-place):</b></p>
+      <table style="width:60%;font-size:12px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;"></th>
+            <th style="background:#22223a;color:#888;padding:8px;">j=0</th>
+            <th style="background:#22223a;color:#888;padding:8px;">j=1</th>
+            <th style="background:#22223a;color:#888;padding:8px;">j=2</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#888;">i=0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1+3=4</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">4+1=5</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#888;">i=1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1+1=2</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">5+min(4,2)=7</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1+min(5,7)=6</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#888;">i=2</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">4+2=6</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2+min(7,6)=8</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">1+min(6,8)=7</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#4caf50;"><b>Result: dp[2][2] = 7</b> ✓ (path: 1→3→1→1→1)</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>1D DP (#39) vs 2D DP (#40):</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Aspect</th>
+            <th style="background:#22223a;color:#888;padding:5px;">#39 Climbing Stairs</th>
+            <th style="background:#22223a;color:#888;padding:5px;">#40 Min Cost Path</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">State</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">dp[i] (1 variable)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">dp[i][j] (2 variables)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Depends on</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">dp[i-1], dp[i-2]</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">dp[i-1][j], dp[i][j-1]</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Base</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">dp[1]=1, dp[2]=2</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">First row, first column</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Fill order</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Left to right</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Row by row, left to right</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:12px;"><b>2D Grid DP family:</b></p>
+      <ul>
+        <li>Min path sum (this) — min cost, move right/down</li>
+        <li>Unique paths — count paths, move right/down</li>
+        <li>Unique paths with obstacles — same but skip blocked cells</li>
+        <li>Maximal square — largest square of 1s in binary matrix</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag"><span class="label">Time:</span><span class="value">O(m × n)</span></div>
+        <div class="complexity-tag"><span class="label">Space:</span><span class="value">O(1)*</span></div>
+      </div>
+      <p style="margin-top:10px;">*O(1) if modifying grid in-place. O(m×n) if using separate dp array. O(n) with rolling array optimization.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">public class</span> <span class="type">MinPathSum</span> {
+
+    <span class="keyword">public static int</span> <span class="type">minPathSum</span>(<span class="type">int</span>[][] grid) {
+        <span class="type">int</span> m = grid.length, n = grid[<span class="number">0</span>].length;
+
+        <span class="comment">// Fill first row</span>
+        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">1</span>; j &lt; n; j++)
+            grid[<span class="number">0</span>][j] += grid[<span class="number">0</span>][j - <span class="number">1</span>];
+
+        <span class="comment">// Fill first column</span>
+        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt; m; i++)
+            grid[i][<span class="number">0</span>] += grid[i - <span class="number">1</span>][<span class="number">0</span>];
+
+        <span class="comment">// Fill rest</span>
+        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt; m; i++)
+            <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">1</span>; j &lt; n; j++)
+                grid[i][j] += Math.min(grid[i - <span class="number">1</span>][j], grid[i][j - <span class="number">1</span>]);
+
+        <span class="keyword">return</span> grid[m - <span class="number">1</span>][n - <span class="number">1</span>];
+    }
+}</code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 In-place modification: no extra dp array. grid itself becomes the dp table. Ask interviewer if modifying input is OK.</p>
+    </div>
+  </div>
+
+  <!-- Remaining sections -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead><tr><th style="background:#22223a;color:#888;padding:8px;">Case</th><th style="background:#22223a;color:#888;padding:8px;">Note</th></tr></thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1×1 grid</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Answer = grid[0][0]</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single row</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Only path = sum of all elements</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single column</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Only path = sum of all elements</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All zeros</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Answer = 0</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Large values</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Sum can overflow int — use long if needed</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Forgetting to handle first row and first column separately</b>
+          <p style="color:#e44d26;">❌ <code>dp[0][j] = min(dp[-1][j], dp[0][j-1])</code> → index out of bounds</p>
+          <p style="color:#4caf50;">✅ First row: only from left. First column: only from above. No min needed.</p>
+        </li>
+        <li style="margin-top:10px;"><b>Using max instead of min (or vice versa)</b>
+          <p style="color:#888;">Read carefully: "minimum cost" → use min. "Maximum path sum" → use max.</p>
+        </li>
+        <li style="margin-top:10px;"><b>Allowing up/left movement</b>
+          <p style="color:#888;">This problem only allows right/down. If all 4 directions allowed → need BFS/Dijkstra, not DP.</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>✅ "Min/max cost path in grid" with restricted movement (right/down only)</li>
+        <li>✅ "Count unique paths" in a grid</li>
+        <li>✅ Any grid problem where movement is monotonic (only right/down, never back)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ Movement in all 4 directions — use BFS (#32) or Dijkstra (#35)</li>
+        <li>❌ Grid has negative costs with cycles — DP doesn't work (need Bellman-Ford)</li>
+        <li>❌ "Find the actual path" (not just cost) — need to trace back through dp table</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="takeaway">
+    💡 "2D Grid DP: dp[i][j] = cost + min(top, left). First row/column are base cases (only one direction). Same DP recipe as 1D, just two indices."
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>#39 was Fibonacci DP (ways to reach step). #40 was Grid DP (min cost to reach cell).</p>
+      <p style="margin-top:8px;">Next: <b>"Robbing Houses Without Getting Caught"</b> — for each house, decide: rob it (skip neighbor) or skip it. This is the <b>Include/Exclude DP</b> pattern — same as subsets (#21) but with optimization.</p>
+      <p style="margin-top:8px;"><code>dp[i] = max(dp[i-1], dp[i-2] + nums[i])</code> — skip this house, or rob it + best from 2 houses back.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Grid DP (2D, min cost) → Include/Exclude DP (1D, max value with constraint)</p>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem39.html">← Problem #39</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(40)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem41.html">Problem #41 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY="dsa-roadmap-progress";const PROBLEM_NUM=40;
+function loadProgress(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{};}catch{return{};}}
+function saveProgress(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}
+function toggleDone(n){const p=loadProgress();if(p[n]==="done")delete p[n];else p[n]="done";saveProgress(p);updateUI();}
+function updateUI(){const p=loadProgress(),btn=document.getElementById("mark-done-btn");if(p[PROBLEM_NUM]==="done"){btn.textContent="✔ Completed";btn.classList.add("completed");}else{btn.textContent="☐ Mark as Done";btn.classList.remove("completed");}updateReadProgress();}
+function updateReadProgress(){const p=loadProgress();if(p[PROBLEM_NUM]==="done"){document.getElementById("section-pct").textContent="100%";document.getElementById("section-bar").style.width="100%";return;}const s=document.querySelectorAll(".section, .takeaway"),t=s.length;if(t===0)return;let v=0;s.forEach(sec=>{if(sec.getBoundingClientRect().top<window.innerHeight)v++;});const pct=Math.min(100,Math.round((v/t)*100));document.getElementById("section-pct").textContent=pct+"%";document.getElementById("section-bar").style.width=pct+"%";}
+window.addEventListener("scroll",updateReadProgress);updateUI();
+</script>
+</body>
+</html>

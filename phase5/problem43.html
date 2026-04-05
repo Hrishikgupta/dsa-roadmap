@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#43 — Knapsack — Packing for a Trip | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 5: Mastery</span>
+    <span class="problem-id">Problem #43 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #43: Knapsack — Packing for a Trip</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#43 — Knapsack — Packing for a Trip</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: DP (0/1 Knapsack)</p>
+
+  <!-- SECTION 0 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum trip pe ja rahe ho. Bag capacity = <b>7 kg</b>. Items available:</p>
+      <table style="width:50%;font-size:12px;margin-top:8px;">
+        <thead><tr><th style="background:#22223a;color:#888;padding:8px;">Item</th><th style="background:#22223a;color:#888;padding:8px;">Weight</th><th style="background:#22223a;color:#888;padding:8px;">Value</th></tr></thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Laptop</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3 kg</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">₹4</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Camera</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">4 kg</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">₹5</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Book</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2 kg</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">₹3</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;">Question: <b>"Maximum value kya pack kar sakte ho within 7 kg?"</b></p>
+      <p>Laptop(3kg,₹4) + Camera(4kg,₹5) = 7kg, ₹9. Or Laptop + Book = 5kg, ₹7. <span style="color:#4caf50;">Best: ₹9</span></p>
+      <p style="color:#888;font-size:11px;margin-top:4px;">The 0/1 Knapsack — the most important DP pattern. Foundation for Coin Change, Subset Sum, Partition, and many more.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given n items, each with weight and value, and a bag with capacity W</li>
+        <li>Each item can be taken at most once (0/1 = take or don't take)</li>
+        <li>Maximize total value without exceeding capacity</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Why "0/1"?</b> Each item: 0 (don't take) or 1 (take). No fractions, no duplicates.</p>
+      <p style="margin-top:10px;"><b>DP recipe:</b></p>
+      <ol>
+        <li><b>State:</b> <code>dp[i][w]</code> = max value using first i items with capacity w</li>
+        <li><b>Recurrence:</b>
+          <ul>
+            <li>If <code>wt[i] > w</code>: can't take item i → <code>dp[i][w] = dp[i-1][w]</code></li>
+            <li>Else: <code>dp[i][w] = max(dp[i-1][w], dp[i-1][w-wt[i]] + val[i])</code></li>
+          </ul>
+        </li>
+        <li><b>Base:</b> <code>dp[0][w] = 0</code> (no items), <code>dp[i][0] = 0</code> (no capacity)</li>
+        <li><b>Order:</b> Row by row (item by item), left to right (capacity 0 to W)</li>
+        <li><b>Answer:</b> <code>dp[n][W]</code></li>
+      </ol>
+      <p style="margin-top:10px;"><b>Connection to #41 (House Robber):</b></p>
+      <ul>
+        <li>#41: Include/Exclude with adjacency constraint → 1D DP</li>
+        <li>#43: Include/Exclude with capacity constraint → 2D DP (items × capacity)</li>
+        <li>Same include/exclude decision, but now "capacity remaining" is a second dimension</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Try all 2ⁿ subsets (#21), check weight ≤ W, track max value.</b> O(2ⁿ).</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 DP reduces this to O(n × W) by remembering: "what's the best value I can get with the first i items and capacity w?"</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>The include/exclude decision at each item:</b></p>
+<pre><code><span class="comment">For item i with weight wt[i] and value val[i]:</span>
+
+<span class="comment">EXCLUDE: don't take item i</span>
+  dp[i][w] = dp[i-<span class="number">1</span>][w]  <span class="comment">// same value as without this item</span>
+
+<span class="comment">INCLUDE: take item i (only if wt[i] ≤ w)</span>
+  dp[i][w] = dp[i-<span class="number">1</span>][w - wt[i]] + val[i]  <span class="comment">// value of item + best with remaining capacity</span>
+
+<span class="comment">CHOOSE: max of both</span>
+  dp[i][w] = max(exclude, include)</code></pre>
+      <p style="margin-top:10px;"><b>Space optimization:</b> Since row i only depends on row i-1, we can use a 1D array and fill RIGHT TO LEFT (to avoid using updated values from the same row).</p>
+<pre><code><span class="comment">// 1D space-optimized</span>
+<span class="keyword">for</span> each item i:
+    <span class="keyword">for</span> w = W <span class="keyword">down to</span> wt[i]:  <span class="comment">// RIGHT TO LEFT!</span>
+        dp[w] = max(dp[w], dp[w - wt[i]] + val[i])</code></pre>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>0/1 Knapsack — 2D DP (items × capacity). Include/Exclude at each item. Space-optimize to 1D by iterating capacity RIGHT TO LEFT.</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Items: wt=[3,4,2], val=[4,5,3], W=7</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">item\cap</th>
+            <th style="background:#22223a;color:#888;padding:5px;">0</th><th style="background:#22223a;color:#888;padding:5px;">1</th><th style="background:#22223a;color:#888;padding:5px;">2</th><th style="background:#22223a;color:#888;padding:5px;">3</th><th style="background:#22223a;color:#888;padding:5px;">4</th><th style="background:#22223a;color:#888;padding:5px;">5</th><th style="background:#22223a;color:#888;padding:5px;">6</th><th style="background:#22223a;color:#888;padding:5px;">7</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#888;">0 items</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#888;">Laptop(3,4)</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">4</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">4</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#888;">+Camera(4,5)</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">5</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">9</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#888;">+Book(2,3)</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">3</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">7</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">8</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">9</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;color:#4caf50;"><b>Result: dp[3][7] = 9</b> ✓ (Laptop + Camera = 3+4=7kg, 4+5=₹9)</p>
+      <p style="color:#888;font-size:11px;">Cell dp[2][7]: max(dp[1][7]=4, dp[1][7-4]+5 = dp[1][3]+5 = 4+5 = 9) = 9. Include camera wins!</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Why RIGHT TO LEFT in 1D optimization:</b></p>
+<pre><code><span class="comment">LEFT TO RIGHT (WRONG for 0/1):</span>
+dp[3] = max(dp[3], dp[3-3]+4) = max(0, 0+4) = 4  <span class="comment">// take laptop</span>
+dp[6] = max(dp[6], dp[6-3]+4) = max(0, 4+4) = 8  <span class="comment">// takes laptop AGAIN! (dp[3] already updated)</span>
+
+<span class="comment">RIGHT TO LEFT (CORRECT):</span>
+dp[7] = max(dp[7], dp[7-3]+4) = max(0, dp[4]+4)  <span class="comment">// dp[4] still from previous row</span>
+dp[3] = max(dp[3], dp[0]+4) = 4  <span class="comment">// dp[0] still from previous row</span></code></pre>
+      <p style="margin-top:8px;">Right-to-left ensures we read from "previous row" values (not yet updated in this round). This prevents using an item twice.</p>
+
+      <p style="margin-top:14px;"><b>Knapsack family:</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Variant</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Items</th>
+            <th style="background:#22223a;color:#888;padding:5px;">1D loop direction</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Problem</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">0/1 Knapsack</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Each used at most once</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">RIGHT TO LEFT</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">#43 (this), #45</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Unbounded Knapsack</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Unlimited copies</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">LEFT TO RIGHT</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">#44 (Coin Change)</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:6px;color:#888;font-size:11px;">The ONLY difference between 0/1 and unbounded in 1D: loop direction. Right-to-left = use once. Left-to-right = use unlimited.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag"><span class="label">Time:</span><span class="value">O(n × W)</span></div>
+        <div class="complexity-tag"><span class="label">Space:</span><span class="value">O(W)</span></div>
+      </div>
+      <p style="margin-top:10px;">n items × W capacity. Space O(W) with 1D optimization, O(n×W) with 2D table.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>1D space-optimized (RIGHT TO LEFT):</b></p>
+<pre><code><span class="keyword">public class</span> <span class="type">Knapsack01</span> {
+
+    <span class="keyword">public static int</span> <span class="type">knapsack</span>(<span class="type">int</span>[] wt, <span class="type">int</span>[] val, <span class="type">int</span> W) {
+        <span class="type">int</span>[] dp = <span class="keyword">new</span> <span class="type">int</span>[W + <span class="number">1</span>];
+
+        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; wt.length; i++) {
+            <span class="keyword">for</span> (<span class="type">int</span> w = W; w &gt;= wt[i]; w--) { <span class="comment">// RIGHT TO LEFT!</span>
+                dp[w] = Math.max(dp[w], dp[w - wt[i]] + val[i]);
+            }
+        }
+        <span class="keyword">return</span> dp[W];
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        <span class="type">int</span>[] wt = {<span class="number">3</span>, <span class="number">4</span>, <span class="number">2</span>}, val = {<span class="number">4</span>, <span class="number">5</span>, <span class="number">3</span>};
+        System.out.println(knapsack(wt, val, <span class="number">7</span>)); <span class="comment">// 9</span>
+    }
+}</code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 The inner loop goes from W DOWN TO wt[i]. This single direction change is what makes it 0/1 (not unbounded). Memorize this.</p>
+    </div>
+  </div>
+
+  <!-- Remaining sections -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead><tr><th style="background:#22223a;color:#888;padding:8px;">Case</th><th style="background:#22223a;color:#888;padding:8px;">Note</th></tr></thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">W = 0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Can't take anything → 0</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All items too heavy</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">None fit → 0</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">One item fits exactly</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Take it → its value</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All items fit</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Take all → sum of values</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Iterating LEFT TO RIGHT in 1D 0/1 knapsack</b>
+          <p style="color:#e44d26;">❌ Allows using same item multiple times → becomes unbounded knapsack</p>
+          <p style="color:#4caf50;">✅ RIGHT TO LEFT for 0/1. LEFT TO RIGHT for unbounded (#44).</p>
+        </li>
+        <li style="margin-top:10px;"><b>Confusing 0/1 with unbounded</b>
+          <p style="color:#888;">0/1: each item once. Unbounded: unlimited copies. The ONLY code difference in 1D = loop direction.</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>✅ "Maximize value with weight/capacity limit" — classic knapsack</li>
+        <li>✅ "Subset sum" (#45) — knapsack where value = weight, target = specific sum</li>
+        <li>✅ "Partition equal subset sum" (#45) — can we split into two equal halves?</li>
+        <li>✅ "Target sum" — assign +/- to elements to reach target</li>
+        <li>✅ Any "select items with constraint, optimize value" problem</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ Unlimited copies of items → use Unbounded Knapsack (#44)</li>
+        <li>❌ W is very large (>10⁶) → O(n×W) is too slow, need different approach</li>
+        <li>❌ Fractional items allowed → use Greedy (take highest value/weight ratio first)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="takeaway">
+    💡 "0/1 Knapsack: for each item, max(skip, take + best with remaining capacity). 1D optimization: iterate capacity RIGHT TO LEFT to prevent reuse. This pattern is the foundation of half of all DP problems."
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>0/1 Knapsack: each item used at most once. Loop RIGHT TO LEFT.</p>
+      <p style="margin-top:8px;">Next: <b>"Coin Change — Minimum Notes for Bill"</b> — unlimited copies of each coin. This is <b>Unbounded Knapsack</b>. Same code, but loop LEFT TO RIGHT (allowing reuse).</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ 0/1 Knapsack (right-to-left, use once) → Unbounded Knapsack (left-to-right, use unlimited)</p>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem42.html">← Problem #42</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(43)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem44.html">Problem #44 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY="dsa-roadmap-progress";const PROBLEM_NUM=43;
+function loadProgress(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{};}catch{return{};}}
+function saveProgress(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}
+function toggleDone(n){const p=loadProgress();if(p[n]==="done")delete p[n];else p[n]="done";saveProgress(p);updateUI();}
+function updateUI(){const p=loadProgress(),btn=document.getElementById("mark-done-btn");if(p[PROBLEM_NUM]==="done"){btn.textContent="✔ Completed";btn.classList.add("completed");}else{btn.textContent="☐ Mark as Done";btn.classList.remove("completed");}updateReadProgress();}
+function updateReadProgress(){const p=loadProgress();if(p[PROBLEM_NUM]==="done"){document.getElementById("section-pct").textContent="100%";document.getElementById("section-bar").style.width="100%";return;}const s=document.querySelectorAll(".section, .takeaway"),t=s.length;if(t===0)return;let v=0;s.forEach(sec=>{if(sec.getBoundingClientRect().top<window.innerHeight)v++;});const pct=Math.min(100,Math.round((v/t)*100));document.getElementById("section-pct").textContent=pct+"%";document.getElementById("section-bar").style.width=pct+"%";}
+window.addEventListener("scroll",updateReadProgress);updateUI();
+</script>
+</body>
+</html>

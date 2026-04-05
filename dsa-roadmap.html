@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSA Problem-Solving Roadmap — Java</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #0f0f1a;
+    color: #e0e0e0;
+    min-height: 100vh;
+  }
+  .header {
+    text-align: center;
+    padding: 35px 20px 20px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border-bottom: 3px solid #6c63ff;
+  }
+  .header h1 {
+    font-size: 28px;
+    color: #6c63ff;
+    letter-spacing: 1px;
+  }
+  .header p {
+    font-size: 13px;
+    color: #888;
+    margin-top: 6px;
+  }
+
+  /* Overall Progress */
+  .overall-progress {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 16px 30px;
+    background: #1a1a2e;
+    border-bottom: 1px solid #2a2a4a;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .overall-progress .label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .overall-progress .label-row span {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ccc;
+  }
+  .overall-progress .label-row .pct {
+    color: #6c63ff;
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .progress-bar-outer {
+    width: 100%;
+    height: 18px;
+    background: #2a2a4a;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .progress-bar-inner {
+    height: 100%;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #6c63ff, #48c6ef);
+    transition: width 0.5s ease;
+    width: 0%;
+  }
+  .stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 12px;
+    font-size: 12px;
+    color: #888;
+  }
+  .stats-row span { display: flex; align-items: center; gap: 5px; }
+  .stats-row .dot {
+    width: 10px; height: 10px; border-radius: 50%; display: inline-block;
+  }
+  .dot-done { background: #4caf50; }
+  .dot-progress { background: #ffc107; }
+  .dot-locked { background: #555; }
+
+  /* Phase Sections */
+  .container { max-width: 900px; margin: 0 auto; padding: 20px 30px 40px; }
+
+  .phase {
+    margin-bottom: 30px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #2a2a4a;
+    background: #1a1a2e;
+  }
+  .phase-header {
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+  }
+  .phase-header:hover { filter: brightness(1.1); }
+  .phase-header .left { display: flex; align-items: center; gap: 10px; }
+  .phase-header .left .icon { font-size: 20px; }
+  .phase-header .left .title { font-size: 15px; font-weight: 700; }
+  .phase-header .right { display: flex; align-items: center; gap: 12px; }
+  .phase-header .right .phase-pct { font-size: 13px; font-weight: 600; }
+  .phase-header .right .arrow { font-size: 14px; transition: transform 0.3s; }
+  .phase.collapsed .phase-body { display: none; }
+  .phase.collapsed .arrow { transform: rotate(-90deg); }
+
+  .p1 .phase-header { background: linear-gradient(135deg, #1b4332, #2d6a4f); }
+  .p2 .phase-header { background: linear-gradient(135deg, #5a3e00, #7a5c1e); }
+  .p3 .phase-header { background: linear-gradient(135deg, #6b1d1d, #922b21); }
+  .p4 .phase-header { background: linear-gradient(135deg, #3b1f6e, #5b2c9e); }
+  .p5 .phase-header { background: linear-gradient(135deg, #7a1020, #b71c1c); }
+
+  /* Phase progress bar */
+  .phase-progress {
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+  }
+  .phase-progress-inner {
+    height: 100%;
+    background: #6c63ff;
+    transition: width 0.5s ease;
+    width: 0%;
+  }
+
+  /* Problem Table */
+  .phase-body { padding: 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  thead th {
+    background: #12121f;
+    color: #888;
+    font-weight: 600;
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-bottom: 1px solid #2a2a4a;
+  }
+  tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #1f1f35;
+    vertical-align: middle;
+  }
+  tbody tr { transition: background 0.2s; }
+  tbody tr:hover { background: #22223a; }
+
+  td:first-child { text-align: center; width: 35px; }
+  .problem-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 50%;
+    font-weight: 700; font-size: 11px;
+  }
+  .status-done .problem-num { background: #4caf50; color: #fff; }
+  .status-progress .problem-num { background: #ffc107; color: #1a1a2e; }
+  .status-locked .problem-num { background: #333; color: #666; }
+
+  td.problem-title a {
+    color: #7c9aff;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
+  }
+  td.problem-title a:hover { color: #a8bfff; text-decoration: underline; }
+  .status-locked td.problem-title a { color: #7c9aff; }
+
+  td.pattern { color: #ff7043; font-weight: 600; font-size: 11px; }
+  td.why { color: #aaa; font-size: 11px; }
+  td.dep { color: #666; font-size: 10px; }
+
+  /* Checkbox */
+  .check-cell { text-align: center !important; width: 40px; }
+  .check-cell input[type="checkbox"] {
+    width: 16px; height: 16px; cursor: pointer;
+    accent-color: #6c63ff;
+  }
+
+  /* Summary */
+  .summary {
+    margin-top: 10px;
+    padding: 20px;
+    background: #1a1a2e;
+    border-radius: 12px;
+    border: 1px solid #2a2a4a;
+  }
+  .summary h2 { font-size: 16px; color: #6c63ff; margin-bottom: 12px; }
+  .summary table thead th { background: #6c63ff; color: #fff; }
+  .summary tbody td { color: #ccc; }
+
+  .footer {
+    text-align: center;
+    padding: 20px;
+    color: #555;
+    font-size: 11px;
+  }
+
+  /* Reset Button */
+  .reset-btn {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 6px 16px;
+    background: #333;
+    color: #aaa;
+    border: 1px solid #444;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 11px;
+    transition: all 0.2s;
+  }
+  .reset-btn:hover { background: #c0392b; color: #fff; border-color: #c0392b; }
+
+  /* Make entire row clickable */
+  tbody tr { cursor: pointer; }
+  tbody tr:active { background: #2a2a5a; }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    .header h1 { font-size: 20px; }
+    .header p { font-size: 11px; }
+    .overall-progress { margin: 15px 10px; padding: 14px 16px; }
+    .container { padding: 10px 10px 30px; }
+    .stats-row { flex-wrap: wrap; gap: 10px; }
+    .phase-header .left .title { font-size: 12px; }
+    .phase-header .right .phase-pct { font-size: 11px; }
+    .phase-header { padding: 10px 12px; }
+
+    /* Hide less important columns on mobile */
+    thead th:nth-child(4),
+    thead th:nth-child(5),
+    tbody td:nth-child(4),
+    tbody td:nth-child(5) { display: none; }
+
+    table { font-size: 11px; }
+    thead th { padding: 8px 6px; font-size: 9px; }
+    tbody td { padding: 8px 6px; }
+    td.pattern { font-size: 10px; }
+  }
+
+  @media (max-width: 480px) {
+    .header h1 { font-size: 17px; }
+    .overall-progress .label-row span { font-size: 12px; }
+    .overall-progress .label-row .pct { font-size: 14px; }
+    .progress-bar-outer { height: 14px; }
+    .stats-row { font-size: 10px; gap: 8px; }
+    .phase-header .left .title { font-size: 11px; }
+    .phase-header .left .icon { font-size: 16px; }
+
+    /* Hide pattern column too on very small screens */
+    thead th:nth-child(3),
+    tbody td:nth-child(3) { display: none; }
+
+    .problem-num { width: 24px; height: 24px; font-size: 10px; }
+    .check-cell input[type="checkbox"] { width: 14px; height: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📋 DSA Problem-Solving Roadmap</h1>
+  <p>Java-Focused &nbsp;|&nbsp; Beginner → Advanced &nbsp;|&nbsp; 50 Problems &nbsp;|&nbsp; Pattern-Based Learning</p>
+</div>
+
+<!-- Overall Progress -->
+<div class="overall-progress">
+  <div class="label-row">
+    <span>🎯 Overall Progress</span>
+    <span class="pct" id="overall-pct">0%</span>
+  </div>
+  <div class="progress-bar-outer">
+    <div class="progress-bar-inner" id="overall-bar"></div>
+  </div>
+  <div class="stats-row">
+    <span><span class="dot dot-done"></span> Completed: <b id="stat-done">0</b></span>
+    <span><span class="dot dot-progress"></span> In Progress: <b id="stat-progress">0</b></span>
+    <span><span class="dot dot-locked"></span> Remaining: <b id="stat-locked">50</b></span>
+    <span><button class="reset-btn" onclick="resetProgress()">Reset Progress</button></span>
+  </div>
+</div>
+
+<div class="container" id="phases-container">
+<!-- Phases are rendered by JS -->
+</div>
+
+<div class="footer">
+  DSA Problem-Solving Roadmap — Java Focused — Interactive Learning Portal
+</div>
+
+<script>
+const PHASES = [
+  {
+    id: "p1", cls: "p1", icon: "📗",
+    title: "PHASE 1: FOUNDATION — Problem Decomposition & Brute Force Thinking",
+    problems: [
+      { num: 1, title: "Finding the Best Sale Day (Max Profit)", file: "phase1/problem1.html", pattern: "Linear Scan / Tracking Variables", why: "Think in one pass instead of nested loops", dep: "—" },
+      { num: 2, title: "Duplicate Customer Complaint", file: "phase1/problem2.html", pattern: "Frequency Counting (HashMap)", why: "Foundation of hashing — used everywhere", dep: "#1" },
+      { num: 3, title: "Balancing the Warehouse Stock", file: "phase1/problem3.html", pattern: "Prefix Sum", why: "Converts O(n) repeated queries to O(1)", dep: "#1" },
+      { num: 4, title: "Rotating the Security Shift Schedule", file: "phase1/problem4.html", pattern: "Array Rotation (Reversal Trick)", why: "In-place manipulation — space optimization", dep: "#1" },
+      { num: 5, title: "Merging Two Sorted Delivery Lists", file: "phase1/problem5.html", pattern: "Two Pointer (Sorted Merge)", why: "First intro to two pointer technique", dep: "#1" }
+    ]
+  },
+  {
+    id: "p2", cls: "p2", icon: "📙",
+    title: "PHASE 2: CORE PATTERNS — Arrays, Strings, Two Pointers, Sliding Window",
+    problems: [
+      { num: 6, title: "Pair of Items That Hit Target Budget", file: "phase2/problem6.html", pattern: "Two Pointer (Pair Sum)", why: "Classic interview pattern — Amazon/Google fav", dep: "#5" },
+      { num: 7, title: "Triplet Combo for Gift Packing", file: "phase2/problem7.html", pattern: "Two Pointer (3Sum)", why: "Extension of pair sum — duplicate handling", dep: "#6" },
+      { num: 8, title: "Longest Streak of Active Users", file: "phase2/problem8.html", pattern: "Sliding Window (Fixed Size)", why: "Intro to window-based thinking", dep: "#3" },
+      { num: 9, title: "Shortest Refueling Stop on Highway", file: "phase2/problem9.html", pattern: "Sliding Window (Variable Size)", why: "Variable window — extremely common", dep: "#8" },
+      { num: 10, title: "Longest Unique Song Playlist", file: "phase2/problem10.html", pattern: "Sliding Window + HashMap", why: "Combines hashing with window", dep: "#9, #2" },
+      { num: 11, title: "Checking if Two Words are Anagram Passwords", file: "phase2/problem11.html", pattern: "Frequency Map Comparison", why: "String pattern recognition foundation", dep: "#2" },
+      { num: 12, title: "Smallest Window Containing All Keywords", file: "phase2/problem12.html", pattern: "Sliding Window (Min Window)", why: "Hardest window problem — builds mastery", dep: "#10, #11" },
+      { num: 13, title: "Trapping Rainwater Between Buildings", file: "phase2/problem13.html", pattern: "Two Pointer (Opposite Ends)", why: "Pre-computation + pointer logic — classic", dep: "#6, #3" },
+      { num: 14, title: "Container With Most Water in a Tank", file: "phase2/problem14.html", pattern: "Two Pointer (Greedy Shrink)", why: "Greedy + two pointer combo", dep: "#13" }
+    ]
+  },
+  {
+    id: "p3", cls: "p3", icon: "📕",
+    title: "PHASE 3: INTERMEDIATE — Stack, Queue, Hashing, Recursion",
+    problems: [
+      { num: 15, title: "Validating Nested Code Brackets", file: "phase3/problem15.html", pattern: "Stack (Matching Pairs)", why: "Stack fundamentals — compiler design", dep: "—" },
+      { num: 16, title: "Next Warmer Day Forecast", file: "phase3/problem16.html", pattern: "Monotonic Stack", why: "'Next greater/smaller' family", dep: "#15" },
+      { num: 17, title: "Stock Span — How Many Days Was I King?", file: "phase3/problem17.html", pattern: "Monotonic Stack (Backward Span)", why: "Solidifies monotonic thinking", dep: "#16" },
+      { num: 18, title: "First Non-Repeating Char in Live Stream", file: "phase3/problem18.html", pattern: "Queue + HashMap", why: "Real-time processing pattern", dep: "#2, #15" },
+      { num: 19, title: "LRU Cache for Browser History", file: "phase3/problem19.html", pattern: "HashMap + Doubly Linked List", why: "Top system design + DSA crossover", dep: "#2" },
+      { num: 20, title: "Power of Recursion — Tower of Hanoi", file: "phase3/problem20.html", pattern: "Recursion (Trust the Function)", why: "Builds recursive thinking from scratch", dep: "—" },
+      { num: 21, title: "Generate All Subsets of a Menu", file: "phase3/problem21.html", pattern: "Recursion (Include/Exclude)", why: "Subset generation — backtracking foundation", dep: "#20" },
+      { num: 22, title: "All Permutations of a Lock Code", file: "phase3/problem22.html", pattern: "Recursion (Permutation)", why: "Permutation pattern", dep: "#21" },
+      { num: 23, title: "Phone Keypad Letter Combinations", file: "phase3/problem23.html", pattern: "Recursion (Multi-branch)", why: "Multiple choices at each step", dep: "#22" },
+      { num: 24, title: "Merge Sort — Divide the Army", file: "phase3/problem24.html", pattern: "Divide and Conquer", why: "Foundation for merge-based problems", dep: "#20" },
+      { num: 25, title: "Count Inversions in a Ranking List", file: "phase3/problem25.html", pattern: "Modified Merge Sort", why: "Extract info during sorting", dep: "#24" }
+    ]
+  },
+  {
+    id: "p4", cls: "p4", icon: "📘",
+    title: "PHASE 4: ADVANCED — Trees, Graphs, Backtracking",
+    problems: [
+      { num: 26, title: "Company Org Chart — Max Depth", file: "phase4/problem26.html", pattern: "Tree DFS (Recursion on Trees)", why: "First tree problem — DFS foundation", dep: "#20" },
+      { num: 27, title: "Is This a Balanced Team Structure?", file: "phase4/problem27.html", pattern: "Tree DFS (Height + Validation)", why: "Recursion with condition checking", dep: "#26" },
+      { num: 28, title: "Lowest Common Manager of Two Employees", file: "phase4/problem28.html", pattern: "LCA (Lowest Common Ancestor)", why: "Classic tree — asked in every FAANG", dep: "#26" },
+      { num: 29, title: "Serialize & Deserialize the Org Chart", file: "phase4/problem29.html", pattern: "Tree BFS + Encoding", why: "Traversal mastery + serialization", dep: "#26" },
+      { num: 30, title: "Right Side View of a Building", file: "phase4/problem30.html", pattern: "Tree BFS (Level Order)", why: "BFS on trees — level-based thinking", dep: "#29" },
+      { num: 31, title: "Number of Islands on a Map", file: "phase4/problem31.html", pattern: "Graph BFS/DFS (Grid)", why: "Connected component thinking", dep: "#26" },
+      { num: 32, title: "Shortest Path in a Maze", file: "phase4/problem32.html", pattern: "Graph BFS (Shortest Path)", why: "BFS = shortest path unweighted", dep: "#31" },
+      { num: 33, title: "Course Prerequisite Order", file: "phase4/problem33.html", pattern: "Topological Sort (Kahn's BFS)", why: "Dependency resolution — scheduling", dep: "#31" },
+      { num: 34, title: "Detect Cycle in Task Dependencies", file: "phase4/problem34.html", pattern: "Cycle Detection (DFS Coloring)", why: "Prevents infinite loops", dep: "#33" },
+      { num: 35, title: "Cheapest Flight Within K Stops", file: "phase4/problem35.html", pattern: "Graph BFS / Dijkstra Variant", why: "Weighted shortest path + constraints", dep: "#32" },
+      { num: 36, title: "Solving a Sudoku Puzzle", file: "phase4/problem36.html", pattern: "Backtracking (Constraint-Based)", why: "Pure backtracking mastery", dep: "#22, #23" },
+      { num: 37, title: "N-Queens — Place Queens Safely", file: "phase4/problem37.html", pattern: "Backtracking (Placement)", why: "Classic backtracking — pruning", dep: "#36" },
+      { num: 38, title: "Word Search in a Grid", file: "phase4/problem38.html", pattern: "Backtracking + DFS on Grid", why: "Grid traversal + backtracking", dep: "#31, #36" }
+    ]
+  },
+  {
+    id: "p5", cls: "p5", icon: "📓",
+    title: "PHASE 5: MASTERY — Dynamic Programming, Optimization, Hard Problems",
+    problems: [
+      { num: 39, title: "Climbing Stairs — How Many Ways?", file: "phase5/problem39.html", pattern: "DP (Fibonacci Pattern)", why: "Gentlest intro to DP", dep: "#20" },
+      { num: 40, title: "Minimum Cost to Reach Home", file: "phase5/problem40.html", pattern: "DP (Min Cost Path)", why: "2D DP introduction — grid-based", dep: "#39" },
+      { num: 41, title: "Robbing Houses Without Getting Caught", file: "phase5/problem41.html", pattern: "DP (Include/Exclude)", why: "Decision-based DP", dep: "#21, #39" },
+      { num: 42, title: "Longest Increasing Stock Prices", file: "phase5/problem42.html", pattern: "DP (LIS)", why: "Classic DP + Binary Search optimization", dep: "#39" },
+      { num: 43, title: "Knapsack — Packing for a Trip", file: "phase5/problem43.html", pattern: "DP (0/1 Knapsack)", why: "Foundation of all knapsack variants", dep: "#41" },
+      { num: 44, title: "Coin Change — Minimum Notes for Bill", file: "phase5/problem44.html", pattern: "DP (Unbounded Knapsack)", why: "Unbounded variant — infinite supply", dep: "#43" },
+      { num: 45, title: "Partition Equal Subset Sum", file: "phase5/problem45.html", pattern: "DP (Subset Sum)", why: "Knapsack disguised as partition", dep: "#43" },
+      { num: 46, title: "Longest Common Subsequence of Playlists", file: "phase5/problem46.html", pattern: "DP (Two String DP)", why: "2D DP on strings — edit distance base", dep: "#39" },
+      { num: 47, title: "Edit Distance — Autocorrect Engine", file: "phase5/problem47.html", pattern: "DP (Edit Distance)", why: "Builds on LCS — real-world NLP", dep: "#46" },
+      { num: 48, title: "Burst Balloons for Max Points", file: "phase5/problem48.html", pattern: "DP (Interval DP)", why: "Advanced DP — thinking in ranges", dep: "#39" },
+      { num: 49, title: "Word Break — Can This Sentence Be Split?", file: "phase5/problem49.html", pattern: "DP + Hashing", why: "Combines DP with dictionary lookup", dep: "#39, #2" },
+      { num: 50, title: "Longest Palindromic Substring", file: "phase5/problem50.html", pattern: "DP / Expand Around Center", why: "String DP — multiple approaches", dep: "#46" }
+    ]
+  }
+];
+
+const STORAGE_KEY = "dsa-roadmap-progress";
+
+function loadProgress() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+  } catch { return {}; }
+}
+
+function saveProgress(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function resetProgress() {
+  if (confirm("Reset all progress? This cannot be undone.")) {
+    localStorage.removeItem(STORAGE_KEY);
+    renderAll();
+  }
+}
+
+function renderAll() {
+  const progress = loadProgress();
+  const container = document.getElementById("phases-container");
+  container.innerHTML = "";
+
+  let totalDone = 0, totalProblems = 0;
+
+  PHASES.forEach(phase => {
+    const phaseDiv = document.createElement("div");
+    phaseDiv.className = `phase ${phase.cls}`;
+
+    let phaseDone = 0;
+    const phaseTotal = phase.problems.length;
+    totalProblems += phaseTotal;
+
+    phase.problems.forEach(p => {
+      if (progress[p.num] === "done") { phaseDone++; totalDone++; }
+    });
+
+    const phasePct = phaseTotal > 0 ? Math.round((phaseDone / phaseTotal) * 100) : 0;
+
+    // Phase header
+    const header = document.createElement("div");
+    header.className = "phase-header";
+    header.innerHTML = `
+      <div class="left">
+        <span class="icon">${phase.icon}</span>
+        <span class="title">${phase.title}</span>
+      </div>
+      <div class="right">
+        <span class="phase-pct">${phaseDone}/${phaseTotal} — ${phasePct}%</span>
+        <span class="arrow">▼</span>
+      </div>
+    `;
+    header.addEventListener("click", () => {
+      phaseDiv.classList.toggle("collapsed");
+    });
+
+    // Phase progress bar
+    const progressBar = document.createElement("div");
+    progressBar.className = "phase-progress";
+    progressBar.innerHTML = `<div class="phase-progress-inner" style="width:${phasePct}%"></div>`;
+
+    // Table
+    const body = document.createElement("div");
+    body.className = "phase-body";
+    let rows = "";
+    phase.problems.forEach(p => {
+      const status = progress[p.num] === "done" ? "status-done" : "status-locked";
+      const checked = progress[p.num] === "done" ? "checked" : "";
+      rows += `
+        <tr class="${status}" data-num="${p.num}">
+          <td><span class="problem-num">${p.num}</span></td>
+          <td class="problem-title"><a href="${p.file}">${p.title}</a></td>
+          <td class="pattern">${p.pattern}</td>
+          <td class="why">${p.why}</td>
+          <td class="dep">${p.dep}</td>
+          <td class="check-cell"><input type="checkbox" ${checked} data-num="${p.num}"></td>
+        </tr>`;
+    });
+
+    body.innerHTML = `
+      <table>
+        <thead><tr>
+          <th>#</th><th>Problem Title</th><th>Pattern / Concept</th><th>Why This Matters</th><th>Dep</th><th>✓</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+
+    phaseDiv.appendChild(header);
+    phaseDiv.appendChild(progressBar);
+    phaseDiv.appendChild(body);
+    container.appendChild(phaseDiv);
+  });
+
+  // Bind checkbox events
+  document.querySelectorAll('.check-cell input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener("change", (e) => {
+      e.stopPropagation();
+      const num = parseInt(e.target.dataset.num);
+      const prog = loadProgress();
+      if (e.target.checked) { prog[num] = "done"; }
+      else { delete prog[num]; }
+      saveProgress(prog);
+      renderAll();
+    });
+  });
+
+  // Make entire row clickable (navigate to problem page)
+  document.querySelectorAll('tbody tr').forEach(row => {
+    row.addEventListener("click", (e) => {
+      // Don't navigate if clicking checkbox
+      if (e.target.type === "checkbox") return;
+      const link = row.querySelector("td.problem-title a");
+      if (link) window.location.href = link.href;
+    });
+  });
+
+  // Overall stats
+  const overallPct = totalProblems > 0 ? Math.round((totalDone / totalProblems) * 100) : 0;
+  document.getElementById("overall-pct").textContent = overallPct + "%";
+  document.getElementById("overall-bar").style.width = overallPct + "%";
+  document.getElementById("stat-done").textContent = totalDone;
+  document.getElementById("stat-progress").textContent = 0;
+  document.getElementById("stat-locked").textContent = totalProblems - totalDone;
+}
+
+renderAll();
+</script>
+</body>
+</html>

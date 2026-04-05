@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#49 — Word Break — Can This Sentence Be Split? | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 5: Mastery</span>
+    <span class="problem-id">Problem #49 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #49: Word Break — Can This Sentence Be Split?</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#49 — Word Break — Can This Sentence Be Split?</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: DP + Hashing</p>
+
+  <!-- SECTION 0 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek search engine bana rahe ho. User ne bina spaces ke type kiya: <b>"leetcode"</b></p>
+      <p style="margin-top:8px;">Dictionary: <code>["leet", "code"]</code></p>
+      <p><b>"Kya yeh string dictionary words mein split ho sakti hai?"</b></p>
+      <ul>
+        <li>"leetcode" → "leet" + "code" → <span style="color:#4caf50;">YES ✓</span></li>
+        <li>"applepenapple" with dict ["apple","pen"] → "apple" + "pen" + "apple" → <span style="color:#4caf50;">YES ✓</span></li>
+        <li>"catsandog" with dict ["cats","dog","sand","and","cat"] → <span style="color:#e44d26;">NO ✗</span></li>
+      </ul>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #139 — Word Break. Combines DP (#39 pattern) with HashSet (#2 pattern).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given a string and a dictionary of words, can the string be segmented into dictionary words?</li>
+        <li>Words can be reused (unlimited — like unbounded knapsack!)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>DP + HashSet combo:</b></p>
+      <ul>
+        <li><b>HashSet</b> (from #2): O(1) lookup for "is this substring a dictionary word?"</li>
+        <li><b>DP</b> (from #39): dp[i] = "can s[0..i-1] be segmented into dictionary words?"</li>
+      </ul>
+      <p style="margin-top:10px;"><b>DP recipe:</b></p>
+      <ol>
+        <li><b>State:</b> <code>dp[i]</code> = can s[0..i-1] be segmented? (boolean)</li>
+        <li><b>Recurrence:</b> <code>dp[i] = true</code> if there exists j &lt; i where <code>dp[j] == true</code> AND <code>s[j..i-1]</code> is in dictionary</li>
+        <li><b>Base:</b> <code>dp[0] = true</code> (empty string is "segmented")</li>
+        <li><b>Order:</b> Left to right (i = 1 to n)</li>
+        <li><b>Answer:</b> <code>dp[n]</code></li>
+      </ol>
+      <p style="margin-top:10px;"><b>Intuition:</b> For each position i, check all possible last words ending at i. If any of them starts at a position j where dp[j] is true → dp[i] is true.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code>Set&lt;String&gt; dict = <span class="keyword">new</span> HashSet&lt;&gt;(wordDict);
+<span class="type">boolean</span>[] dp = <span class="keyword">new boolean</span>[n + <span class="number">1</span>];
+dp[<span class="number">0</span>] = <span class="keyword">true</span>;
+
+<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; i++) {
+    <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; i; j++) {
+        <span class="keyword">if</span> (dp[j] &amp;&amp; dict.contains(s.substring(j, i))) {
+            dp[i] = <span class="keyword">true</span>;
+            <span class="keyword">break</span>; <span class="comment">// found one valid split, no need to check more</span>
+        }
+    }
+}</code></pre>
+      <p style="margin-top:10px;"><b>Optimization: limit j range by max word length:</b></p>
+      <ul>
+        <li>Instead of j from 0 to i-1, only check j from <code>i - maxWordLen</code> to i-1</li>
+        <li>No dictionary word is longer than maxWordLen → earlier j's can't form a valid word</li>
+      </ul>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>DP + HashSet — dp[i] checks all possible last words ending at i. HashSet gives O(1) word lookup. Break early on first valid split.</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>s = "leetcode", dict = {"leet", "code"}</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:6px;">i</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Check j values</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Found?</th>
+            <th style="background:#22223a;color:#888;padding:6px;">dp[i]</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">base</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">true</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">j=0: dp[0]✓, "l" ∉ dict</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">No</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">false</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">"le" ∉, "e" — dp[1]=F</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">No</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">false</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">"lee" ∉, ...</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">No</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">false</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">4</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">j=0: dp[0]✓, "leet" ∈ dict ✓</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">YES!</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">true</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">5-7</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">no valid split found</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">No</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">false</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">8</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">j=4: dp[4]✓, "code" ∈ dict ✓</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">YES!</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">true</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#4caf50;"><b>dp[8] = true</b> ✓ ("leet" at [0,4) + "code" at [4,8))</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Why "catsandog" fails with dict ["cats","dog","sand","and","cat"]:</b></p>
+      <ul>
+        <li>dp[3] = true ("cat"), dp[4] = true ("cats")</li>
+        <li>dp[7] = true ("cats" + "and" or "cat" + "sand")</li>
+        <li>But dp[8]? Need word ending at 8. s[7..8] = "o" ∉ dict. s[4..8] = "ando" ∉ dict. No valid split.</li>
+        <li>dp[10]? s[7..10] = "dog" ∈ dict, but dp[7] = true → dp[10] = true? Wait, s = "catsandog" has length 9.</li>
+        <li>dp[9]: s[7..9] = "og" ∉ dict. s[4..9] = "andog" ∉ dict. <span style="color:#e44d26;">No valid split → false.</span></li>
+      </ul>
+      <p style="margin-top:12px;"><b>Word Break variants:</b></p>
+      <ul>
+        <li>Word Break I (this) — can it be segmented? (boolean)</li>
+        <li>Word Break II (LC #140) — return ALL valid segmentations (backtracking + DP)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag"><span class="label">Time:</span><span class="value">O(n² × k)</span></div>
+        <div class="complexity-tag"><span class="label">Space:</span><span class="value">O(n)</span></div>
+      </div>
+      <p style="margin-top:10px;">n = string length, k = average substring comparison cost. With max word length optimization: O(n × maxLen × k). HashSet lookup is O(k) for string of length k.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">import</span> java.util.*;
+
+<span class="keyword">public class</span> <span class="type">WordBreak</span> {
+
+    <span class="keyword">public static boolean</span> <span class="type">wordBreak</span>(String s, List&lt;String&gt; wordDict) {
+        Set&lt;String&gt; dict = <span class="keyword">new</span> HashSet&lt;&gt;(wordDict);
+        <span class="type">int</span> n = s.length();
+        <span class="type">boolean</span>[] dp = <span class="keyword">new boolean</span>[n + <span class="number">1</span>];
+        dp[<span class="number">0</span>] = <span class="keyword">true</span>;
+
+        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; i++) {
+            <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; i; j++) {
+                <span class="keyword">if</span> (dp[j] &amp;&amp; dict.contains(s.substring(j, i))) {
+                    dp[i] = <span class="keyword">true</span>;
+                    <span class="keyword">break</span>;
+                }
+            }
+        }
+        <span class="keyword">return</span> dp[n];
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        System.out.println(wordBreak(<span class="string">"leetcode"</span>,
+            Arrays.asList(<span class="string">"leet"</span>, <span class="string">"code"</span>))); <span class="comment">// true</span>
+        System.out.println(wordBreak(<span class="string">"catsandog"</span>,
+            Arrays.asList(<span class="string">"cats"</span>,<span class="string">"dog"</span>,<span class="string">"sand"</span>,<span class="string">"and"</span>,<span class="string">"cat"</span>))); <span class="comment">// false</span>
+    }
+}</code></pre>
+    </div>
+  </div>
+
+  <!-- Remaining -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead><tr><th style="background:#22223a;color:#888;padding:8px;">s</th><th style="background:#22223a;color:#888;padding:8px;">dict</th><th style="background:#22223a;color:#888;padding:8px;">Result</th><th style="background:#22223a;color:#888;padding:8px;">Note</th></tr></thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">""</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">any</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">true</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Empty string = base case</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"a"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">["a"]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">true</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single char match</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"aaaa"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">["a","aa"]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">true</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Multiple valid segmentations</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"ab"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">["a"]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">false</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"b" not in dict</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Greedy (match longest/shortest word first)</b>
+          <p style="color:#e44d26;">❌ "catsand" with ["cat","cats","and"] — greedy "cats" leaves "and" ✓, but greedy "cat" leaves "sand" which might not be in dict</p>
+          <p style="color:#4caf50;">✅ DP tries ALL possible splits — no greedy shortcut</p>
+        </li>
+        <li style="margin-top:10px;"><b>Not using HashSet for dictionary</b>
+          <p style="color:#e44d26;">❌ List.contains() is O(n) per lookup → O(n³) total</p>
+          <p style="color:#4caf50;">✅ Convert to HashSet first → O(1) lookup</p>
+        </li>
+        <li style="margin-top:10px;"><b>Not breaking early when dp[i] becomes true</b>
+          <p style="color:#888;">Not wrong, but wasteful. Once dp[i] = true, no need to check more j values.</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use / 12. When NOT</span>
+      <span class="sec-num">STEP 11-12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Use when:</b> ✅ "Can string be segmented into dictionary words?" ✅ "Word segmentation" / "Text tokenization" ✅ DP + dictionary lookup combo</p>
+      <p style="margin-top:8px;"><b>Don't use when:</b> ❌ Need ALL segmentations (use backtracking + DP, LC #140) ❌ Dictionary is a pattern (use regex or Trie)</p>
+    </div>
+  </div>
+
+  <div class="takeaway">
+    💡 "Word Break = DP + HashSet. dp[i] = exists j where dp[j]=true AND s[j..i] is in dict. HashSet for O(1) word lookup. Break early on first valid split."
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>One more problem to go — the FINAL problem of the entire roadmap!</p>
+      <p style="margin-top:8px;">Problem #50: <b>"Longest Palindromic Substring"</b> — find the longest substring that reads the same forwards and backwards. Multiple approaches: DP, Expand Around Center, Manacher's.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ DP + Hashing (word break) → String DP / Expand (palindrome) — the grand finale!</p>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem48.html">← Problem #48</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(49)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem50.html">Problem #50 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY="dsa-roadmap-progress";const PROBLEM_NUM=49;
+function loadProgress(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{};}catch{return{};}}
+function saveProgress(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}
+function toggleDone(n){const p=loadProgress();if(p[n]==="done")delete p[n];else p[n]="done";saveProgress(p);updateUI();}
+function updateUI(){const p=loadProgress(),btn=document.getElementById("mark-done-btn");if(p[PROBLEM_NUM]==="done"){btn.textContent="✔ Completed";btn.classList.add("completed");}else{btn.textContent="☐ Mark as Done";btn.classList.remove("completed");}updateReadProgress();}
+function updateReadProgress(){const p=loadProgress();if(p[PROBLEM_NUM]==="done"){document.getElementById("section-pct").textContent="100%";document.getElementById("section-bar").style.width="100%";return;}const s=document.querySelectorAll(".section, .takeaway"),t=s.length;if(t===0)return;let v=0;s.forEach(sec=>{if(sec.getBoundingClientRect().top<window.innerHeight)v++;});const pct=Math.min(100,Math.round((v/t)*100));document.getElementById("section-pct").textContent=pct+"%";document.getElementById("section-bar").style.width=pct+"%";}
+window.addEventListener("scroll",updateReadProgress);updateUI();
+</script>
+</body>
+</html>

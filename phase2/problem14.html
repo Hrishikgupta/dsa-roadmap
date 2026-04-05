@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#14 — Container With Most Water in a Tank | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 2: Core Patterns</span>
+    <span class="problem-id">Problem #14 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #14: Container With Most Water in a Tank</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#14 — Container With Most Water in a Tank</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Two Pointer (Greedy Shrink)</p>
+
+  <!-- SECTION 0: Real-World Scenario -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek fish tank design kar rahe ho. Tank ke dono sides mein vertical walls hain of different heights:</p>
+      <p><code>[1, 8, 6, 2, 5, 4, 8, 3, 7]</code></p>
+      <p>Tum koi bhi do walls choose kar sakte ho. Unke beech mein paani bharoge.</p>
+<pre><code><span class="comment">  █           █
+  █   █   █   █   █
+  █   █ █ █   █   █
+  █   █ █ █ █ █   █
+  █   █ █ █ █ █ █ █
+  █ █ █ █ █ █ █ █ █
+█ █ █ █ █ █ █ █ █
+  1 8 6 2 5 4 8 3 7</span>
+
+<span style="color:#48c6ef;">Best container: walls at index 1 (h=8) and index 8 (h=7)</span>
+<span style="color:#48c6ef;">Area = min(8,7) × (8-1) = 7 × 7 = 49</span></code></pre>
+      <p style="color:#4caf50;margin-top:8px;">Question: <b>Maximum kitna water store ho sakta hai?</b> Answer: <b>49</b></p>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #11 — Container With Most Water. Classic two-pointer problem.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Problem Understanding -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given n vertical lines, find two lines that together with the x-axis form a container holding the most water</li>
+        <li>Area = <code>min(height[i], height[j]) × (j - i)</code></li>
+        <li>Water level = shorter wall (water overflows over the shorter one)</li>
+        <li>Width = distance between the two walls</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Input → Output:</b></p>
+      <ul>
+        <li>Input: <code>int[] height</code></li>
+        <li>Output: <code>int</code> — maximum area</li>
+      </ul>
+      <p style="margin-top:10px;"><b>#13 (Trap Water) vs #14 (Container) — they look similar but are VERY different:</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">Aspect</th>
+            <th style="background:#22223a;color:#888;padding:7px;">#13 Trapping Rain Water</th>
+            <th style="background:#22223a;color:#888;padding:7px;">#14 Container With Most Water</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">What to find</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Total water in ALL gaps</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Max water between ANY two lines</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Bars in between</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Matter (they displace water)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Ignored (only two walls count)</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Formula</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Sum of per-position water</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">min(h[i],h[j]) × (j-i)</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Greedy decision</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Process shorter side</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Move shorter wall inward</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Brute Force Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>First instinct:</b> Try every pair of walls.</p>
+<pre><code><span class="comment">// Brute Force — O(n²)</span>
+<span class="type">int</span> maxArea = <span class="number">0</span>;
+<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) {
+    <span class="keyword">for</span> (<span class="type">int</span> j = i + <span class="number">1</span>; j &lt; n; j++) {
+        <span class="type">int</span> area = Math.min(height[i], height[j]) * (j - i);
+        maxArea = Math.max(maxArea, area);
+    }
+}</code></pre>
+      <p>O(n²) pairs. For n = 100,000 → 5 billion. TLE.</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 Area = width × height. Start with maximum width (left=0, right=n-1). As we shrink width, we need taller walls to compensate. Which wall should we move?</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Optimization Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Key Insight — The Greedy Argument:</b></p>
+      <p>Start with the widest container (left=0, right=n-1). Now we must shrink.</p>
+      <ul>
+        <li>Area = <code>min(h[L], h[R]) × width</code></li>
+        <li>Width will decrease by 1 no matter what. So we need height to increase.</li>
+        <li>Height is limited by the <b>shorter</b> wall.</li>
+        <li>Moving the <b>taller</b> wall inward: width decreases, height can only stay same or decrease → area CANNOT increase</li>
+        <li>Moving the <b>shorter</b> wall inward: width decreases, but height MIGHT increase → area COULD increase</li>
+      </ul>
+      <p style="margin-top:10px;"><b>So the greedy choice is clear: always move the shorter wall.</b></p>
+
+      <p style="margin-top:12px;"><b>Why we never miss the optimal:</b></p>
+      <ul>
+        <li>When we move the shorter wall, we're discarding all pairs involving that wall with any inner position</li>
+        <li>But all those pairs have the same or smaller width AND the same bottleneck height → they can't be better</li>
+        <li>So it's safe to discard them</li>
+      </ul>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>Two Pointer (Greedy Shrink) — start widest, move the shorter wall inward</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Final Approach -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach (Pattern-Based)</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Pattern:</b> Two Pointer — Greedy Shrink from Opposite Ends</p>
+      <p style="margin-top:10px;"><b>Algorithm:</b></p>
+      <ol>
+        <li><code>left = 0</code>, <code>right = n - 1</code>, <code>maxArea = 0</code></li>
+        <li>While <code>left &lt; right</code>:
+          <ul>
+            <li><code>area = min(height[left], height[right]) × (right - left)</code></li>
+            <li><code>maxArea = max(maxArea, area)</code></li>
+            <li>If <code>height[left] &lt; height[right]</code>: <code>left++</code></li>
+            <li>Else: <code>right--</code></li>
+          </ul>
+        </li>
+        <li>Return maxArea</li>
+      </ol>
+      <p style="margin-top:8px;color:#888;font-size:11px;">That's it. The simplest code among all Phase 2 problems — but the greedy proof is the hard part.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Step-by-Step Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Input:</b> <code>height = [1, 8, 6, 2, 5, 4, 8, 3, 7]</code></p>
+      <table style="width:100%;font-size:11px;margin-top:10px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:6px;">Step</th>
+            <th style="background:#22223a;color:#888;padding:6px;">L</th>
+            <th style="background:#22223a;color:#888;padding:6px;">R</th>
+            <th style="background:#22223a;color:#888;padding:6px;">h[L]</th>
+            <th style="background:#22223a;color:#888;padding:6px;">h[R]</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Width</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Area</th>
+            <th style="background:#22223a;color:#888;padding:6px;">maxArea</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Move</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">8</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#e44d26;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">7</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">8</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">min(1,7)×8 = 8</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">8</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">L++ (1 shorter)</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">8</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">8</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#e44d26;">7</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">7</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">min(8,7)×7 = <b>49</b></td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">49 ✓</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">R-- (7 shorter)</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">7</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">8</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#e44d26;">3</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">6</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">min(8,3)×6 = 18</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">49</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">R-- (3 shorter)</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">6</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">8</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">8</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">min(8,8)×5 = 40</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">49</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">R-- (equal, either works)</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">8</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#e44d26;">4</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">min(8,4)×4 = 16</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">49</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">R--</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">6</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">8</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#e44d26;">5</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">min(8,5)×3 = 15</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">49</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">R--</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">7</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">8</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#e44d26;">2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">min(8,2)×2 = 4</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">49</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">R--</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">8</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">8</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#e44d26;">6</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">min(8,6)×1 = 6</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">49</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">L &lt; R false → done</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#4caf50;"><b>Result: maxArea = 49</b> (walls at index 1 and 8, heights 8 and 7)</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Internal Mechanics -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Formal proof — why moving the shorter wall is optimal:</b></p>
+      <p>Suppose <code>h[L] &lt; h[R]</code>. Consider all containers involving wall L:</p>
+      <ul>
+        <li>Container (L, R): area = h[L] × (R-L)</li>
+        <li>Container (L, R-1): area = min(h[L], h[R-1]) × (R-L-1)</li>
+        <li>Container (L, R-2): area = min(h[L], h[R-2]) × (R-L-2)</li>
+        <li>...</li>
+      </ul>
+      <p style="margin-top:8px;">For ALL of these:</p>
+      <ul>
+        <li>Width is strictly less than (R-L)</li>
+        <li>Height is at most h[L] (since h[L] is the shorter wall, min is capped at h[L])</li>
+        <li>So area ≤ h[L] × (R-L) = area we already computed</li>
+      </ul>
+      <p style="margin-top:8px;color:#4caf50;">Therefore, <b>no container involving wall L can be better than (L, R)</b>. Safe to discard L and move to L+1.</p>
+
+      <p style="margin-top:14px;"><b>What if heights are equal?</b></p>
+      <ul>
+        <li>If <code>h[L] == h[R]</code>, moving either pointer is fine</li>
+        <li>Both sides are equally "bottlenecked" — neither can produce a better result with the current partner</li>
+        <li>Convention: move either one (most implementations move right, some move left)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Complexity Analysis -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag">
+          <span class="label">Time:</span>
+          <span class="value">O(n)</span>
+        </div>
+        <div class="complexity-tag">
+          <span class="label">Space:</span>
+          <span class="value">O(1)</span>
+        </div>
+      </div>
+      <p style="margin-top:10px;">Each step moves one pointer. Total steps = n-1. Constant work per step.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Java Implementation -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">public class</span> <span class="type">ContainerWithMostWater</span> {
+
+    <span class="keyword">public static int</span> <span class="type">maxArea</span>(<span class="type">int</span>[] height) {
+        <span class="type">int</span> left = <span class="number">0</span>, right = height.length - <span class="number">1</span>;
+        <span class="type">int</span> maxArea = <span class="number">0</span>;
+
+        <span class="keyword">while</span> (left &lt; right) {
+            <span class="type">int</span> area = Math.min(height[left], height[right]) * (right - left);
+            maxArea = Math.max(maxArea, area);
+
+            <span class="keyword">if</span> (height[left] &lt; height[right]) {
+                left++;
+            } <span class="keyword">else</span> {
+                right--;
+            }
+        }
+        <span class="keyword">return</span> maxArea;
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        <span class="type">int</span>[] h = {<span class="number">1</span>,<span class="number">8</span>,<span class="number">6</span>,<span class="number">2</span>,<span class="number">5</span>,<span class="number">4</span>,<span class="number">8</span>,<span class="number">3</span>,<span class="number">7</span>};
+        System.out.println(maxArea(h)); <span class="comment">// 49</span>
+    }
+}</code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 Possibly the cleanest code in the entire roadmap. 10 lines of logic. The elegance of two pointers.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 9: Edge Cases -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Case</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Input</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Output</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Why</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Two elements</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1, 1]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">min(1,1)×1 = 1</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Ascending</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,2,3,4,5]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">6</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">min(2,5)×3=6 or min(1,5)×4=4... best is (1,4): min(2,5)×3=6</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All same</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[5,5,5,5]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">15</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">min(5,5)×3 = 15 (widest)</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">One tall, rest short</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[100,1,1,1,1]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">min(100,1)×4 = 4 (tall wall wasted)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 10: Common Mistakes -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Confusing with Trapping Rain Water (#13)</b>
+          <p style="color:#e44d26;">❌ Trying to sum water at each position — that's #13, not this</p>
+          <p style="color:#4caf50;">✅ This is about finding the single best pair of walls</p>
+        </li>
+        <li style="margin-top:10px;"><b>Moving the taller wall</b>
+          <p style="color:#e44d26;">❌ Moving the taller wall can only decrease or maintain area — never improve</p>
+          <p style="color:#4caf50;">✅ Always move the shorter wall — it's the bottleneck</p>
+        </li>
+        <li style="margin-top:10px;"><b>Using <code>height[left] * (right - left)</code> instead of <code>min(h[L], h[R]) * width</code></b>
+          <p style="color:#e44d26;">❌ Water overflows over the shorter wall — must use min</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 11: When to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Signals to पहचान (identify):</b></p>
+      <ul>
+        <li>✅ "Maximize area/product between two elements"</li>
+        <li>✅ Result depends on both distance AND value of two elements</li>
+        <li>✅ Greedy: one factor decreases (width), other might increase (height)</li>
+        <li>✅ "Choose two lines/walls/points to optimize something"</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Phase 2 Two Pointer summary:</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:6px;">#</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Problem</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Two Pointer Variant</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Greedy Decision</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">6</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Pair Sum</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Opposite ends</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Sum too small? L++. Too big? R--.</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">7</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3Sum</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Fix one + opposite ends</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Same as #6 inside a loop</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">13</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Trap Water</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Opposite ends + running max</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Process shorter side</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">14</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Container</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Opposite ends + greedy</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Move shorter wall inward</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 12: When NOT to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ Trapping rain water (#13) — different problem despite similar appearance</li>
+        <li>❌ "Largest rectangle in histogram" — needs stack-based approach</li>
+        <li>❌ When you need to consider more than 2 walls simultaneously</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 13: Key Takeaway -->
+  <div class="takeaway">
+    💡 "Start widest. Width will shrink — so move the shorter wall hoping for a taller one. The taller wall can never help more by moving."
+  </div>
+
+  <!-- SECTION 14: Bridge to Next Problem -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>🎉 Phase 2 Complete!</b></p>
+      <p style="margin-top:8px;">Recap of what you've mastered:</p>
+      <ul>
+        <li>#6-7: Two Pointer — pair sum, 3Sum</li>
+        <li>#8-10: Sliding Window — fixed, variable (shortest/longest), with HashMap</li>
+        <li>#11-12: Frequency Comparison — anagram check, min window substring</li>
+        <li>#13-14: Advanced Two Pointer — trapping water, container</li>
+      </ul>
+      <p style="margin-top:12px;">Phase 3 introduces <b>entirely new data structures</b>: Stack, Queue, and Recursion.</p>
+      <p style="margin-top:8px;">Problem #15: <b>Validating Nested Code Brackets</b> — your first Stack problem. A completely new way of thinking.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Phase 2 (Arrays/Strings patterns) complete → Phase 3 (Stack, Queue, Recursion) begins!</p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem13.html">← Problem #13</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(14)">☐ Mark as Done</button>
+    <a class="nav-btn" href="../phase3/problem15.html">Problem #15 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "dsa-roadmap-progress";
+const PROBLEM_NUM = 14;
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+
+function saveProgress(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function toggleDone(num) {
+  const prog = loadProgress();
+  if (prog[num] === "done") { delete prog[num]; }
+  else { prog[num] = "done"; }
+  saveProgress(prog);
+  updateUI();
+}
+
+function updateUI() {
+  const prog = loadProgress();
+  const btn = document.getElementById("mark-done-btn");
+  if (prog[PROBLEM_NUM] === "done") {
+    btn.textContent = "✔ Completed";
+    btn.classList.add("completed");
+  } else {
+    btn.textContent = "☐ Mark as Done";
+    btn.classList.remove("completed");
+  }
+  updateReadProgress();
+}
+
+function updateReadProgress() {
+  const prog = loadProgress();
+  if (prog[PROBLEM_NUM] === "done") {
+    document.getElementById("section-pct").textContent = "100%";
+    document.getElementById("section-bar").style.width = "100%";
+    return;
+  }
+  const sections = document.querySelectorAll(".section, .takeaway");
+  const total = sections.length;
+  if (total === 0) return;
+  let visible = 0;
+  sections.forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    if (rect.top < window.innerHeight) visible++;
+  });
+  const pct = Math.min(100, Math.round((visible / total) * 100));
+  document.getElementById("section-pct").textContent = pct + "%";
+  document.getElementById("section-bar").style.width = pct + "%";
+}
+
+window.addEventListener("scroll", updateReadProgress);
+updateUI();
+</script>
+</body>
+</html>

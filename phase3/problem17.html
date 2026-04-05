@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#17 — Stock Span — How Many Days Was I the King? | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 3: Intermediate</span>
+    <span class="problem-id">Problem #17 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #17: Stock Span — How Many Days Was I the King?</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#17 — Stock Span — How Many Days Was I the King?</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Monotonic Stack (Backward Span)</p>
+
+  <!-- SECTION 0: Real-World Scenario -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek stock trading dashboard bana rahe ho. Har din ke liye ek metric dikhana hai:</p>
+      <p><b>"Aaj se peeche kitne consecutive days mein stock price aaj se kam ya equal tha?"</b></p>
+      <p style="margin-top:8px;">(Including today itself — "for how many days was today's price the king?")</p>
+      <p style="margin-top:8px;">Prices: <code>[100, 80, 60, 70, 60, 75, 85]</code></p>
+      <p>Expected spans: <code>[1, 1, 1, 2, 1, 4, 6]</code></p>
+      <ul>
+        <li>Day 0 (100): no previous day → span = <b>1</b> (just today)</li>
+        <li>Day 3 (70): Day 2 (60) ≤ 70 ✓, Day 1 (80) > 70 ✗ → span = <b>2</b> (days 2,3)</li>
+        <li>Day 5 (75): Days 4(60),3(70),2(60) all ≤ 75, Day 1(80) > 75 → span = <b>4</b></li>
+        <li>Day 6 (85): Days 5(75),4(60),3(70),2(60),1(80) all ≤ 85, Day 0(100) > 85 → span = <b>6</b></li>
+      </ul>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #901 — Online Stock Span.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Problem Understanding -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>For each day, find the number of consecutive days (ending at today) where the price was ≤ today's price</li>
+        <li>Equivalently: find the distance to the <b>previous day with a strictly greater price</b>, then span = that distance</li>
+        <li>If no previous greater price exists → span = current index + 1 (all days from start)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Input → Output:</b></p>
+      <ul>
+        <li>Input: <code>int[] prices</code> (or stream of prices one by one)</li>
+        <li>Output: <code>int[] spans</code></li>
+      </ul>
+      <p style="margin-top:10px;"><b>#16 vs #17 — same tool, different direction:</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">Aspect</th>
+            <th style="background:#22223a;color:#888;padding:7px;">#16 Daily Temperatures</th>
+            <th style="background:#22223a;color:#888;padding:7px;">#17 Stock Span</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Looking for</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Next Greater (→ right)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Previous Greater (← left)</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Answer is</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Distance to next greater</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Distance from previous greater</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Stack maintains</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Decreasing (waiting for bigger)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Decreasing (same!)</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">When to record answer</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">When popping (popped element gets answer)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">After popping (current element gets answer)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Brute Force Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>First instinct:</b> For each day, scan backwards until you find a day with higher price.</p>
+<pre><code><span class="comment">// Brute Force — O(n²)</span>
+<span class="type">int</span>[] span = <span class="keyword">new</span> <span class="type">int</span>[n];
+<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) {
+    span[i] = <span class="number">1</span>;
+    <span class="type">int</span> j = i - <span class="number">1</span>;
+    <span class="keyword">while</span> (j &gt;= <span class="number">0</span> &amp;&amp; prices[j] &lt;= prices[i]) {
+        span[i]++;
+        j--;
+    }
+}</code></pre>
+      <p>O(n²) worst case (ascending prices — every day scans all the way back).</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 Problem #16 mein humne seekha: monotonic stack se "next greater" O(n) mein milta hai. Yahan "previous greater" chahiye — same stack, bas answer recording ka timing alag hai.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Optimization Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Key Insight — Reusing #16's logic:</b></p>
+      <p>In #16, when we popped an element, the <b>popped element</b> got its answer (next greater = current element).</p>
+      <p>Here, after popping all smaller elements, the <b>current element</b> gets its answer:</p>
+      <ul>
+        <li>If stack is empty after popping → no previous greater exists → span = i + 1</li>
+        <li>If stack has something → top of stack is the previous greater → span = i - stack.peek()</li>
+      </ul>
+
+      <p style="margin-top:12px;"><b>The "Jumping" Optimization (alternative view):</b></p>
+      <p>Instead of scanning back one-by-one, we can "jump" over already-computed spans:</p>
+      <ul>
+        <li>Day 6 (85): Day 5 has span 4, meaning days 2-5 are all ≤ 75 ≤ 85</li>
+        <li>So we can jump from day 5 directly to day 1 (skip 4 days at once)</li>
+        <li>The stack does this jumping automatically — popping skips over entire groups</li>
+      </ul>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>Monotonic Decreasing Stack — pop smaller/equal, span = distance to stack top (previous greater)</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Final Approach -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach (Pattern-Based)</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Pattern:</b> Monotonic Decreasing Stack (Previous Greater Element)</p>
+      <p style="margin-top:10px;"><b>Algorithm:</b></p>
+      <ol>
+        <li>Create empty stack (stores indices)</li>
+        <li>For <code>i = 0</code> to <code>n - 1</code>:
+          <ul>
+            <li>While stack not empty AND <code>prices[stack.peek()] &lt;= prices[i]</code>: pop</li>
+            <li>If stack empty: <code>span[i] = i + 1</code> (no previous greater)</li>
+            <li>Else: <code>span[i] = i - stack.peek()</code> (distance to previous greater)</li>
+            <li>Push <code>i</code></li>
+          </ul>
+        </li>
+      </ol>
+      <p style="margin-top:10px;color:#888;font-size:11px;">💡 Note: we use <code>&lt;=</code> (not <code>&lt;</code>) because span includes days with equal price. We pop equal elements too.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Step-by-Step Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Input:</b> <code>prices = [100, 80, 60, 70, 60, 75, 85]</code></p>
+      <table style="width:100%;font-size:10px;margin-top:10px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">i</th>
+            <th style="background:#22223a;color:#888;padding:5px;">price</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Pop (≤ current)?</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Stack top after pop</th>
+            <th style="background:#22223a;color:#888;padding:5px;">span</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Stack after push</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">100</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">empty</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">empty</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">0+1 = <b>1</b></td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;"><code>[0]</code></td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">80</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">100>80, no pop</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">0 (100)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">1-0 = <b>1</b></td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;"><code>[0, 1]</code></td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">60</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">80>60, no pop</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">1 (80)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">2-1 = <b>1</b></td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;"><code>[0, 1, 2]</code></td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">70</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Pop 2 (60≤70)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">1 (80)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">3-1 = <b>2</b></td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;"><code>[0, 1, 3]</code></td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">60</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">70>60, no pop</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">3 (70)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">4-3 = <b>1</b></td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;"><code>[0, 1, 3, 4]</code></td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">75</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Pop 4(60≤75), Pop 3(70≤75)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">1 (80)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">5-1 = <b>4</b></td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;"><code>[0, 1, 5]</code></td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">6</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">85</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Pop 5(75≤85), Pop 1(80≤85)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">0 (100)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">6-0 = <b>6</b></td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;"><code>[0, 6]</code></td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#4caf50;"><b>Result: [1, 1, 1, 2, 1, 4, 6]</b> ✓</p>
+      <p style="color:#888;font-size:11px;">Step 6: 85 pops both 75 and 80 — jumps over 5 days in 2 pops. That's the stack's power.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Internal Mechanics -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>#16 vs #17 — the subtle difference:</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">Step</th>
+            <th style="background:#22223a;color:#888;padding:7px;">#16 (Next Greater)</th>
+            <th style="background:#22223a;color:#888;padding:7px;">#17 (Previous Greater / Span)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Pop condition</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;"><code>current > stack top</code></td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;"><code>current >= stack top</code> (includes equal)</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Who gets the answer?</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">The <b>popped</b> element</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">The <b>current</b> element</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Answer formula</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;"><code>result[popped] = i - popped</code></td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;"><code>span[i] = i - stack.peek()</code> (or i+1 if empty)</td></tr>
+        </tbody>
+      </table>
+
+      <p style="margin-top:14px;"><b>Online vs Batch processing:</b></p>
+      <ul>
+        <li>LC #901 is an "online" problem — prices arrive one at a time via <code>next(price)</code></li>
+        <li>Stack persists across calls — each call pushes one element and pops as needed</li>
+        <li>Our batch version processes all at once, but the logic is identical</li>
+      </ul>
+
+      <p style="margin-top:14px;"><b>The complete Monotonic Stack cheat sheet:</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Find</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Stack Order</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Pop When</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Answer Goes To</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Next Greater →</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Decreasing</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">curr > top</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Popped element</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Next Smaller →</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Increasing</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">curr < top</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Popped element</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Prev Greater ←</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Decreasing</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">curr ≥ top</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Current element</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Prev Smaller ←</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Increasing</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">curr ≤ top</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Current element</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:6px;color:#888;font-size:11px;">Save this table. It covers every monotonic stack variant you'll ever see.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Complexity Analysis -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag">
+          <span class="label">Time:</span>
+          <span class="value">O(n)</span>
+        </div>
+        <div class="complexity-tag">
+          <span class="label">Space:</span>
+          <span class="value">O(n)</span>
+        </div>
+      </div>
+      <p style="margin-top:10px;">Same amortized argument as #16: each element pushed once, popped at most once = O(2n) = O(n).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Java Implementation -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Batch version (all prices at once):</b></p>
+<pre><code><span class="keyword">import</span> java.util.ArrayDeque;
+<span class="keyword">import</span> java.util.Arrays;
+<span class="keyword">import</span> java.util.Deque;
+
+<span class="keyword">public class</span> <span class="type">StockSpan</span> {
+
+    <span class="keyword">public static int</span>[] <span class="type">calculateSpan</span>(<span class="type">int</span>[] prices) {
+        <span class="type">int</span> n = prices.length;
+        <span class="type">int</span>[] span = <span class="keyword">new</span> <span class="type">int</span>[n];
+        Deque&lt;Integer&gt; stack = <span class="keyword">new</span> ArrayDeque&lt;&gt;();
+
+        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) {
+            <span class="keyword">while</span> (!stack.isEmpty() &amp;&amp; prices[stack.peek()] &lt;= prices[i]) {
+                stack.pop();
+            }
+            span[i] = stack.isEmpty() ? i + <span class="number">1</span> : i - stack.peek();
+            stack.push(i);
+        }
+        <span class="keyword">return</span> span;
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        <span class="type">int</span>[] prices = {<span class="number">100</span>, <span class="number">80</span>, <span class="number">60</span>, <span class="number">70</span>, <span class="number">60</span>, <span class="number">75</span>, <span class="number">85</span>};
+        System.out.println(Arrays.toString(calculateSpan(prices)));
+        <span class="comment">// [1, 1, 1, 2, 1, 4, 6]</span>
+    }
+}</code></pre>
+
+      <p style="margin-top:14px;"><b>Online version (LC #901 — prices arrive one at a time):</b></p>
+<pre><code><span class="keyword">class</span> <span class="type">StockSpanner</span> {
+    Deque&lt;<span class="type">int</span>[]&gt; stack; <span class="comment">// [price, span]</span>
+
+    <span class="keyword">public</span> <span class="type">StockSpanner</span>() {
+        stack = <span class="keyword">new</span> ArrayDeque&lt;&gt;();
+    }
+
+    <span class="keyword">public int</span> <span class="type">next</span>(<span class="type">int</span> price) {
+        <span class="type">int</span> span = <span class="number">1</span>;
+        <span class="keyword">while</span> (!stack.isEmpty() &amp;&amp; stack.peek()[<span class="number">0</span>] &lt;= price) {
+            span += stack.pop()[<span class="number">1</span>]; <span class="comment">// absorb popped element's span</span>
+        }
+        stack.push(<span class="keyword">new</span> <span class="type">int</span>[]{price, span});
+        <span class="keyword">return</span> span;
+    }
+}</code></pre>
+      <p style="margin-top:6px;color:#888;font-size:11px;">💡 Online version stores [price, span] pairs. When popping, we absorb the popped element's span into ours — that's the "jumping" optimization.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 9: Edge Cases -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Case</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Input</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Output</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Why</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Ascending</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,2,3,4]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,2,3,4]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Each day is king of all previous</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Descending</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[4,3,2,1]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,1,1,1]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Each day blocked by previous</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All same</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[5,5,5,5]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,2,3,4]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Equal counts as ≤ → span grows</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[42]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Just today</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 10: Common Mistakes -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Using <code>&lt;</code> instead of <code>&lt;=</code> in pop condition</b>
+          <p style="color:#e44d26;">❌ <code>prices[stack.peek()] < prices[i]</code> → equal prices don't get popped → wrong span for equal days</p>
+          <p style="color:#4caf50;">✅ <code>prices[stack.peek()] <= prices[i]</code> → equal prices are part of the span</p>
+        </li>
+        <li style="margin-top:10px;"><b>Confusing who gets the answer (#16 vs #17)</b>
+          <p style="color:#888;">#16: popped element gets answer. #17: current element gets answer after popping.</p>
+        </li>
+        <li style="margin-top:10px;"><b>Forgetting the empty stack case</b>
+          <p style="color:#e44d26;">❌ <code>span[i] = i - stack.peek()</code> when stack is empty → exception</p>
+          <p style="color:#4caf50;">✅ Check <code>stack.isEmpty()</code> first → span = i + 1</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 11: When to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Signals to पहचान (identify):</b></p>
+      <ul>
+        <li>✅ "Stock span" / "How many consecutive days before..."</li>
+        <li>✅ "Previous greater/smaller element"</li>
+        <li>✅ "Consecutive count looking backward"</li>
+        <li>✅ Online/streaming data where you process one element at a time</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 12: When NOT to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ "Maximum profit from buying/selling" — that's Problem #1 (tracking variable), not stack</li>
+        <li>❌ "K-day moving average" — that's sliding window (#8)</li>
+        <li>❌ Non-consecutive span (e.g., "total days with lower price, not necessarily consecutive")</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 13: Key Takeaway -->
+  <div class="takeaway">
+    💡 "Stock Span = Previous Greater Element. Same monotonic decreasing stack as #16, but the CURRENT element gets the answer (distance to stack top), not the popped one."
+  </div>
+
+  <!-- SECTION 14: Bridge to Next Problem -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Ab tum Monotonic Stack ke dono directions master kar chuke ho:</p>
+      <ul>
+        <li>#16: Next Greater → forward-looking</li>
+        <li>#17: Previous Greater → backward-looking</li>
+      </ul>
+      <p style="margin-top:10px;">Stack chapter complete. Ab ek naya data structure aata hai: <b>Queue</b>.</p>
+      <p style="margin-top:8px;">Stack = LIFO (last in, first out). Queue = <b>FIFO</b> (first in, first out).</p>
+      <p style="margin-top:8px;">Problem #18: <b>First Non-Repeating Character in Live Stream</b> — characters arrive one by one, maintain the first unique one. Queue + HashMap combo.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Stack (LIFO — matching, monotonic) → Queue (FIFO — ordering, streaming) — new data structure!</p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem16.html">← Problem #16</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(17)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem18.html">Problem #18 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "dsa-roadmap-progress";
+const PROBLEM_NUM = 17;
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+
+function saveProgress(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function toggleDone(num) {
+  const prog = loadProgress();
+  if (prog[num] === "done") { delete prog[num]; }
+  else { prog[num] = "done"; }
+  saveProgress(prog);
+  updateUI();
+}
+
+function updateUI() {
+  const prog = loadProgress();
+  const btn = document.getElementById("mark-done-btn");
+  if (prog[PROBLEM_NUM] === "done") {
+    btn.textContent = "✔ Completed";
+    btn.classList.add("completed");
+  } else {
+    btn.textContent = "☐ Mark as Done";
+    btn.classList.remove("completed");
+  }
+  updateReadProgress();
+}
+
+function updateReadProgress() {
+  const prog = loadProgress();
+  if (prog[PROBLEM_NUM] === "done") {
+    document.getElementById("section-pct").textContent = "100%";
+    document.getElementById("section-bar").style.width = "100%";
+    return;
+  }
+  const sections = document.querySelectorAll(".section, .takeaway");
+  const total = sections.length;
+  if (total === 0) return;
+  let visible = 0;
+  sections.forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    if (rect.top < window.innerHeight) visible++;
+  });
+  const pct = Math.min(100, Math.round((visible / total) * 100));
+  document.getElementById("section-pct").textContent = pct + "%";
+  document.getElementById("section-bar").style.width = pct + "%";
+}
+
+window.addEventListener("scroll", updateReadProgress);
+updateUI();
+</script>
+</body>
+</html>

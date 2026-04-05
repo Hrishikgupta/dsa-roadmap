@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#35 — Cheapest Flight Within K Stops | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 4: Advanced</span>
+    <span class="problem-id">Problem #35 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #35: Cheapest Flight Within K Stops</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#35 — Cheapest Flight Within K Stops</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Graph BFS / Bellman-Ford Variant</p>
+
+  <!-- SECTION 0 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum flight booking app bana rahe ho. User ko Delhi se New York jaana hai with at most 1 stop:</p>
+<pre><code><span class="comment">Cities: 0(Delhi), 1(Dubai), 2(London), 3(New York)</span>
+<span class="comment">Flights: [from, to, price]</span>
+<span class="comment">  0→1: ₹200    0→2: ₹500</span>
+<span class="comment">  1→2: ₹100    1→3: ₹600</span>
+<span class="comment">  2→3: ₹200</span>
+
+<span class="comment">  0(Delhi)──200──→1(Dubai)──600──→3(NY)  = ₹800 (1 stop)</span>
+<span class="comment">  0(Delhi)──500──→2(London)─200──→3(NY)  = ₹700 (1 stop) ✓</span>
+<span class="comment">  0(Delhi)──200──→1──100──→2──200──→3    = ₹500 (2 stops) ✗ exceeds K=1</span></code></pre>
+      <p style="margin-top:8px;">Question: <b>"Cheapest flight from Delhi to NY with at most K=1 stop?"</b></p>
+      <p style="color:#4caf50;">Answer: <b>₹700</b> (Delhi→London→NY)</p>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #787 — Cheapest Flights Within K Stops. Combines shortest path with a constraint.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given n cities, flights with prices, source, destination, and max K stops</li>
+        <li>Find cheapest price from src to dst with at most K stops (K+1 edges)</li>
+        <li>Return -1 if no such route exists</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Why standard BFS (#32) doesn't work:</b></p>
+      <ul>
+        <li>BFS finds shortest path by NUMBER OF EDGES (unweighted)</li>
+        <li>Here edges have WEIGHTS (prices) — cheapest ≠ fewest edges</li>
+        <li>Also have a constraint: max K stops</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Three approaches:</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Approach</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Time</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Idea</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Bellman-Ford (K+1 rounds)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(K × E)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Relax all edges K+1 times</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">BFS with pruning</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">O(V × K)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">BFS level = stops, track min cost per node per level</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Dijkstra + stops tracking</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">O(E × K log(VK))</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Priority queue with (cost, node, stops)</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;">Bellman-Ford variant is the cleanest and most interview-friendly for this specific problem.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>DFS: try all paths with ≤ K stops, track minimum cost.</b></p>
+      <p>Exponential — too many paths. Need something smarter.</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 Bellman-Ford relaxes ALL edges in each round. After round i, we know the shortest path using at most i edges. After K+1 rounds → shortest path with at most K stops.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Bellman-Ford — the "relax all edges" approach:</b></p>
+      <ul>
+        <li>Maintain <code>dist[i]</code> = cheapest cost to reach city i</li>
+        <li>Initialize: <code>dist[src] = 0</code>, all others = ∞</li>
+        <li>Repeat K+1 times (K stops = K+1 edges):
+          <ul>
+            <li>For each flight (u, v, price): if <code>dist[u] + price &lt; dist[v]</code> → update <code>dist[v]</code></li>
+          </ul>
+        </li>
+        <li>Answer = <code>dist[dst]</code> (or -1 if still ∞)</li>
+      </ul>
+
+      <p style="margin-top:12px;"><b>Critical trick — use a COPY of dist for each round:</b></p>
+      <ul>
+        <li>Without copy: updates in round i can cascade (use a result from the same round)</li>
+        <li>This would allow paths with MORE than K+1 edges</li>
+        <li>Solution: at start of each round, copy <code>dist</code> to <code>prev</code>. Read from <code>prev</code>, write to <code>dist</code>.</li>
+      </ul>
+<pre><code><span class="keyword">for</span> round = <span class="number">0</span> to K:
+    prev = copy of dist
+    <span class="keyword">for</span> each flight (u, v, price):
+        <span class="keyword">if</span> prev[u] + price &lt; dist[v]:
+            dist[v] = prev[u] + price</code></pre>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>Bellman-Ford with K+1 rounds + copy trick — guarantees at most K stops.</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Algorithm:</b></p>
+      <ol>
+        <li><code>dist = new int[n]</code>, fill with ∞, <code>dist[src] = 0</code></li>
+        <li>For <code>i = 0</code> to <code>K</code> (K+1 rounds):
+          <ul>
+            <li><code>prev = Arrays.copyOf(dist)</code></li>
+            <li>For each flight [u, v, w]: <code>if (prev[u] != ∞ && prev[u] + w < dist[v]) dist[v] = prev[u] + w</code></li>
+          </ul>
+        </li>
+        <li>Return <code>dist[dst] == ∞ ? -1 : dist[dst]</code></li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>n=4, src=0, dst=3, K=1</b></p>
+      <p>Flights: [0,1,200],[0,2,500],[1,2,100],[1,3,600],[2,3,200]</p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Round</th>
+            <th style="background:#22223a;color:#888;padding:5px;">prev[]</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Relaxations</th>
+            <th style="background:#22223a;color:#888;padding:5px;">dist[] after</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Init</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">[0, ∞, ∞, ∞]</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">0 (1st edge)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">[0,∞,∞,∞]</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">0→1: 200, 0→2: 500</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">[0, <span style="color:#4caf50;">200</span>, <span style="color:#4caf50;">500</span>, ∞]</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">1 (2nd edge)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">[0,200,500,∞]</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">1→2: 300, 1→3: 800, 2→3: 700</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">[0, 200, <span style="color:#4caf50;">300</span>, <span style="color:#4caf50;">700</span>]</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;color:#888;font-size:11px;">Round 1: 1→3 gives 200+600=800, but 2→3 gives 500+200=700 (cheaper). dist[3]=700.</p>
+      <p style="margin-top:8px;color:#888;font-size:11px;">Note: 0→1→2→3 = 500 would need 2 stops (round 2), but K=1 so we stop after round 1.</p>
+      <p style="margin-top:10px;color:#4caf50;"><b>Result: dist[3] = 700</b> ✓ (Delhi→London→NY, 1 stop)</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Why the copy trick is essential:</b></p>
+<pre><code><span class="comment">Without copy (WRONG):</span>
+<span class="comment">Round 0: process 0→1 (dist[1]=200), then 1→3 (dist[3]=800)</span>
+<span class="comment">But 1→3 used dist[1]=200 which was SET IN THIS ROUND</span>
+<span class="comment">→ This is a 2-edge path (0→1→3) found in round 0 (should need round 1)</span>
+
+<span class="comment">With copy (CORRECT):</span>
+<span class="comment">Round 0: prev=[0,∞,∞,∞]. 1→3: prev[1]=∞ → skip (can't reach 1 yet)</span>
+<span class="comment">→ Only direct flights from src are found in round 0. Correct!</span></code></pre>
+
+      <p style="margin-top:14px;"><b>Shortest path algorithms comparison:</b></p>
+      <table style="width:100%;font-size:9px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Algorithm</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Weights</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Constraint</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Time</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Problem</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">BFS</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Unweighted</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">None</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">O(V+E)</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">#32</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Dijkstra</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Non-negative</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">None</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">O(E log V)</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Classic</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Bellman-Ford (K rounds)</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Any</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Max K edges</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">O(K×E)</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">#35 (this)</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Bellman-Ford (full)</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Any (neg ok)</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">None</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">O(V×E)</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Neg weights</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag"><span class="label">Time:</span><span class="value">O(K × E)</span></div>
+        <div class="complexity-tag"><span class="label">Space:</span><span class="value">O(V)</span></div>
+      </div>
+      <p style="margin-top:10px;">K+1 rounds × E edges per round. Space: two arrays of size V (dist + prev copy).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">import</span> java.util.Arrays;
+
+<span class="keyword">public class</span> <span class="type">CheapestFlight</span> {
+
+    <span class="keyword">public static int</span> <span class="type">findCheapestPrice</span>(<span class="type">int</span> n, <span class="type">int</span>[][] flights,
+                                          <span class="type">int</span> src, <span class="type">int</span> dst, <span class="type">int</span> k) {
+        <span class="type">int</span>[] dist = <span class="keyword">new</span> <span class="type">int</span>[n];
+        Arrays.fill(dist, Integer.MAX_VALUE);
+        dist[src] = <span class="number">0</span>;
+
+        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt;= k; i++) {
+            <span class="type">int</span>[] prev = Arrays.copyOf(dist, n); <span class="comment">// COPY!</span>
+            <span class="keyword">for</span> (<span class="type">int</span>[] f : flights) {
+                <span class="type">int</span> u = f[<span class="number">0</span>], v = f[<span class="number">1</span>], w = f[<span class="number">2</span>];
+                <span class="keyword">if</span> (prev[u] != Integer.MAX_VALUE
+                    &amp;&amp; prev[u] + w &lt; dist[v]) {
+                    dist[v] = prev[u] + w;
+                }
+            }
+        }
+
+        <span class="keyword">return</span> dist[dst] == Integer.MAX_VALUE ? -<span class="number">1</span> : dist[dst];
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        <span class="type">int</span>[][] flights = {{<span class="number">0</span>,<span class="number">1</span>,<span class="number">200</span>},{<span class="number">0</span>,<span class="number">2</span>,<span class="number">500</span>},{<span class="number">1</span>,<span class="number">2</span>,<span class="number">100</span>},{<span class="number">1</span>,<span class="number">3</span>,<span class="number">600</span>},{<span class="number">2</span>,<span class="number">3</span>,<span class="number">200</span>}};
+        System.out.println(findCheapestPrice(<span class="number">4</span>, flights, <span class="number">0</span>, <span class="number">3</span>, <span class="number">1</span>)); <span class="comment">// 700</span>
+    }
+}</code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 The entire solution is 15 lines. The <code>Arrays.copyOf</code> line is the key — without it, the algorithm is wrong.</p>
+    </div>
+  </div>
+
+  <!-- Remaining sections -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead><tr><th style="background:#22223a;color:#888;padding:8px;">Case</th><th style="background:#22223a;color:#888;padding:8px;">Result</th><th style="background:#22223a;color:#888;padding:8px;">Note</th></tr></thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Direct flight exists</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Direct price</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Found in round 0 (0 stops)</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No path within K stops</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">-1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">dist[dst] stays ∞</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">K = 0 (direct only)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Direct price or -1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Only 1 round of relaxation</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">src == dst</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Already there</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Cheaper path needs more stops</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">More expensive but valid</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">K constraint forces suboptimal price</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Not copying dist array each round</b>
+          <p style="color:#e44d26;">❌ Cascading updates allow paths with more than K+1 edges</p>
+          <p style="color:#4caf50;">✅ <code>int[] prev = Arrays.copyOf(dist, n)</code> at start of each round</p>
+        </li>
+        <li style="margin-top:10px;"><b>K+1 rounds vs K rounds</b>
+          <p style="color:#e44d26;">❌ K stops = K+1 edges. Loop should run K+1 times (0 to K inclusive).</p>
+        </li>
+        <li style="margin-top:10px;"><b>Integer overflow: prev[u] + w</b>
+          <p style="color:#e44d26;">❌ If prev[u] = MAX_VALUE, adding w overflows</p>
+          <p style="color:#4caf50;">✅ Check <code>prev[u] != Integer.MAX_VALUE</code> before adding</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>✅ "Cheapest/shortest path with at most K edges/stops"</li>
+        <li>✅ Weighted graph + edge count constraint</li>
+        <li>✅ Negative weights allowed (Bellman-Ford handles them, Dijkstra doesn't)</li>
+        <li>✅ "Network delay time" (LC #743) — Dijkstra without K constraint</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ Unweighted graph — use BFS (#32), much simpler</li>
+        <li>❌ No edge constraint — use standard Dijkstra (faster)</li>
+        <li>❌ Negative cycles — Bellman-Ford detects them but can't find shortest path</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="takeaway">
+    💡 "Cheapest path with K stops = Bellman-Ford with K+1 rounds. Copy dist array each round to prevent cascading. Read from prev, write to dist."
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Graph chapter complete! You've mastered:</p>
+      <ul>
+        <li>#31: Grid DFS (connected components)</li>
+        <li>#32: Grid BFS (shortest path unweighted)</li>
+        <li>#33: Topological Sort (Kahn's BFS)</li>
+        <li>#34: Cycle Detection (DFS 3-color)</li>
+        <li>#35: Weighted shortest path with constraint (Bellman-Ford)</li>
+      </ul>
+      <p style="margin-top:10px;">Now: <b>Backtracking</b> — the final section of Phase 4.</p>
+      <p style="margin-top:8px;">Problem #36: <b>Solving a Sudoku Puzzle</b> — try a number, check constraints, if stuck → backtrack. This combines recursion (#20-23) with constraint checking.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Graphs (explore/search) → Backtracking (explore + undo + constraints) — recursion with pruning!</p>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem34.html">← Problem #34</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(35)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem36.html">Problem #36 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY="dsa-roadmap-progress";const PROBLEM_NUM=35;
+function loadProgress(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{};}catch{return{};}}
+function saveProgress(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}
+function toggleDone(n){const p=loadProgress();if(p[n]==="done")delete p[n];else p[n]="done";saveProgress(p);updateUI();}
+function updateUI(){const p=loadProgress(),btn=document.getElementById("mark-done-btn");if(p[PROBLEM_NUM]==="done"){btn.textContent="✔ Completed";btn.classList.add("completed");}else{btn.textContent="☐ Mark as Done";btn.classList.remove("completed");}updateReadProgress();}
+function updateReadProgress(){const p=loadProgress();if(p[PROBLEM_NUM]==="done"){document.getElementById("section-pct").textContent="100%";document.getElementById("section-bar").style.width="100%";return;}const s=document.querySelectorAll(".section, .takeaway"),t=s.length;if(t===0)return;let v=0;s.forEach(sec=>{if(sec.getBoundingClientRect().top<window.innerHeight)v++;});const pct=Math.min(100,Math.round((v/t)*100));document.getElementById("section-pct").textContent=pct+"%";document.getElementById("section-bar").style.width=pct+"%";}
+window.addEventListener("scroll",updateReadProgress);updateUI();
+</script>
+</body>
+</html>

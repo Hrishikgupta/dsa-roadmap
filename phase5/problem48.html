@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#48 — Burst Balloons for Max Points | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 5: Mastery</span>
+    <span class="problem-id">Problem #48 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #48: Burst Balloons for Max Points</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#48 — Burst Balloons for Max Points</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: DP (Interval DP)</p>
+
+  <!-- SECTION 0 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek carnival game khel rahe ho. Balloons hain with numbers: <code>[3, 1, 5, 8]</code></p>
+      <p style="margin-top:8px;">Jab tum balloon i burst karte ho, points milte hain: <code>nums[i-1] × nums[i] × nums[i+1]</code> (left neighbor × self × right neighbor). Boundary pe 1 assume karo.</p>
+      <p style="margin-top:8px;"><b>"Maximize total points by bursting all balloons in optimal order."</b></p>
+<pre><code><span class="comment">Burst 1: 3×1×5 = 15  → [3, 5, 8]</span>
+<span class="comment">Burst 5: 3×5×8 = 120 → [3, 8]</span>
+<span class="comment">Burst 3: 1×3×8 = 24  → [8]</span>
+<span class="comment">Burst 8: 1×8×1 = 8   → []</span>
+<span class="comment">Total: 15+120+24+8 = 167</span>
+
+<span style="color:#4caf50;">But optimal order gives 167. Is there better? Yes!</span>
+<span class="comment">Optimal: burst order [1,5,3,8] → total = 167</span></code></pre>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #312 — Burst Balloons. Hard-rated. The classic Interval DP problem.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What is Interval DP?</b></p>
+      <ul>
+        <li>Previous DP: dp[i] (1D), dp[i][j] where i=item and j=capacity or i=string1 and j=string2</li>
+        <li>Interval DP: <code>dp[i][j]</code> = best answer for the <b>range [i..j]</b></li>
+        <li>We try every possible "split point" k within the range and combine left and right subproblems</li>
+      </ul>
+      <p style="margin-top:10px;"><b>The key trick — think about the LAST balloon to burst:</b></p>
+      <ul>
+        <li>Instead of "which balloon to burst first?" (hard — neighbors change)</li>
+        <li>Think: "which balloon is burst LAST in range [i..j]?" (easier — boundaries are fixed)</li>
+        <li>If balloon k is burst last in [i..j], its neighbors are i-1 and j+1 (everything else already gone)</li>
+        <li>Points for k = <code>nums[i-1] × nums[k] × nums[j+1]</code></li>
+        <li>Plus: best points from [i..k-1] and [k+1..j] (already burst optimally)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>DP recipe:</b></p>
+      <ol>
+        <li><b>State:</b> <code>dp[i][j]</code> = max points from bursting all balloons in range [i..j]</li>
+        <li><b>Recurrence:</b> <code>dp[i][j] = max over k in [i..j] of: dp[i][k-1] + nums[i-1]×nums[k]×nums[j+1] + dp[k+1][j]</code></li>
+        <li><b>Base:</b> <code>dp[i][j] = 0</code> when i > j (empty range)</li>
+        <li><b>Order:</b> Fill by increasing range length (len=1, then 2, then 3...)</li>
+        <li><b>Answer:</b> <code>dp[1][n]</code> (entire range)</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>The "last to burst" insight:</b></p>
+<pre><code><span class="comment">Range [i..j], balloon k is burst LAST:</span>
+
+<span class="comment">Left subproblem: [i..k-1] — burst optimally (k is still there as right boundary)</span>
+<span class="comment">Right subproblem: [k+1..j] — burst optimally (k is still there as left boundary)</span>
+<span class="comment">Finally burst k: neighbors are i-1 and j+1 (everything else in [i..j] is gone)</span>
+
+dp[i][j] = max <span class="keyword">for</span> k = i to j:
+    dp[i][k-<span class="number">1</span>] + nums[i-<span class="number">1</span>] * nums[k] * nums[j+<span class="number">1</span>] + dp[k+<span class="number">1</span>][j]</code></pre>
+      <p style="margin-top:10px;"><b>Pad the array with 1s:</b> Add 1 at both ends: <code>[1, 3, 1, 5, 8, 1]</code>. This handles boundary conditions cleanly — no special cases for first/last balloon.</p>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>Interval DP — dp[i][j] for range, try every split point k, combine left + right + cost of k. Fill by increasing range length.</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>nums = [3,1,5,8] → padded: [1, 3, 1, 5, 8, 1] (indices 0-5)</b></p>
+      <p><b>Range length 1 (single balloons):</b></p>
+      <ul style="font-size:11px;">
+        <li>dp[1][1]: k=1 → 1×3×1 = 3</li>
+        <li>dp[2][2]: k=2 → 3×1×5 = 15</li>
+        <li>dp[3][3]: k=3 → 1×5×8 = 40</li>
+        <li>dp[4][4]: k=4 → 5×8×1 = 40</li>
+      </ul>
+      <p><b>Range length 2:</b></p>
+      <ul style="font-size:11px;">
+        <li>dp[1][2]: k=1 → 1×3×5 + dp[2][2] = 15+15=30. k=2 → dp[1][1] + 1×1×5 = 3+5=8. max=<span style="color:#4caf50;">30</span></li>
+        <li>dp[3][4]: k=3 → 1×5×1 + dp[4][4] = 5+40=45. k=4 → dp[3][3] + 1×8×1 = 40+8=48. max=<span style="color:#4caf50;">48</span></li>
+      </ul>
+      <p><b>... continuing to range length 4:</b></p>
+      <p style="color:#4caf50;margin-top:8px;"><b>dp[1][4] = 167</b> ✓</p>
+      <p style="color:#888;font-size:11px;">The key: we fill small ranges first, then use them to compute larger ranges. Each range tries every possible "last balloon to burst."</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Interval DP template:</b></p>
+<pre><code><span class="comment">// Fill by increasing range length</span>
+<span class="keyword">for</span> len = <span class="number">1</span> to n:
+    <span class="keyword">for</span> i = <span class="number">1</span> to n - len + <span class="number">1</span>:
+        j = i + len - <span class="number">1</span>
+        <span class="keyword">for</span> k = i to j:  <span class="comment">// try every split point</span>
+            dp[i][j] = max(dp[i][j],
+                dp[i][k-<span class="number">1</span>] + cost(i,k,j) + dp[k+<span class="number">1</span>][j])</code></pre>
+      <p style="margin-top:12px;"><b>Interval DP problems:</b></p>
+      <ul>
+        <li>Burst Balloons (this) — last to burst in range</li>
+        <li>Matrix Chain Multiplication — optimal parenthesization</li>
+        <li>Minimum Cost to Merge Stones</li>
+        <li>Palindrome Partitioning II</li>
+      </ul>
+      <p style="margin-top:8px;color:#888;font-size:11px;">All share the same structure: dp[i][j] for range, try split points, combine subranges.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag"><span class="label">Time:</span><span class="value">O(n³)</span></div>
+        <div class="complexity-tag"><span class="label">Space:</span><span class="value">O(n²)</span></div>
+      </div>
+      <p style="margin-top:10px;">Three nested loops: range length × start position × split point. dp table is n×n.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">public class</span> <span class="type">BurstBalloons</span> {
+
+    <span class="keyword">public static int</span> <span class="type">maxCoins</span>(<span class="type">int</span>[] nums) {
+        <span class="type">int</span> n = nums.length;
+        <span class="type">int</span>[] arr = <span class="keyword">new</span> <span class="type">int</span>[n + <span class="number">2</span>]; <span class="comment">// pad with 1s</span>
+        arr[<span class="number">0</span>] = arr[n + <span class="number">1</span>] = <span class="number">1</span>;
+        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) arr[i + <span class="number">1</span>] = nums[i];
+
+        <span class="type">int</span>[][] dp = <span class="keyword">new</span> <span class="type">int</span>[n + <span class="number">2</span>][n + <span class="number">2</span>];
+
+        <span class="keyword">for</span> (<span class="type">int</span> len = <span class="number">1</span>; len &lt;= n; len++) {
+            <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n - len + <span class="number">1</span>; i++) {
+                <span class="type">int</span> j = i + len - <span class="number">1</span>;
+                <span class="keyword">for</span> (<span class="type">int</span> k = i; k &lt;= j; k++) {
+                    <span class="type">int</span> coins = dp[i][k - <span class="number">1</span>]
+                              + arr[i - <span class="number">1</span>] * arr[k] * arr[j + <span class="number">1</span>]
+                              + dp[k + <span class="number">1</span>][j];
+                    dp[i][j] = Math.max(dp[i][j], coins);
+                }
+            }
+        }
+        <span class="keyword">return</span> dp[<span class="number">1</span>][n];
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        System.out.println(maxCoins(<span class="keyword">new</span> <span class="type">int</span>[]{<span class="number">3</span>,<span class="number">1</span>,<span class="number">5</span>,<span class="number">8</span>})); <span class="comment">// 167</span>
+    }
+}</code></pre>
+    </div>
+  </div>
+
+  <!-- Remaining -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Thinking "first to burst" instead of "last to burst"</b>
+          <p style="color:#e44d26;">❌ First-to-burst changes neighbors → subproblems aren't independent</p>
+          <p style="color:#4caf50;">✅ Last-to-burst keeps boundaries fixed → clean subproblem decomposition</p>
+        </li>
+        <li style="margin-top:10px;"><b>Forgetting to pad with 1s</b>
+          <p style="color:#4caf50;">✅ arr = [1, ...nums..., 1] — handles boundary balloons cleanly</p>
+        </li>
+        <li style="margin-top:10px;"><b>Wrong fill order</b>
+          <p style="color:#4caf50;">✅ Must fill small ranges before large (len=1, then 2, then 3...)</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use / 12. When NOT</span>
+      <span class="sec-num">STEP 11-12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Use when:</b> ✅ "Optimal order to process a range" ✅ "Matrix chain multiplication" ✅ "Merge stones" ✅ Any problem where you split a range and combine subranges</p>
+      <p style="margin-top:8px;"><b>Don't use when:</b> ❌ No range structure (use other DP types) ❌ n > 500 (O(n³) too slow)</p>
+    </div>
+  </div>
+
+  <div class="takeaway">
+    💡 "Interval DP: dp[i][j] for range [i..j]. Think 'last to process' not 'first'. Try every split point k. Fill small ranges first. O(n³)."
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>DP types mastered: Fibonacci, Grid, Include/Exclude, LIS, Knapsack (0/1 + Unbounded), Two-String (LCS + Edit Distance), Interval.</p>
+      <p style="margin-top:8px;">Next: <b>"Word Break"</b> — can a string be segmented into dictionary words? DP + Hashing combo. Then the final problem: Longest Palindromic Substring.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Interval DP (ranges) → DP + Hashing (word break) — combining DP with data structures!</p>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem47.html">← Problem #47</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(48)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem49.html">Problem #49 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY="dsa-roadmap-progress";const PROBLEM_NUM=48;
+function loadProgress(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{};}catch{return{};}}
+function saveProgress(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}
+function toggleDone(n){const p=loadProgress();if(p[n]==="done")delete p[n];else p[n]="done";saveProgress(p);updateUI();}
+function updateUI(){const p=loadProgress(),btn=document.getElementById("mark-done-btn");if(p[PROBLEM_NUM]==="done"){btn.textContent="✔ Completed";btn.classList.add("completed");}else{btn.textContent="☐ Mark as Done";btn.classList.remove("completed");}updateReadProgress();}
+function updateReadProgress(){const p=loadProgress();if(p[PROBLEM_NUM]==="done"){document.getElementById("section-pct").textContent="100%";document.getElementById("section-bar").style.width="100%";return;}const s=document.querySelectorAll(".section, .takeaway"),t=s.length;if(t===0)return;let v=0;s.forEach(sec=>{if(sec.getBoundingClientRect().top<window.innerHeight)v++;});const pct=Math.min(100,Math.round((v/t)*100));document.getElementById("section-pct").textContent=pct+"%";document.getElementById("section-bar").style.width=pct+"%";}
+window.addEventListener("scroll",updateReadProgress);updateUI();
+</script>
+</body>
+</html>

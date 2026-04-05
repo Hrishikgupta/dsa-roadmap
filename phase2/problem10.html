@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#10 — Longest Unique Song Playlist | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 2: Core Patterns</span>
+    <span class="problem-id">Problem #10 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #10: Longest Unique Song Playlist</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#10 — Longest Unique Song Playlist</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Sliding Window + HashMap</p>
+
+  <!-- SECTION 0: Real-World Scenario -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek music streaming app bana rahe ho. User ki listening history hai:</p>
+      <p><code>"abcabcbb"</code> (each character = a song ID)</p>
+      <p>Feature request: <b>"Show the longest streak where the user didn't repeat any song."</b></p>
+      <p style="margin-top:8px;">Possible streaks:</p>
+      <ul>
+        <li>"abc" = 3 unique songs ✓</li>
+        <li>"bca" = 3 unique songs ✓</li>
+        <li>"cab" = 3 unique songs ✓</li>
+        <li>"abcabcbb" full = has repeats ✗</li>
+      </ul>
+      <p style="color:#4caf50;margin-top:8px;">Answer: <b>3</b> (longest substring without repeating characters)</p>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #3 — one of the most asked interview questions across all companies.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Problem Understanding -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given a string, find the length of the <b>longest substring</b> without repeating characters</li>
+        <li>Substring = contiguous (not subsequence)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Input → Output:</b></p>
+      <ul>
+        <li>Input: <code>String s</code></li>
+        <li>Output: <code>int</code> — length of longest unique-character substring</li>
+      </ul>
+      <p style="margin-top:10px;"><b>This problem combines two patterns we already know:</b></p>
+      <table style="width:100%;font-size:12px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">From Problem</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Pattern</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Used Here For</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">#2</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">HashMap</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Track which characters are in the window + their last position</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">#9</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Variable Sliding Window</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Expand/shrink window to maintain uniqueness</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#6c63ff;font-size:12px;">💡 This is your first "pattern combination" problem — real interviews are full of these.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Brute Force Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>First instinct:</b> Check every substring, verify all characters are unique.</p>
+<pre><code><span class="comment">// Brute Force — O(n³)</span>
+<span class="type">int</span> maxLen = <span class="number">0</span>;
+<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) {
+    <span class="keyword">for</span> (<span class="type">int</span> j = i; j &lt; n; j++) {
+        <span class="keyword">if</span> (allUnique(s, i, j)) {  <span class="comment">// O(n) check</span>
+            maxLen = Math.max(maxLen, j - i + <span class="number">1</span>);
+        }
+    }
+}</code></pre>
+      <p>O(n²) substrings × O(n) uniqueness check = <b>O(n³)</b>. Terrible.</p>
+      <p style="margin-top:8px;"><b>Slightly better:</b> Use HashSet per starting position — O(n²).</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 Problem #9 mein humne seekha: variable window expand/shrink karo. Yahan condition hai "all unique". Jab repeat aaye → shrink. Jab unique ho → expand.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Optimization Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Key Insight — Two approaches, both O(n):</b></p>
+
+      <p style="margin-top:10px;"><b>Approach A: Sliding Window + HashSet (shrink one-by-one)</b></p>
+      <ul>
+        <li>Expand right: add character to set</li>
+        <li>If character already in set → shrink left one-by-one, removing from set, until duplicate is gone</li>
+        <li>Track max window size</li>
+      </ul>
+
+      <p style="margin-top:12px;"><b>Approach B: Sliding Window + HashMap (jump left directly) ⭐</b></p>
+      <ul>
+        <li>HashMap stores each character's <b>last seen index</b></li>
+        <li>When a repeat is found at position <code>right</code>:</li>
+        <li>Instead of shrinking one-by-one, <b>jump left</b> directly to <code>map.get(char) + 1</code></li>
+        <li>Faster in practice — avoids unnecessary shrink steps</li>
+      </ul>
+
+      <p style="margin-top:12px;"><b>Why HashMap is better than HashSet here:</b></p>
+      <ul>
+        <li>HashSet: when 'a' repeats, you shrink left one-by-one until 'a' is removed. Could be many steps.</li>
+        <li>HashMap: you know exactly WHERE 'a' was last seen → jump left there directly. One step.</li>
+      </ul>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>Variable Sliding Window + HashMap (last-seen index) — for longest unique substring</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Final Approach -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach (Pattern-Based)</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Pattern:</b> Variable Sliding Window + HashMap (last-seen index)</p>
+      <p style="margin-top:10px;"><b>Algorithm:</b></p>
+      <ol>
+        <li><code>left = 0</code>, <code>maxLen = 0</code>, <code>HashMap&lt;Character, Integer&gt; map</code></li>
+        <li>For <code>right = 0</code> to <code>n - 1</code>:
+          <ul>
+            <li>If <code>s.charAt(right)</code> is in map AND its last index ≥ left:
+              <ul>
+                <li><code>left = map.get(char) + 1</code> (jump past the duplicate)</li>
+              </ul>
+            </li>
+            <li><code>map.put(char, right)</code> (update last-seen position)</li>
+            <li><code>maxLen = Math.max(maxLen, right - left + 1)</code></li>
+          </ul>
+        </li>
+        <li>Return maxLen</li>
+      </ol>
+      <p style="margin-top:10px;color:#888;font-size:11px;">💡 The check <code>map.get(char) >= left</code> is crucial — if the duplicate is BEFORE our current window, we ignore it.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Step-by-Step Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Input:</b> <code>s = "abcabcbb"</code></p>
+      <table style="width:100%;font-size:11px;margin-top:10px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:6px;">R</th>
+            <th style="background:#22223a;color:#888;padding:6px;">char</th>
+            <th style="background:#22223a;color:#888;padding:6px;">In map? ≥ L?</th>
+            <th style="background:#22223a;color:#888;padding:6px;">L update</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Map after put</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Window</th>
+            <th style="background:#22223a;color:#888;padding:6px;">maxLen</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">a</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">No</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">L=0</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">{a→0}</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;"><code><span style="color:#6c63ff;">a</span></code></td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">1</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">b</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">No</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">L=0</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">{a→0, b→1}</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;"><code><span style="color:#6c63ff;">ab</span></code></td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">2</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">c</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">No</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">L=0</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">{a→0, b→1, c→2}</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;"><code><span style="color:#6c63ff;">abc</span></code></td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">3</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#e44d26;">a</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#e44d26;">Yes! a→0, 0≥0</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#ffc107;">L = 0+1 = 1</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">{a→<span style="color:#ffc107;">3</span>, b→1, c→2}</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;"><code><span style="color:#6c63ff;">bca</span></code></td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">4</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#e44d26;">b</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#e44d26;">Yes! b→1, 1≥1</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#ffc107;">L = 1+1 = 2</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">{a→3, b→<span style="color:#ffc107;">4</span>, c→2}</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;"><code><span style="color:#6c63ff;">cab</span></code></td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">5</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#e44d26;">c</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#e44d26;">Yes! c→2, 2≥2</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#ffc107;">L = 2+1 = 3</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">{a→3, b→4, c→<span style="color:#ffc107;">5</span>}</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;"><code><span style="color:#6c63ff;">abc</span></code></td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">6</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#e44d26;">b</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#e44d26;">Yes! b→4, 4≥3</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#ffc107;">L = 4+1 = 5</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">{a→3, b→<span style="color:#ffc107;">6</span>, c→5}</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;"><code><span style="color:#6c63ff;">cb</span></code></td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">7</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#e44d26;">b</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#e44d26;">Yes! b→6, 6≥5</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#ffc107;">L = 6+1 = 7</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">{a→3, b→<span style="color:#ffc107;">7</span>, c→5}</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;"><code><span style="color:#6c63ff;">b</span></code></td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#4caf50;"><b>Result: maxLen = 3</b> (substrings "abc", "bca", "cab" all have length 3)</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Internal Mechanics -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Why <code>map.get(char) >= left</code> is critical:</b></p>
+      <p>Consider: <code>s = "abba"</code></p>
+      <ul>
+        <li>R=0: a→0, L=0, window="a"</li>
+        <li>R=1: b→1, L=0, window="ab"</li>
+        <li>R=2: b repeats at 1, 1≥0 → L=2, b→2, window="b"</li>
+        <li>R=3: a is in map at 0, but <b>0 &lt; L(2)</b> → a is OUTSIDE our window → ignore it!</li>
+      </ul>
+      <p style="margin-top:8px;">Without the <code>>= left</code> check, we'd wrongly jump left back to 1, which is before our current window. The map has stale entries from before the window — we must ignore them.</p>
+
+      <p style="margin-top:14px;"><b>HashSet approach vs HashMap approach:</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">Aspect</th>
+            <th style="background:#22223a;color:#888;padding:7px;">HashSet</th>
+            <th style="background:#22223a;color:#888;padding:7px;">HashMap (last index)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">On duplicate</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Shrink left one-by-one</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Jump left directly</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Worst case</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">O(n) — same</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">O(n) — same</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Practical speed</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Slower (many shrink steps)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Faster (one jump)</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Code complexity</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Simpler</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Slightly trickier (≥ left check)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Complexity Analysis -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag">
+          <span class="label">Time:</span>
+          <span class="value">O(n)</span>
+        </div>
+        <div class="complexity-tag">
+          <span class="label">Space:</span>
+          <span class="value">O(min(n, m))</span>
+        </div>
+      </div>
+      <p style="margin-top:10px;">Where <code>m</code> = size of character set (26 for lowercase, 128 for ASCII, 65536 for Unicode).</p>
+      <p style="margin-top:6px;">HashMap stores at most <code>m</code> entries. For ASCII strings, space is effectively O(1) = O(128).</p>
+      <table style="width:100%;font-size:12px;margin-top:10px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Approach</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Time</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Space</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Brute Force</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">O(n³)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">O(n)</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">HashSet window</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(n)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">O(min(n,m))</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">HashMap window</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(n)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">O(min(n,m))</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Java Implementation -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Approach 1: HashMap (optimal — jump left)</b></p>
+<pre><code><span class="keyword">import</span> java.util.HashMap;
+
+<span class="keyword">public class</span> <span class="type">LongestUniqueSubstring</span> {
+
+    <span class="keyword">public static int</span> <span class="type">lengthOfLongestSubstring</span>(String s) {
+        HashMap&lt;Character, Integer&gt; map = <span class="keyword">new</span> HashMap&lt;&gt;();
+        <span class="type">int</span> left = <span class="number">0</span>, maxLen = <span class="number">0</span>;
+
+        <span class="keyword">for</span> (<span class="type">int</span> right = <span class="number">0</span>; right &lt; s.length(); right++) {
+            <span class="type">char</span> c = s.charAt(right);
+
+            <span class="keyword">if</span> (map.containsKey(c) &amp;&amp; map.get(c) &gt;= left) {
+                left = map.get(c) + <span class="number">1</span>;
+            }
+
+            map.put(c, right);
+            maxLen = Math.max(maxLen, right - left + <span class="number">1</span>);
+        }
+
+        <span class="keyword">return</span> maxLen;
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        System.out.println(lengthOfLongestSubstring(<span class="string">"abcabcbb"</span>)); <span class="comment">// 3</span>
+        System.out.println(lengthOfLongestSubstring(<span class="string">"bbbbb"</span>));    <span class="comment">// 1</span>
+        System.out.println(lengthOfLongestSubstring(<span class="string">"pwwkew"</span>));   <span class="comment">// 3</span>
+    }
+}</code></pre>
+
+      <p style="margin-top:14px;"><b>Approach 2: int[128] array (fastest for ASCII)</b></p>
+<pre><code><span class="keyword">public static int</span> <span class="type">lengthOfLongestSubstringFast</span>(String s) {
+    <span class="type">int</span>[] lastSeen = <span class="keyword">new</span> <span class="type">int</span>[<span class="number">128</span>];
+    Arrays.fill(lastSeen, -<span class="number">1</span>);
+    <span class="type">int</span> left = <span class="number">0</span>, maxLen = <span class="number">0</span>;
+
+    <span class="keyword">for</span> (<span class="type">int</span> right = <span class="number">0</span>; right &lt; s.length(); right++) {
+        <span class="type">char</span> c = s.charAt(right);
+        <span class="keyword">if</span> (lastSeen[c] &gt;= left) {
+            left = lastSeen[c] + <span class="number">1</span>;
+        }
+        lastSeen[c] = right;
+        maxLen = Math.max(maxLen, right - left + <span class="number">1</span>);
+    }
+    <span class="keyword">return</span> maxLen;
+}</code></pre>
+      <p style="margin-top:6px;color:#888;font-size:11px;">💡 Array lookup is faster than HashMap. Use <code>int[128]</code> for ASCII, <code>int[256]</code> for extended ASCII. Initialize with -1 (never seen).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 9: Edge Cases -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Case</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Input</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Output</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Why</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Empty string</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>""</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No characters</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All same</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>"aaaa"</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Every char repeats immediately</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All unique</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>"abcdef"</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">6</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Entire string is the answer</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Spaces & special chars</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>"a b c"</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"a b" or "b c" (space counts)</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single char</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>"x"</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">One character = length 1</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Tricky: "abba"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>"abba"</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Tests the ≥ left check</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 10: Common Mistakes -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Missing the <code>>= left</code> check</b>
+          <p style="color:#e44d26;">❌ <code>if (map.containsKey(c)) left = map.get(c) + 1</code></p>
+          <p style="color:#888;">Fails on "abba" — jumps left backwards when 'a' is found at index 0 (before current window)</p>
+          <p style="color:#4caf50;">✅ <code>if (map.containsKey(c) && map.get(c) >= left)</code></p>
+        </li>
+        <li style="margin-top:10px;"><b>Not updating map for every character</b>
+          <p style="color:#e44d26;">❌ Only updating map when character is new</p>
+          <p style="color:#4caf50;">✅ Always <code>map.put(c, right)</code> — update last-seen position even for repeats</p>
+        </li>
+        <li style="margin-top:10px;"><b>Confusing substring with subsequence</b>
+          <p style="color:#888;">Substring = contiguous. "ace" is a subsequence of "abcde" but not a substring.</p>
+          <p style="color:#888;">Sliding window works for substrings. Subsequences need different approaches (DP).</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 11: When to Use This Pattern -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Signals to पहचान (identify) this pattern:</b></p>
+      <ul>
+        <li>✅ "Longest substring without repeating characters"</li>
+        <li>✅ "Longest substring with at most K distinct characters"</li>
+        <li>✅ "Longest subarray with at most K different elements"</li>
+        <li>✅ Any "longest/shortest contiguous" + "uniqueness/frequency constraint"</li>
+      </ul>
+      <p style="margin-top:10px;"><b>The Sliding Window + HashMap family:</b></p>
+      <ul>
+        <li>This problem: HashMap tracks last-seen index</li>
+        <li>K distinct chars: HashMap tracks frequency count</li>
+        <li>Min window substring (#12): HashMap tracks required vs found counts</li>
+        <li>All use the same expand/shrink framework — just different window state</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 12: When NOT to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ "Longest subsequence" (not substring) — needs DP, not sliding window</li>
+        <li>❌ Non-contiguous selection — sliding window only works on contiguous ranges</li>
+        <li>❌ When the "uniqueness" condition involves complex relationships between elements (not just presence/absence)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 13: Key Takeaway -->
+  <div class="takeaway">
+    💡 "Sliding Window + HashMap = power combo. Window handles the range, HashMap handles the state. Together they solve most substring problems in O(n)."
+  </div>
+
+  <!-- SECTION 14: Bridge to Next Problem -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Ab tak humne sliding window ke saare flavors dekhe:</p>
+      <ul>
+        <li>#8: Fixed size window (sum)</li>
+        <li>#9: Variable window + sum condition (shortest)</li>
+        <li>#10: Variable window + HashMap uniqueness (longest)</li>
+      </ul>
+      <p style="margin-top:10px;">Next problem mein hum HashMap ko ek alag tarike se use karenge — <b>frequency comparison</b>.</p>
+      <p style="margin-top:8px;">Problem #11: <b>Checking if Two Words are Anagram Passwords</b> — do strings ke character frequencies match karte hain ya nahi?</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ HashMap for tracking (window state) → HashMap for comparing (frequency matching)</p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem9.html">← Problem #9</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(10)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem11.html">Problem #11 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "dsa-roadmap-progress";
+const PROBLEM_NUM = 10;
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+
+function saveProgress(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function toggleDone(num) {
+  const prog = loadProgress();
+  if (prog[num] === "done") { delete prog[num]; }
+  else { prog[num] = "done"; }
+  saveProgress(prog);
+  updateUI();
+}
+
+function updateUI() {
+  const prog = loadProgress();
+  const btn = document.getElementById("mark-done-btn");
+  if (prog[PROBLEM_NUM] === "done") {
+    btn.textContent = "✔ Completed";
+    btn.classList.add("completed");
+  } else {
+    btn.textContent = "☐ Mark as Done";
+    btn.classList.remove("completed");
+  }
+  updateReadProgress();
+}
+
+function updateReadProgress() {
+  const prog = loadProgress();
+  if (prog[PROBLEM_NUM] === "done") {
+    document.getElementById("section-pct").textContent = "100%";
+    document.getElementById("section-bar").style.width = "100%";
+    return;
+  }
+  const sections = document.querySelectorAll(".section, .takeaway");
+  const total = sections.length;
+  if (total === 0) return;
+  let visible = 0;
+  sections.forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    if (rect.top < window.innerHeight) visible++;
+  });
+  const pct = Math.min(100, Math.round((visible / total) * 100));
+  document.getElementById("section-pct").textContent = pct + "%";
+  document.getElementById("section-bar").style.width = pct + "%";
+}
+
+window.addEventListener("scroll", updateReadProgress);
+updateUI();
+</script>
+</body>
+</html>

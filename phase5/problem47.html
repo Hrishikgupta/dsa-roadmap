@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#47 — Edit Distance — Autocorrect Engine | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 5: Mastery</span>
+    <span class="problem-id">Problem #47 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #47: Edit Distance — Autocorrect Engine</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#47 — Edit Distance — Autocorrect Engine</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: DP (Edit Distance / Levenshtein)</p>
+
+  <!-- SECTION 0 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek autocorrect engine bana rahe ho. User ne type kiya <b>"horse"</b>, dictionary mein closest word hai <b>"ros"</b>.</p>
+      <p style="margin-top:8px;"><b>"Minimum kitne edits lagenge 'horse' ko 'ros' mein convert karne mein?"</b></p>
+      <ul>
+        <li>horse → <span style="color:#e44d26;">r</span>orse (replace h with r) → 1 edit</li>
+        <li>rorse → ro<span style="color:#e44d26;">s</span>e (replace r with s, wait — let me redo)</li>
+      </ul>
+<pre><code><span class="comment">horse → rorse  (replace 'h' → 'r')
+rorse → rose   (delete 'r' at index 2)
+rose  → ros    (delete 'e')</span>
+<span style="color:#4caf50;">= 3 operations</span></code></pre>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #72 — Edit Distance (Levenshtein Distance). Used in spell checkers, DNA alignment, NLP.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given two strings, find minimum number of operations to convert s1 into s2</li>
+        <li>Three operations allowed: <b>Insert</b>, <b>Delete</b>, <b>Replace</b> (each costs 1)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Builds directly on LCS (#46):</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Aspect</th>
+            <th style="background:#22223a;color:#888;padding:5px;">#46 LCS</th>
+            <th style="background:#22223a;color:#888;padding:5px;">#47 Edit Distance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Goal</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Maximize common</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Minimize operations</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Match</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">diag + 1</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">diag + 0 (no cost)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">No match</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">max(top, left)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">1 + min(top, left, diag)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Base</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">dp[0][j]=0, dp[i][0]=0</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">dp[0][j]=j, dp[i][0]=i</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;"><b>DP recipe:</b></p>
+      <ol>
+        <li><b>State:</b> <code>dp[i][j]</code> = min edits to convert s1[0..i-1] to s2[0..j-1]</li>
+        <li><b>Recurrence:</b>
+          <ul>
+            <li>Match: <code>dp[i][j] = dp[i-1][j-1]</code> (no operation needed)</li>
+            <li>No match: <code>dp[i][j] = 1 + min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1])</code></li>
+          </ul>
+        </li>
+        <li><b>Base:</b> <code>dp[i][0] = i</code> (delete all), <code>dp[0][j] = j</code> (insert all)</li>
+        <li><b>Answer:</b> <code>dp[m][n]</code></li>
+      </ol>
+      <p style="margin-top:10px;"><b>The three operations mapped to dp transitions:</b></p>
+      <ul>
+        <li><code>dp[i-1][j] + 1</code> = <b>Delete</b> from s1 (remove s1[i-1], match remaining)</li>
+        <li><code>dp[i][j-1] + 1</code> = <b>Insert</b> into s1 (insert s2[j-1], match remaining)</li>
+        <li><code>dp[i-1][j-1] + 1</code> = <b>Replace</b> s1[i-1] with s2[j-1]</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">if</span> s1[i-<span class="number">1</span>] == s2[j-<span class="number">1</span>]:
+    dp[i][j] = dp[i-<span class="number">1</span>][j-<span class="number">1</span>]          <span class="comment">// match — free!</span>
+<span class="keyword">else</span>:
+    dp[i][j] = <span class="number">1</span> + min(
+        dp[i-<span class="number">1</span>][j],      <span class="comment">// delete from s1</span>
+        dp[i][j-<span class="number">1</span>],      <span class="comment">// insert into s1</span>
+        dp[i-<span class="number">1</span>][j-<span class="number">1</span>]     <span class="comment">// replace in s1</span>
+    )</code></pre>
+      <p style="color:#4caf50;margin-top:10px;">💡 Same 2D table as LCS. Match = free (diagonal, no cost). No match = 1 + min of three neighbors (delete, insert, replace).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>s1 = "horse", s2 = "ros"</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:6px;"></th>
+            <th style="background:#22223a;color:#888;padding:6px;">""</th>
+            <th style="background:#22223a;color:#888;padding:6px;">r</th>
+            <th style="background:#22223a;color:#888;padding:6px;">o</th>
+            <th style="background:#22223a;color:#888;padding:6px;">s</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#888;">""</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#ffc107;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#ffc107;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#ffc107;">2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#ffc107;">3</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#888;">h</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#ffc107;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#888;">o</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#ffc107;">2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">1 ↖</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#888;">r</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#ffc107;">3</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">2 ↖</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#888;">s</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#ffc107;">4</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">2 ↖</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#888;">e</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#ffc107;">5</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">3</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#4caf50;"><b>Result: dp[5][3] = 3</b> ✓ (replace h→r, delete r, delete e)</p>
+      <p style="color:#888;font-size:11px;">Yellow = base cases (i deletions or j insertions). Green ↖ = match (free diagonal). Other cells = 1 + min(top, left, diagonal).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Relationship between LCS and Edit Distance:</b></p>
+      <p><code>editDistance(s1, s2) = m + n - 2 × LCS(s1, s2)</code></p>
+      <p style="margin-top:4px;color:#888;font-size:11px;">(When only insert and delete are allowed, no replace. With replace, the formula is different.)</p>
+      <p style="margin-top:12px;"><b>Real-world applications:</b></p>
+      <ul>
+        <li>Spell checkers — suggest words with smallest edit distance</li>
+        <li>Autocorrect — "teh" → "the" (1 swap ≈ 1 edit)</li>
+        <li>DNA alignment — mutations = edits between gene sequences</li>
+        <li>Plagiarism detection — how different are two texts?</li>
+        <li>Fuzzy search — find approximate matches in databases</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag"><span class="label">Time:</span><span class="value">O(m × n)</span></div>
+        <div class="complexity-tag"><span class="label">Space:</span><span class="value">O(m × n)</span></div>
+      </div>
+      <p style="margin-top:10px;">Can optimize space to O(min(m,n)) with rolling array.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">public class</span> <span class="type">EditDistance</span> {
+
+    <span class="keyword">public static int</span> <span class="type">minDistance</span>(String s1, String s2) {
+        <span class="type">int</span> m = s1.length(), n = s2.length();
+        <span class="type">int</span>[][] dp = <span class="keyword">new</span> <span class="type">int</span>[m + <span class="number">1</span>][n + <span class="number">1</span>];
+
+        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt;= m; i++) dp[i][<span class="number">0</span>] = i;
+        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt;= n; j++) dp[<span class="number">0</span>][j] = j;
+
+        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= m; i++) {
+            <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">1</span>; j &lt;= n; j++) {
+                <span class="keyword">if</span> (s1.charAt(i-<span class="number">1</span>) == s2.charAt(j-<span class="number">1</span>)) {
+                    dp[i][j] = dp[i-<span class="number">1</span>][j-<span class="number">1</span>];
+                } <span class="keyword">else</span> {
+                    dp[i][j] = <span class="number">1</span> + Math.min(dp[i-<span class="number">1</span>][j],
+                                   Math.min(dp[i][j-<span class="number">1</span>], dp[i-<span class="number">1</span>][j-<span class="number">1</span>]));
+                }
+            }
+        }
+        <span class="keyword">return</span> dp[m][n];
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        System.out.println(minDistance(<span class="string">"horse"</span>, <span class="string">"ros"</span>));       <span class="comment">// 3</span>
+        System.out.println(minDistance(<span class="string">"intention"</span>, <span class="string">"execution"</span>)); <span class="comment">// 5</span>
+    }
+}</code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 Almost identical to LCS (#46). Base cases change (i and j instead of 0), and no-match uses min of THREE neighbors + 1 instead of max of two.</p>
+    </div>
+  </div>
+
+  <!-- Remaining sections -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead><tr><th style="background:#22223a;color:#888;padding:8px;">s1</th><th style="background:#22223a;color:#888;padding:8px;">s2</th><th style="background:#22223a;color:#888;padding:8px;">Distance</th><th style="background:#22223a;color:#888;padding:8px;">Note</th></tr></thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">""</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"abc"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Insert all 3 chars</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"abc"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"abc"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Identical</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"abc"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">""</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Delete all 3 chars</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"a"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"b"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">One replace</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Base cases: dp[i][0] = 0 instead of i</b>
+          <p style="color:#e44d26;">❌ Converting "abc" to "" needs 3 deletions, not 0</p>
+          <p style="color:#4caf50;">✅ <code>dp[i][0] = i</code> (delete i chars), <code>dp[0][j] = j</code> (insert j chars)</p>
+        </li>
+        <li style="margin-top:10px;"><b>Forgetting the diagonal (replace) option on mismatch</b>
+          <p style="color:#e44d26;">❌ Only considering insert and delete → suboptimal</p>
+          <p style="color:#4caf50;">✅ min of ALL THREE: top (delete), left (insert), diagonal (replace)</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use / 12. When NOT</span>
+      <span class="sec-num">STEP 11-12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Use when:</b> ✅ "Minimum edits to transform string A to B" ✅ "Similarity between two strings" ✅ Spell checking, fuzzy matching, DNA alignment</p>
+      <p style="margin-top:8px;"><b>Don't use when:</b> ❌ Only need to know if strings are equal (just compare directly) ❌ Operations have different costs (need weighted edit distance — same structure, different costs)</p>
+    </div>
+  </div>
+
+  <div class="takeaway">
+    💡 "Edit Distance = LCS's twin. Same 2D table. Match → diagonal (free). No match → 1 + min(delete=top, insert=left, replace=diagonal). Base: dp[i][0]=i, dp[0][j]=j."
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Two-String DP chapter complete: LCS (#46) and Edit Distance (#47).</p>
+      <p style="margin-top:8px;">Next: <b>"Burst Balloons for Max Points"</b> — Interval DP. Instead of dp[i][j] being two strings, it's dp[i][j] = best answer for the RANGE [i..j]. A completely different DP structure — thinking in ranges.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Two-String DP (s1 × s2) → Interval DP (range [i..j]) — the final DP paradigm!</p>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem46.html">← Problem #46</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(47)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem48.html">Problem #48 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY="dsa-roadmap-progress";const PROBLEM_NUM=47;
+function loadProgress(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{};}catch{return{};}}
+function saveProgress(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}
+function toggleDone(n){const p=loadProgress();if(p[n]==="done")delete p[n];else p[n]="done";saveProgress(p);updateUI();}
+function updateUI(){const p=loadProgress(),btn=document.getElementById("mark-done-btn");if(p[PROBLEM_NUM]==="done"){btn.textContent="✔ Completed";btn.classList.add("completed");}else{btn.textContent="☐ Mark as Done";btn.classList.remove("completed");}updateReadProgress();}
+function updateReadProgress(){const p=loadProgress();if(p[PROBLEM_NUM]==="done"){document.getElementById("section-pct").textContent="100%";document.getElementById("section-bar").style.width="100%";return;}const s=document.querySelectorAll(".section, .takeaway"),t=s.length;if(t===0)return;let v=0;s.forEach(sec=>{if(sec.getBoundingClientRect().top<window.innerHeight)v++;});const pct=Math.min(100,Math.round((v/t)*100));document.getElementById("section-pct").textContent=pct+"%";document.getElementById("section-bar").style.width=pct+"%";}
+window.addEventListener("scroll",updateReadProgress);updateUI();
+</script>
+</body>
+</html>

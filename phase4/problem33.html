@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#33 — Course Prerequisite Order | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 4: Advanced</span>
+    <span class="problem-id">Problem #33 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #33: Course Prerequisite Order</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#33 — Course Prerequisite Order</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Topological Sort (Kahn's BFS)</p>
+
+  <!-- SECTION 0: Scenario -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum college mein course registration kar rahe ho. Kuch courses ke prerequisites hain:</p>
+<pre><code><span class="comment">4 courses (0,1,2,3), prerequisites:</span>
+<span class="comment">To take 1, must complete 0 first:  0 → 1</span>
+<span class="comment">To take 2, must complete 0 first:  0 → 2</span>
+<span class="comment">To take 3, must complete 1 first:  1 → 3</span>
+<span class="comment">To take 3, must complete 2 first:  2 → 3</span>
+
+<span class="comment">Graph:</span>
+<span class="comment">  0 → 1 → 3</span>
+<span class="comment">  ↓       ↑</span>
+<span class="comment">  2 ------┘</span>
+
+<span style="color:#4caf50;">Valid order: [0, 1, 2, 3] or [0, 2, 1, 3]</span></code></pre>
+      <p style="margin-top:8px;">Question: <b>"Find a valid order to take all courses, respecting prerequisites."</b></p>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #210 — Course Schedule II. Also LC #207 (just check if possible). Classic Topological Sort.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Understanding -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given <code>numCourses</code> and <code>prerequisites[][]</code> (pairs [a,b] meaning "b before a")</li>
+        <li>Return a valid ordering of all courses, or empty array if impossible (cycle exists)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>What is Topological Sort?</b></p>
+      <ul>
+        <li>A linear ordering of nodes in a <b>Directed Acyclic Graph (DAG)</b></li>
+        <li>For every edge u → v, u appears before v in the ordering</li>
+        <li>Only possible if graph has NO cycles (if cycle exists → impossible)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Key concept — In-degree:</b></p>
+      <ul>
+        <li><b>In-degree</b> of a node = number of edges pointing INTO it = number of prerequisites</li>
+        <li>A course with in-degree 0 = no prerequisites → can be taken immediately</li>
+        <li>After taking a course, reduce in-degree of its dependents</li>
+        <li>When a dependent's in-degree becomes 0 → it can now be taken</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Connection to previous:</b></p>
+      <ul>
+        <li>#32: BFS on grid (level by level). Here: BFS on directed graph (layer by layer of "ready" courses)</li>
+        <li>Same Queue-based BFS template, but nodes are courses and edges are prerequisites</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Brute Force -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Naive:</b> Try all permutations of courses, check if each respects prerequisites. O(n!) — absurd.</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 Better: think like a student. "Which courses can I take RIGHT NOW?" → ones with no prerequisites (in-degree 0). Take them, then check what new courses become available. Repeat.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Optimization -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Kahn's Algorithm (BFS-based Topological Sort):</b></p>
+      <ol>
+        <li>Compute in-degree for every node</li>
+        <li>Add all nodes with in-degree 0 to queue (no prerequisites)</li>
+        <li>While queue not empty:
+          <ul>
+            <li>Dequeue node → add to result order</li>
+            <li>For each neighbor of this node: decrement their in-degree</li>
+            <li>If any neighbor's in-degree becomes 0 → add to queue</li>
+          </ul>
+        </li>
+        <li>If result has all n nodes → valid order. If fewer → cycle exists (impossible).</li>
+      </ol>
+<pre><code><span class="comment">// Kahn's Algorithm — BFS Topological Sort</span>
+Queue&lt;Integer&gt; queue = <span class="keyword">new</span> LinkedList&lt;&gt;();
+<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++)
+    <span class="keyword">if</span> (inDegree[i] == <span class="number">0</span>) queue.add(i);
+
+<span class="keyword">while</span> (!queue.isEmpty()) {
+    <span class="type">int</span> course = queue.poll();
+    result.add(course);
+    <span class="keyword">for</span> (<span class="type">int</span> next : graph[course]) {
+        inDegree[next]--;
+        <span class="keyword">if</span> (inDegree[next] == <span class="number">0</span>) queue.add(next);
+    }
+}</code></pre>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>Kahn's Algorithm — BFS with in-degree tracking. Process nodes with 0 in-degree, reduce neighbors, repeat.</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Final Approach -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach (Pattern-Based)</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Setup:</b></p>
+      <ol>
+        <li>Build adjacency list: <code>graph[u]</code> = list of courses that depend on u</li>
+        <li>Compute <code>inDegree[v]</code> for each course</li>
+      </ol>
+      <p><b>BFS:</b></p>
+      <ol>
+        <li>Enqueue all courses with inDegree == 0</li>
+        <li>Process queue: dequeue → add to result → decrement neighbors' inDegree → enqueue if 0</li>
+        <li>If result.size() == numCourses → return result. Else → cycle exists, return [].</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>4 courses, prereqs: [[1,0],[2,0],[3,1],[3,2]]</b></p>
+      <p>Graph: 0→{1,2}, 1→{3}, 2→{3}. InDegree: [0,1,1,2]</p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:6px;">Step</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Queue</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Process</th>
+            <th style="background:#22223a;color:#888;padding:6px;">InDegree changes</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Init</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[0]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">inDeg: [0,1,1,2]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[]</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[1, 2]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1→0✓, 2→0✓</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[0]</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[2]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3→1 (not 0 yet)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[0, 1]</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[3]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3→0✓ (enqueue!)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[0, 1, 2]</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">3</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">no neighbors</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">[0, 1, 2, 3] ✓</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#4caf50;"><b>Result: [0, 1, 2, 3]</b> — valid topological order ✓</p>
+      <p style="color:#888;font-size:11px;">4 courses processed = numCourses → no cycle. If we had processed fewer → cycle exists.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Mechanics -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Why Kahn's detects cycles:</b></p>
+      <ul>
+        <li>In a cycle: A→B→C→A. Each has in-degree ≥ 1.</li>
+        <li>None of them ever reaches in-degree 0 → none gets enqueued → none gets processed</li>
+        <li>Result has fewer than n nodes → cycle detected!</li>
+      </ul>
+      <p style="margin-top:12px;"><b>Kahn's BFS vs DFS Topological Sort:</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Aspect</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Kahn's (BFS)</th>
+            <th style="background:#22223a;color:#888;padding:5px;">DFS-based</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Approach</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Remove nodes with 0 in-degree</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Post-order DFS, reverse result</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Cycle detection</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">result.size() < n</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Back edge detection (3-color)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Intuition</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">More intuitive (peel layers)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Trickier to understand</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Interview</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Preferred (clearer)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Good alternative</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:12px;"><b>Real-world topological sort:</b></p>
+      <ul>
+        <li>Build systems (Makefile, Gradle) — compile dependencies in order</li>
+        <li>Task scheduling — which tasks can run in parallel?</li>
+        <li>Package managers (npm, pip) — install dependencies first</li>
+        <li>Spreadsheet cell evaluation — compute cells in dependency order</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Complexity -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag"><span class="label">Time:</span><span class="value">O(V + E)</span></div>
+        <div class="complexity-tag"><span class="label">Space:</span><span class="value">O(V + E)</span></div>
+      </div>
+      <p style="margin-top:10px;">V = courses, E = prerequisites. Build graph O(E), BFS processes each node once O(V) and each edge once O(E).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Java -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">import</span> java.util.*;
+
+<span class="keyword">public class</span> <span class="type">CourseOrder</span> {
+
+    <span class="keyword">public static int</span>[] <span class="type">findOrder</span>(<span class="type">int</span> numCourses, <span class="type">int</span>[][] prereqs) {
+        List&lt;List&lt;Integer&gt;&gt; graph = <span class="keyword">new</span> ArrayList&lt;&gt;();
+        <span class="type">int</span>[] inDegree = <span class="keyword">new</span> <span class="type">int</span>[numCourses];
+
+        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; numCourses; i++) graph.add(<span class="keyword">new</span> ArrayList&lt;&gt;());
+
+        <span class="keyword">for</span> (<span class="type">int</span>[] p : prereqs) {
+            graph.get(p[<span class="number">1</span>]).add(p[<span class="number">0</span>]); <span class="comment">// p[1] → p[0]</span>
+            inDegree[p[<span class="number">0</span>]]++;
+        }
+
+        Queue&lt;Integer&gt; queue = <span class="keyword">new</span> LinkedList&lt;&gt;();
+        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; numCourses; i++) {
+            <span class="keyword">if</span> (inDegree[i] == <span class="number">0</span>) queue.add(i);
+        }
+
+        <span class="type">int</span>[] result = <span class="keyword">new</span> <span class="type">int</span>[numCourses];
+        <span class="type">int</span> idx = <span class="number">0</span>;
+
+        <span class="keyword">while</span> (!queue.isEmpty()) {
+            <span class="type">int</span> course = queue.poll();
+            result[idx++] = course;
+            <span class="keyword">for</span> (<span class="type">int</span> next : graph.get(course)) {
+                <span class="keyword">if</span> (--inDegree[next] == <span class="number">0</span>) queue.add(next);
+            }
+        }
+
+        <span class="keyword">return</span> idx == numCourses ? result : <span class="keyword">new</span> <span class="type">int</span>[<span class="number">0</span>];
+    }
+}</code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 The <code>idx == numCourses</code> check at the end = cycle detection. If we couldn't process all courses → cycle exists → return empty.</p>
+    </div>
+  </div>
+
+  <!-- Remaining sections -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead><tr><th style="background:#22223a;color:#888;padding:8px;">Case</th><th style="background:#22223a;color:#888;padding:8px;">Result</th><th style="background:#22223a;color:#888;padding:8px;">Note</th></tr></thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No prerequisites</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">[0,1,2,...n-1]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All have inDegree 0 → any order works</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Linear chain 0→1→2→3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">[0,1,2,3]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Only one valid order</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Cycle: 0→1→0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">[]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Impossible — both have inDegree ≥ 1 forever</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single course</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">[0]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Trivial</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Disconnected components</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Valid order exists</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Independent groups can be interleaved</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Wrong edge direction</b>
+          <p style="color:#e44d26;">❌ prereq [1,0] means "to take 1, need 0 first" → edge is 0→1, NOT 1→0</p>
+          <p style="color:#4caf50;">✅ <code>graph.get(p[1]).add(p[0])</code> and <code>inDegree[p[0]]++</code></p>
+        </li>
+        <li style="margin-top:10px;"><b>Forgetting cycle detection</b>
+          <p style="color:#e44d26;">❌ Returning result without checking if all courses were processed</p>
+          <p style="color:#4caf50;">✅ <code>return idx == numCourses ? result : new int[0]</code></p>
+        </li>
+        <li style="margin-top:10px;"><b>Not initializing adjacency list</b>
+          <p style="color:#4caf50;">✅ Create empty list for EVERY node, even those with no outgoing edges</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>✅ "Course schedule" / "Task ordering" / "Build order"</li>
+        <li>✅ "Is it possible to finish all tasks?" (cycle detection)</li>
+        <li>✅ "Dependency resolution" — any DAG ordering problem</li>
+        <li>✅ "Alien dictionary" — derive letter order from sorted words</li>
+        <li>✅ Any problem with "must do X before Y" constraints</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ Undirected graph — topological sort is only for directed graphs</li>
+        <li>❌ Graph has cycles — no valid topological order exists (but Kahn's detects this)</li>
+        <li>❌ "Shortest path" — use BFS (#32) or Dijkstra (#35), not topo sort</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="takeaway">
+    💡 "Topological Sort = BFS with in-degree. Start with 0-inDegree nodes, process them, reduce neighbors' inDegree, enqueue new 0s. If not all processed → cycle."
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Kahn's algorithm detects cycles implicitly (result.size() < n). But what if we need to explicitly find WHERE the cycle is?</p>
+      <p style="margin-top:8px;">Next: <b>"Detect a Cycle in Task Dependencies"</b> — DFS with 3-color marking (white/gray/black). A gray node visiting another gray node = cycle found.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Topological Sort (BFS, implicit cycle detection) → Cycle Detection (DFS, explicit 3-color) — two ways to handle cycles</p>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem32.html">← Problem #32</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(33)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem34.html">Problem #34 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY="dsa-roadmap-progress";const PROBLEM_NUM=33;
+function loadProgress(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{};}catch{return{};}}
+function saveProgress(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}
+function toggleDone(n){const p=loadProgress();if(p[n]==="done")delete p[n];else p[n]="done";saveProgress(p);updateUI();}
+function updateUI(){const p=loadProgress(),btn=document.getElementById("mark-done-btn");if(p[PROBLEM_NUM]==="done"){btn.textContent="✔ Completed";btn.classList.add("completed");}else{btn.textContent="☐ Mark as Done";btn.classList.remove("completed");}updateReadProgress();}
+function updateReadProgress(){const p=loadProgress();if(p[PROBLEM_NUM]==="done"){document.getElementById("section-pct").textContent="100%";document.getElementById("section-bar").style.width="100%";return;}const s=document.querySelectorAll(".section, .takeaway"),t=s.length;if(t===0)return;let v=0;s.forEach(sec=>{if(sec.getBoundingClientRect().top<window.innerHeight)v++;});const pct=Math.min(100,Math.round((v/t)*100));document.getElementById("section-pct").textContent=pct+"%";document.getElementById("section-bar").style.width=pct+"%";}
+window.addEventListener("scroll",updateReadProgress);updateUI();
+</script>
+</body>
+</html>

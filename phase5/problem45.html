@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#45 — Partition Equal Subset Sum | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 5: Mastery</span>
+    <span class="problem-id">Problem #45 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #45: Partition Equal Subset Sum</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#45 — Partition Equal Subset Sum</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: DP (Subset Sum / 0/1 Knapsack Disguised)</p>
+
+  <!-- SECTION 0 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Do friends ne milke items kharide: <code>[1, 5, 11, 5]</code> (total = 22). Ab equally split karna hai.</p>
+      <p style="margin-top:8px;"><b>"Kya items ko do groups mein split kar sakte hain with equal total?"</b></p>
+      <ul>
+        <li>[1, 5, 5] = 11 and [11] = 11 → <span style="color:#4caf50;">YES ✓</span></li>
+        <li>For [1, 2, 3, 5] (total=11, odd) → <span style="color:#e44d26;">NO ✗</span> (can't split odd total equally)</li>
+      </ul>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #416 — Partition Equal Subset Sum. 0/1 Knapsack in disguise.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>The key reduction:</b></p>
+      <ul>
+        <li>Equal partition means each half = totalSum / 2</li>
+        <li>If totalSum is odd → impossible (return false immediately)</li>
+        <li>Problem reduces to: <b>"Can we find a subset with sum = totalSum / 2?"</b></li>
+        <li>That's the <b>Subset Sum</b> problem — a special case of 0/1 Knapsack!</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Knapsack mapping:</b></p>
+      <ul>
+        <li>Items = array elements (each used at most once → 0/1)</li>
+        <li>Weight of each item = its value</li>
+        <li>Capacity = totalSum / 2</li>
+        <li>Question: can we fill the knapsack exactly? (boolean, not max value)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>DP recipe:</b></p>
+      <ol>
+        <li><b>State:</b> <code>dp[s]</code> = can we make sum s using some subset?</li>
+        <li><b>Recurrence:</b> <code>dp[s] = dp[s] || dp[s - nums[i]]</code> (skip or take)</li>
+        <li><b>Base:</b> <code>dp[0] = true</code> (empty subset has sum 0)</li>
+        <li><b>Order:</b> For each item, iterate s from target DOWN TO nums[i] (0/1 = RIGHT TO LEFT)</li>
+        <li><b>Answer:</b> <code>dp[target]</code></li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Generate all subsets (#21), check if any has sum = target.</b> O(2ⁿ).</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 0/1 Knapsack DP reduces this to O(n × target). Same include/exclude logic, but with boolean dp instead of max value.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>1D boolean DP (same as 0/1 Knapsack #43, but boolean):</b></p>
+<pre><code><span class="type">boolean</span>[] dp = <span class="keyword">new boolean</span>[target + <span class="number">1</span>];
+dp[<span class="number">0</span>] = <span class="keyword">true</span>;
+
+<span class="keyword">for</span> (<span class="type">int</span> num : nums) {
+    <span class="keyword">for</span> (<span class="type">int</span> s = target; s &gt;= num; s--) { <span class="comment">// RIGHT TO LEFT (0/1)</span>
+        dp[s] = dp[s] || dp[s - num];
+    }
+}
+<span class="keyword">return</span> dp[target];</code></pre>
+      <p style="margin-top:10px;"><b>Compare with #43 (0/1 Knapsack):</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Aspect</th>
+            <th style="background:#22223a;color:#888;padding:5px;">#43 Knapsack</th>
+            <th style="background:#22223a;color:#888;padding:5px;">#45 Subset Sum</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">dp type</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">int (max value)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">boolean (reachable?)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Combine</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">max(skip, take)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">skip OR take</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Loop direction</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">RIGHT TO LEFT</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">RIGHT TO LEFT (same!)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Answer</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">dp[W] (max value)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">dp[target] (true/false)</td></tr>
+        </tbody>
+      </table>
+      <p style="color:#4caf50;margin-top:10px;">💡 Subset Sum = 0/1 Knapsack where value = weight and dp is boolean. Exact same structure.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>nums = [1, 5, 11, 5], total = 22, target = 11</b></p>
+      <p><code>dp = [T, F, F, F, F, F, F, F, F, F, F, F]</code> (indices 0-11)</p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">After num</th>
+            <th style="background:#22223a;color:#888;padding:5px;">dp (T positions)</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Meaning</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">{0, 1}</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Can make 0 and 1</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">{0, 1, 5, 6}</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">+5, +6 (1+5)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">11</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">{0, 1, 5, 6, <span style="color:#4caf50;">11</span>}</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">+11! dp[11] = true → FOUND!</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#4caf50;"><b>Result: dp[11] = true</b> ✓ (subset {11} or {1,5,5} sums to 11)</p>
+      <p style="color:#888;font-size:11px;">We can stop early once dp[target] becomes true. No need to process remaining elements.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Problems that reduce to Subset Sum:</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Problem</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Reduction</th>
+            <th style="background:#22223a;color:#888;padding:5px;">LC</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Partition Equal Subset (this)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">target = totalSum / 2</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">#416</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Target Sum</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">target = (totalSum + S) / 2</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">#494</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Last Stone Weight II</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Minimize |sum1 - sum2|</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">#1049</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;color:#888;font-size:11px;">Recognizing "this is subset sum in disguise" is the hardest part. Once you see it, the code is identical to #43.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag"><span class="label">Time:</span><span class="value">O(n × target)</span></div>
+        <div class="complexity-tag"><span class="label">Space:</span><span class="value">O(target)</span></div>
+      </div>
+      <p style="margin-top:10px;">Where target = totalSum / 2. n elements × target capacity. 1D boolean array of size target+1.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">public class</span> <span class="type">PartitionEqualSubset</span> {
+
+    <span class="keyword">public static boolean</span> <span class="type">canPartition</span>(<span class="type">int</span>[] nums) {
+        <span class="type">int</span> total = <span class="number">0</span>;
+        <span class="keyword">for</span> (<span class="type">int</span> n : nums) total += n;
+        <span class="keyword">if</span> (total % <span class="number">2</span> != <span class="number">0</span>) <span class="keyword">return false</span>; <span class="comment">// odd sum → impossible</span>
+
+        <span class="type">int</span> target = total / <span class="number">2</span>;
+        <span class="type">boolean</span>[] dp = <span class="keyword">new boolean</span>[target + <span class="number">1</span>];
+        dp[<span class="number">0</span>] = <span class="keyword">true</span>;
+
+        <span class="keyword">for</span> (<span class="type">int</span> num : nums) {
+            <span class="keyword">for</span> (<span class="type">int</span> s = target; s &gt;= num; s--) { <span class="comment">// RIGHT TO LEFT</span>
+                dp[s] = dp[s] || dp[s - num];
+            }
+            <span class="keyword">if</span> (dp[target]) <span class="keyword">return true</span>; <span class="comment">// early exit</span>
+        }
+        <span class="keyword">return</span> dp[target];
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        System.out.println(canPartition(<span class="keyword">new</span> <span class="type">int</span>[]{<span class="number">1</span>,<span class="number">5</span>,<span class="number">11</span>,<span class="number">5</span>})); <span class="comment">// true</span>
+        System.out.println(canPartition(<span class="keyword">new</span> <span class="type">int</span>[]{<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">5</span>})); <span class="comment">// false</span>
+    }
+}</code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 Early exit: once dp[target] is true, no need to process more elements. Can significantly speed up in practice.</p>
+    </div>
+  </div>
+
+  <!-- Remaining sections -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead><tr><th style="background:#22223a;color:#888;padding:8px;">Case</th><th style="background:#22223a;color:#888;padding:8px;">Input</th><th style="background:#22223a;color:#888;padding:8px;">Result</th><th style="background:#22223a;color:#888;padding:8px;">Why</th></tr></thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Odd total</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">[1,2,3]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">true (3+3)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">total=6, target=3, {3} or {1,2}</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Odd total</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">[1,2,3,5]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">false</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">total=11, odd → instant false</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single element</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">[1]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">false</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Can't split one element</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Two equal</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">[5,5]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">true</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">{5} and {5}</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All zeros</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">[0,0,0]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">true</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">target=0, dp[0]=true</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Not checking odd total first</b>
+          <p style="color:#4caf50;">✅ <code>if (total % 2 != 0) return false</code> — instant O(1) rejection</p>
+        </li>
+        <li style="margin-top:10px;"><b>Using LEFT TO RIGHT (unbounded style)</b>
+          <p style="color:#e44d26;">❌ Allows using same element twice → wrong answer</p>
+          <p style="color:#4caf50;">✅ RIGHT TO LEFT — each element used at most once (0/1 knapsack)</p>
+        </li>
+        <li style="margin-top:10px;"><b>Not recognizing this as subset sum</b>
+          <p style="color:#888;">The hardest part is the reduction: "partition into equal halves" → "find subset with sum = total/2"</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use / 12. When NOT</span>
+      <span class="sec-num">STEP 11-12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Use when:</b> ✅ "Can array be split into two equal halves?" ✅ "Does a subset with sum X exist?" ✅ "Target sum with +/- signs"</p>
+      <p style="margin-top:8px;"><b>Don't use when:</b> ❌ Elements can be used multiple times (unbounded) ❌ Target is very large (>10⁶) — O(n×target) too slow</p>
+    </div>
+  </div>
+
+  <div class="takeaway">
+    💡 "Partition Equal Subset = Subset Sum = 0/1 Knapsack with boolean dp. Target = totalSum/2. Odd total → instant false. RIGHT TO LEFT, dp[s] = dp[s] || dp[s-num]."
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Knapsack chapter complete: 0/1 (#43), Unbounded (#44), Subset Sum (#45).</p>
+      <p style="margin-top:8px;">Next: <b>Two-String DP</b> — a completely different DP structure. Instead of items × capacity, it's string1 × string2.</p>
+      <p style="margin-top:8px;">Problem #46: <b>"Longest Common Subsequence of Two Playlists"</b> — dp[i][j] = LCS of first i chars of s1 and first j chars of s2. Foundation for Edit Distance (#47).</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Knapsack DP (items × capacity) → Two-String DP (string1 × string2) — new DP dimension!</p>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem44.html">← Problem #44</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(45)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem46.html">Problem #46 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY="dsa-roadmap-progress";const PROBLEM_NUM=45;
+function loadProgress(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{};}catch{return{};}}
+function saveProgress(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}
+function toggleDone(n){const p=loadProgress();if(p[n]==="done")delete p[n];else p[n]="done";saveProgress(p);updateUI();}
+function updateUI(){const p=loadProgress(),btn=document.getElementById("mark-done-btn");if(p[PROBLEM_NUM]==="done"){btn.textContent="✔ Completed";btn.classList.add("completed");}else{btn.textContent="☐ Mark as Done";btn.classList.remove("completed");}updateReadProgress();}
+function updateReadProgress(){const p=loadProgress();if(p[PROBLEM_NUM]==="done"){document.getElementById("section-pct").textContent="100%";document.getElementById("section-bar").style.width="100%";return;}const s=document.querySelectorAll(".section, .takeaway"),t=s.length;if(t===0)return;let v=0;s.forEach(sec=>{if(sec.getBoundingClientRect().top<window.innerHeight)v++;});const pct=Math.min(100,Math.round((v/t)*100));document.getElementById("section-pct").textContent=pct+"%";document.getElementById("section-bar").style.width=pct+"%";}
+window.addEventListener("scroll",updateReadProgress);updateUI();
+</script>
+</body>
+</html>

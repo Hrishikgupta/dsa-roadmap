@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#32 — Shortest Path in a Maze | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 4: Advanced</span>
+    <span class="problem-id">Problem #32 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #32: Shortest Path in a Maze</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#32 — Shortest Path in a Maze</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Graph BFS (Shortest Path Unweighted)</p>
+
+  <!-- SECTION 0: Scenario -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek maze game bana rahe ho. Player ko top-left se bottom-right tak pahunchna hai:</p>
+<pre><code><span class="comment">0 = open path, 1 = wall</span>
+
+<span style="color:#4caf50;">S</span> 0 0 0
+1 1 0 1
+0 0 0 0
+0 1 1 <span style="color:#e44d26;">E</span>
+
+<span style="color:#4caf50;">S = Start (0,0)</span>
+<span style="color:#e44d26;">E = End (3,3)</span>
+
+<span style="color:#48c6ef;">Shortest path: S→(0,1)→(0,2)→(1,2)→(2,2)→(2,3)→(3,3) = 6 steps</span></code></pre>
+      <p style="margin-top:8px;">Question: <b>"Minimum kitne steps mein player exit tak pahunch sakta hai?"</b></p>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is the classic BFS shortest path on grid. Foundation for LC #1091, #994, #542, and many more.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Understanding -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given a grid with 0 (open) and 1 (wall), find shortest path from (0,0) to (m-1,n-1)</li>
+        <li>Can move up/down/left/right (4 directions)</li>
+        <li>Return number of steps, or -1 if no path exists</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Why BFS, not DFS?</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">Aspect</th>
+            <th style="background:#22223a;color:#888;padding:7px;">DFS</th>
+            <th style="background:#22223a;color:#888;padding:7px;">BFS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Finds</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">A path (any path)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">THE shortest path</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Explores</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Deep first</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Level by level (distance 1, then 2, then 3...)</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Guarantee</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#e44d26;">No shortest guarantee</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">First time reaching target = shortest</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Use for</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Existence, counting, backtracking</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Shortest path (unweighted)</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;color:#6c63ff;font-size:12px;">💡 Golden rule: <b>BFS = shortest path in unweighted graphs.</b> Each BFS level = one more step from start.</p>
+      <p style="margin-top:10px;"><b>Connection to previous:</b></p>
+      <ul>
+        <li>#31: Grid DFS for connected components (explore all)</li>
+        <li>#32: Grid BFS for shortest path (explore level by level)</li>
+        <li>#29-30: Tree BFS template → same Queue-based approach, now on a grid</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Brute Force -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>DFS approach:</b> Try all paths, track minimum length. Works but explores many unnecessary long paths.</p>
+      <p><b>BFS approach:</b> Explore all cells at distance 1, then distance 2, then 3... First time you reach the target = shortest. No need to explore further.</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 BFS is like a ripple in water — it expands outward uniformly. The first ripple to reach the target = shortest distance.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Optimization -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Key Insight — The Ripple/Wave Analogy:</b></p>
+      <ul>
+        <li>Drop a stone at the start cell. Ripple expands outward.</li>
+        <li>After 1 second: all cells at distance 1 are reached</li>
+        <li>After 2 seconds: all cells at distance 2 are reached</li>
+        <li>The moment the ripple hits the target → that's the shortest distance</li>
+      </ul>
+      <p style="margin-top:12px;"><b>BFS Algorithm:</b></p>
+<pre><code>Queue&lt;<span class="type">int</span>[]&gt; queue = <span class="keyword">new</span> LinkedList&lt;&gt;();
+queue.add({startRow, startCol});
+visited[startRow][startCol] = <span class="keyword">true</span>;
+<span class="type">int</span> steps = <span class="number">0</span>;
+
+<span class="keyword">while</span> (!queue.isEmpty()) {
+    <span class="type">int</span> size = queue.size();  <span class="comment">// nodes at current distance</span>
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; size; i++) {
+        <span class="type">int</span>[] cell = queue.poll();
+        <span class="keyword">if</span> (cell == target) <span class="keyword">return</span> steps;  <span class="comment">// FOUND!</span>
+        <span class="keyword">for</span> each neighbor:
+            <span class="keyword">if</span> valid &amp;&amp; !visited:
+                visited = <span class="keyword">true</span>;
+                queue.add(neighbor);
+    }
+    steps++;  <span class="comment">// next distance level</span>
+}</code></pre>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>BFS with level-size loop — each level = one more step. First time reaching target = shortest path.</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Final Approach -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach (Pattern-Based)</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Algorithm:</b></p>
+      <ol>
+        <li>If start or end is a wall → return -1</li>
+        <li>Add start to queue, mark visited</li>
+        <li>BFS with level-size loop:
+          <ul>
+            <li>For each cell in current level: check if target → return steps</li>
+            <li>Add all valid unvisited neighbors to queue, mark visited</li>
+            <li>Increment steps after processing level</li>
+          </ul>
+        </li>
+        <li>Queue empty without reaching target → return -1</li>
+      </ol>
+      <p style="margin-top:10px;color:#e44d26;font-size:11px;">⚠️ Critical: mark visited WHEN ADDING to queue, not when processing. Otherwise the same cell gets added multiple times from different neighbors.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Grid:</b></p>
+<pre><code><span class="comment">S 0 0 0
+1 1 0 1
+0 0 0 0
+0 1 1 E</span></code></pre>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Steps</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Queue (cells at this distance)</th>
+            <th style="background:#22223a;color:#888;padding:5px;">New neighbors added</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;"><code>(0,0)</code></td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">→ (0,1)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;"><code>(0,1)</code></td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">→ (0,2)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;"><code>(0,2)</code></td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">→ (0,3), (1,2)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;"><code>(0,3), (1,2)</code></td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">→ (2,2)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;"><code>(2,2)</code></td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">→ (2,1), (2,3)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;"><code>(2,1), (2,3)</code></td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">→ (3,0) from (2,1), <span style="color:#4caf50;">(3,3)</span> from (2,3)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">6</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;"><code>(3,0), <span style="color:#4caf50;">(3,3)</span></code></td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">(3,3) = TARGET → return 6</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#4caf50;"><b>Result: 6 steps</b> ✓</p>
+      <p style="color:#888;font-size:11px;">BFS explored level by level. The moment (3,3) was dequeued at step 6, we knew that's the shortest.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Mechanics -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Why BFS guarantees shortest path:</b></p>
+      <ul>
+        <li>BFS explores ALL cells at distance d before ANY cell at distance d+1</li>
+        <li>So the first time we reach the target, we've taken the minimum possible steps</li>
+        <li>No shorter path can exist — we would have found it at an earlier level</li>
+      </ul>
+      <p style="margin-top:12px;"><b>Mark visited WHEN ADDING vs WHEN PROCESSING:</b></p>
+<pre><code><span class="comment">// WRONG: mark when processing</span>
+cell = queue.poll();
+visited[cell] = <span class="keyword">true</span>;  <span class="comment">// too late! cell might be in queue multiple times</span>
+
+<span class="comment">// CORRECT: mark when adding</span>
+visited[nr][nc] = <span class="keyword">true</span>;  <span class="comment">// mark immediately</span>
+queue.add({nr, nc});     <span class="comment">// then add — no duplicates possible</span></code></pre>
+      <p style="margin-top:12px;"><b>BFS shortest path — the universal template:</b></p>
+<pre><code><span class="comment">// Works for any unweighted graph (grid, adjacency list, etc.)</span>
+<span class="number">1.</span> Add start to queue, mark visited
+<span class="number">2.</span> <span class="keyword">while</span> queue not empty:
+     levelSize = queue.size()
+     <span class="keyword">for</span> i = <span class="number">0</span> to levelSize-<span class="number">1</span>:
+       node = queue.poll()
+       <span class="keyword">if</span> node == target → <span class="keyword">return</span> steps
+       <span class="keyword">for</span> each neighbor:
+         <span class="keyword">if</span> valid &amp;&amp; !visited → mark, add to queue
+     steps++
+<span class="number">3.</span> <span class="keyword">return</span> -<span class="number">1</span>  <span class="comment">// unreachable</span></code></pre>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Complexity -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag"><span class="label">Time:</span><span class="value">O(m × n)</span></div>
+        <div class="complexity-tag"><span class="label">Space:</span><span class="value">O(m × n)</span></div>
+      </div>
+      <p style="margin-top:10px;">Each cell visited at most once. Queue + visited array = O(m×n).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Java -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">import</span> java.util.*;
+
+<span class="keyword">public class</span> <span class="type">ShortestPathMaze</span> {
+
+    <span class="keyword">public static int</span> <span class="type">shortestPath</span>(<span class="type">int</span>[][] grid) {
+        <span class="type">int</span> m = grid.length, n = grid[<span class="number">0</span>].length;
+        <span class="keyword">if</span> (grid[<span class="number">0</span>][<span class="number">0</span>] == <span class="number">1</span> || grid[m-<span class="number">1</span>][n-<span class="number">1</span>] == <span class="number">1</span>) <span class="keyword">return</span> -<span class="number">1</span>;
+
+        <span class="type">int</span>[] dr = {-<span class="number">1</span>,<span class="number">1</span>,<span class="number">0</span>,<span class="number">0</span>}, dc = {<span class="number">0</span>,<span class="number">0</span>,-<span class="number">1</span>,<span class="number">1</span>};
+        <span class="type">boolean</span>[][] visited = <span class="keyword">new boolean</span>[m][n];
+        Queue&lt;<span class="type">int</span>[]&gt; queue = <span class="keyword">new</span> LinkedList&lt;&gt;();
+
+        queue.add(<span class="keyword">new</span> <span class="type">int</span>[]{<span class="number">0</span>, <span class="number">0</span>});
+        visited[<span class="number">0</span>][<span class="number">0</span>] = <span class="keyword">true</span>;
+        <span class="type">int</span> steps = <span class="number">0</span>;
+
+        <span class="keyword">while</span> (!queue.isEmpty()) {
+            <span class="type">int</span> size = queue.size();
+            <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; size; i++) {
+                <span class="type">int</span>[] cell = queue.poll();
+                <span class="keyword">if</span> (cell[<span class="number">0</span>] == m-<span class="number">1</span> &amp;&amp; cell[<span class="number">1</span>] == n-<span class="number">1</span>) <span class="keyword">return</span> steps;
+
+                <span class="keyword">for</span> (<span class="type">int</span> d = <span class="number">0</span>; d &lt; <span class="number">4</span>; d++) {
+                    <span class="type">int</span> nr = cell[<span class="number">0</span>]+dr[d], nc = cell[<span class="number">1</span>]+dc[d];
+                    <span class="keyword">if</span> (nr&gt;=<span class="number">0</span> &amp;&amp; nr&lt;m &amp;&amp; nc&gt;=<span class="number">0</span> &amp;&amp; nc&lt;n
+                        &amp;&amp; !visited[nr][nc] &amp;&amp; grid[nr][nc]==<span class="number">0</span>) {
+                        visited[nr][nc] = <span class="keyword">true</span>;
+                        queue.add(<span class="keyword">new</span> <span class="type">int</span>[]{nr, nc});
+                    }
+                }
+            }
+            steps++;
+        }
+        <span class="keyword">return</span> -<span class="number">1</span>;
+    }
+}</code></pre>
+    </div>
+  </div>
+
+  <!-- Remaining sections -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead><tr><th style="background:#22223a;color:#888;padding:8px;">Case</th><th style="background:#22223a;color:#888;padding:8px;">Result</th><th style="background:#22223a;color:#888;padding:8px;">Note</th></tr></thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Start is wall</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">-1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Can't even start</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">End is wall</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">-1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Can't reach end</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Start == End</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Already there (1×1 grid)</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No path exists</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">-1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Walls block all routes</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All open</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">m+n-2</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Manhattan distance (no obstacles)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Marking visited when PROCESSING instead of when ADDING</b>
+          <p style="color:#e44d26;">❌ Same cell added to queue multiple times → TLE and wrong answer</p>
+          <p style="color:#4caf50;">✅ Mark visited immediately when adding to queue</p>
+        </li>
+        <li style="margin-top:10px;"><b>Using DFS for shortest path</b>
+          <p style="color:#e44d26;">❌ DFS finds A path, not THE shortest. Would need to explore ALL paths and take minimum.</p>
+          <p style="color:#4caf50;">✅ BFS guarantees shortest in unweighted graphs</p>
+        </li>
+        <li style="margin-top:10px;"><b>Forgetting to check start/end validity</b>
+          <p style="color:#4caf50;">✅ Check if start or end is a wall before starting BFS</p>
+        </li>
+        <li style="margin-top:10px;"><b>Off-by-one in step counting</b>
+          <p style="color:#888;">Steps = 0 at start. Increment AFTER processing each level. Check target WHEN processing, not when adding.</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>✅ "Shortest path" in unweighted graph/grid</li>
+        <li>✅ "Minimum steps/moves to reach target"</li>
+        <li>✅ "Rotting oranges" / "Walls and gates" (multi-source BFS)</li>
+        <li>✅ "Word ladder" (shortest transformation sequence)</li>
+        <li>✅ Any problem where each step has equal cost</li>
+      </ul>
+      <p style="margin-top:10px;"><b>When edges have different weights → Dijkstra (#35), not BFS.</b></p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ Weighted edges (different costs) → use Dijkstra or Bellman-Ford</li>
+        <li>❌ "Find ALL paths" → use DFS + backtracking</li>
+        <li>❌ "Longest path" → NP-hard in general, BFS doesn't help</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="takeaway">
+    💡 "Shortest path in unweighted graph = BFS. Level-by-level expansion. First time reaching target = shortest. Mark visited when ADDING, not when processing."
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Ab tum grid pe BFS shortest path nikal sakte ho.</p>
+      <p style="margin-top:8px;">Next: graphs move beyond grids to <b>adjacency lists</b> — real graph structures.</p>
+      <p style="margin-top:8px;"><b>"Course Prerequisite Order"</b> — given courses and prerequisites, find a valid order to take all courses. This is <b>Topological Sort</b> — a BFS on a directed graph (Kahn's algorithm).</p>
+      <ul>
+        <li>Grid BFS: cells are nodes, 4-directional edges</li>
+        <li>Graph BFS: nodes are courses, edges are prerequisites</li>
+        <li>Same BFS template, different graph representation</li>
+      </ul>
+      <p style="color:#6c63ff;margin-top:12px;">→ Grid BFS (shortest path) → Graph BFS (topological sort) — BFS on real graphs!</p>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem31.html">← Problem #31</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(32)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem33.html">Problem #33 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY="dsa-roadmap-progress";const PROBLEM_NUM=32;
+function loadProgress(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{};}catch{return{};}}
+function saveProgress(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}
+function toggleDone(n){const p=loadProgress();if(p[n]==="done")delete p[n];else p[n]="done";saveProgress(p);updateUI();}
+function updateUI(){const p=loadProgress(),btn=document.getElementById("mark-done-btn");if(p[PROBLEM_NUM]==="done"){btn.textContent="✔ Completed";btn.classList.add("completed");}else{btn.textContent="☐ Mark as Done";btn.classList.remove("completed");}updateReadProgress();}
+function updateReadProgress(){const p=loadProgress();if(p[PROBLEM_NUM]==="done"){document.getElementById("section-pct").textContent="100%";document.getElementById("section-bar").style.width="100%";return;}const s=document.querySelectorAll(".section, .takeaway"),t=s.length;if(t===0)return;let v=0;s.forEach(sec=>{if(sec.getBoundingClientRect().top<window.innerHeight)v++;});const pct=Math.min(100,Math.round((v/t)*100));document.getElementById("section-pct").textContent=pct+"%";document.getElementById("section-bar").style.width=pct+"%";}
+window.addEventListener("scroll",updateReadProgress);updateUI();
+</script>
+</body>
+</html>

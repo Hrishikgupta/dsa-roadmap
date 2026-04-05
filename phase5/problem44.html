@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#44 — Coin Change — Minimum Notes for Bill | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 5: Mastery</span>
+    <span class="problem-id">Problem #44 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #44: Coin Change — Minimum Notes for Bill</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#44 — Coin Change — Minimum Notes for Bill</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: DP (Unbounded Knapsack)</p>
+
+  <!-- SECTION 0 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>ATM mein coins hain: <code>[1, 5, 10, 25]</code> cents. Customer ko <b>30 cents</b> dene hain.</p>
+      <p style="margin-top:8px;"><b>"Minimum kitne coins lagenge?"</b></p>
+      <ul>
+        <li>25 + 5 = 30 → <b>2 coins</b> ✓ (optimal)</li>
+        <li>10 + 10 + 10 = 30 → 3 coins</li>
+        <li>25 + 1 + 1 + 1 + 1 + 1 = 30 → 6 coins</li>
+      </ul>
+      <p style="color:#4caf50;margin-top:8px;">Answer: <b>2 coins</b> (25 + 5)</p>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #322 — Coin Change. Classic Unbounded Knapsack (unlimited copies of each coin).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given coin denominations and a target amount</li>
+        <li>Find minimum number of coins to make that amount</li>
+        <li>Unlimited supply of each denomination</li>
+        <li>Return -1 if impossible</li>
+      </ul>
+      <p style="margin-top:10px;"><b>0/1 Knapsack (#43) vs Unbounded Knapsack (#44):</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">Aspect</th>
+            <th style="background:#22223a;color:#888;padding:7px;">#43 (0/1 Knapsack)</th>
+            <th style="background:#22223a;color:#888;padding:7px;">#44 (Unbounded)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Item usage</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">At most once</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Unlimited copies</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">1D loop direction</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">RIGHT TO LEFT</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">LEFT TO RIGHT</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Optimize</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">max value</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">min coins (this problem)</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Example</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Packing trip bag</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Making change</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;"><b>DP recipe:</b></p>
+      <ol>
+        <li><b>State:</b> <code>dp[amount]</code> = minimum coins to make this amount</li>
+        <li><b>Recurrence:</b> <code>dp[a] = min(dp[a], dp[a - coin] + 1)</code> for each coin</li>
+        <li><b>Base:</b> <code>dp[0] = 0</code> (0 coins for amount 0)</li>
+        <li><b>Order:</b> Amount 1 to target, LEFT TO RIGHT (allows reuse)</li>
+        <li><b>Answer:</b> <code>dp[amount]</code> (or -1 if still ∞)</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Greedy (take largest coin first) — WRONG for some cases:</b></p>
+      <ul>
+        <li>Coins [1, 3, 4], amount = 6</li>
+        <li>Greedy: 4 + 1 + 1 = 3 coins</li>
+        <li>Optimal: 3 + 3 = <b>2 coins</b></li>
+      </ul>
+      <p style="color:#e44d26;">Greedy fails because taking the largest coin isn't always optimal. DP considers all possibilities.</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 For each amount, try using each coin and take the minimum. <code>dp[6] = min(dp[6-1]+1, dp[6-3]+1, dp[6-4]+1)</code></p>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Bottom-up DP:</b></p>
+<pre><code>dp[<span class="number">0</span>] = <span class="number">0</span>;  <span class="comment">// base: 0 coins for amount 0</span>
+dp[<span class="number">1</span>..amount] = ∞;  <span class="comment">// initially impossible</span>
+
+<span class="keyword">for</span> (<span class="type">int</span> a = <span class="number">1</span>; a &lt;= amount; a++) {
+    <span class="keyword">for</span> (<span class="type">int</span> coin : coins) {
+        <span class="keyword">if</span> (coin &lt;= a &amp;&amp; dp[a - coin] != ∞) {
+            dp[a] = Math.min(dp[a], dp[a - coin] + <span class="number">1</span>);
+        }
+    }
+}</code></pre>
+      <p style="margin-top:10px;"><b>Why LEFT TO RIGHT works for unlimited coins:</b></p>
+      <ul>
+        <li>When computing dp[6] using coin 3: dp[6] = dp[6-3] + 1 = dp[3] + 1</li>
+        <li>dp[3] was already computed (left to right) and might already use coin 3</li>
+        <li>So dp[6] = dp[3] + 1 = (use coin 3 for dp[3]) + 1 = two coin-3's. Reuse allowed!</li>
+        <li>In 0/1 knapsack, right-to-left prevents this reuse. Here we WANT it.</li>
+      </ul>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>Unbounded Knapsack — same as 0/1 but LEFT TO RIGHT (allows reuse). For min coins: use min instead of max.</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>coins = [1, 3, 4], amount = 6</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:6px;">amount</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Try coin 1</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Try coin 3</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Try coin 4</th>
+            <th style="background:#22223a;color:#888;padding:6px;">dp[a]</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;" colspan="3">base</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">0</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">dp[0]+1=1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">dp[1]+1=2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">dp[2]+1=3</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">dp[0]+1=1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">1</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">dp[3]+1=2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">dp[1]+1=2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">dp[0]+1=1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">1</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">dp[4]+1=2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">dp[2]+1=3</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">dp[1]+1=2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">6</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">dp[5]+1=3</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">dp[3]+1=2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">dp[2]+1=3</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">2</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#4caf50;"><b>Result: dp[6] = 2</b> ✓ (coins: 3 + 3)</p>
+      <p style="color:#888;font-size:11px;">Greedy would pick 4+1+1=3 coins. DP finds 3+3=2 coins. DP wins.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Coin Change variants:</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Variant</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Question</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Combine</th>
+            <th style="background:#22223a;color:#888;padding:5px;">LC</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Min coins (this)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Fewest coins to make amount</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">min</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">#322</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Count ways</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">How many ways to make amount</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">sum</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">#518</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Count permutations</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Ways where order matters</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">sum (different loop order)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">#377</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;color:#888;font-size:11px;">Same unbounded knapsack structure. Change the combine function (min/sum) and loop nesting order for different variants.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag"><span class="label">Time:</span><span class="value">O(amount × coins)</span></div>
+        <div class="complexity-tag"><span class="label">Space:</span><span class="value">O(amount)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">import</span> java.util.Arrays;
+
+<span class="keyword">public class</span> <span class="type">CoinChange</span> {
+
+    <span class="keyword">public static int</span> <span class="type">coinChange</span>(<span class="type">int</span>[] coins, <span class="type">int</span> amount) {
+        <span class="type">int</span>[] dp = <span class="keyword">new</span> <span class="type">int</span>[amount + <span class="number">1</span>];
+        Arrays.fill(dp, amount + <span class="number">1</span>); <span class="comment">// "infinity"</span>
+        dp[<span class="number">0</span>] = <span class="number">0</span>;
+
+        <span class="keyword">for</span> (<span class="type">int</span> a = <span class="number">1</span>; a &lt;= amount; a++) {
+            <span class="keyword">for</span> (<span class="type">int</span> coin : coins) {
+                <span class="keyword">if</span> (coin &lt;= a) {
+                    dp[a] = Math.min(dp[a], dp[a - coin] + <span class="number">1</span>);
+                }
+            }
+        }
+
+        <span class="keyword">return</span> dp[amount] &gt; amount ? -<span class="number">1</span> : dp[amount];
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        System.out.println(coinChange(<span class="keyword">new</span> <span class="type">int</span>[]{<span class="number">1</span>,<span class="number">3</span>,<span class="number">4</span>}, <span class="number">6</span>));  <span class="comment">// 2</span>
+        System.out.println(coinChange(<span class="keyword">new</span> <span class="type">int</span>[]{<span class="number">2</span>}, <span class="number">3</span>));      <span class="comment">// -1</span>
+    }
+}</code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 Using <code>amount + 1</code> as "infinity" instead of Integer.MAX_VALUE — avoids overflow when adding +1. If dp[amount] > amount → impossible (can't need more than 'amount' coins of denomination 1).</p>
+    </div>
+  </div>
+
+  <!-- Remaining sections -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead><tr><th style="background:#22223a;color:#888;padding:8px;">Case</th><th style="background:#22223a;color:#888;padding:8px;">Coins</th><th style="background:#22223a;color:#888;padding:8px;">Amount</th><th style="background:#22223a;color:#888;padding:8px;">Result</th></tr></thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Amount = 0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">any</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Impossible</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">[2]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">-1</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single coin</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">[5]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">10</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Coin = 1 exists</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">[1,5,10]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">any</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Always possible</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Using greedy (largest coin first)</b>
+          <p style="color:#e44d26;">❌ Fails for [1,3,4] amount=6. Greedy: 4+1+1=3. Optimal: 3+3=2.</p>
+          <p style="color:#4caf50;">✅ Always use DP for coin change</p>
+        </li>
+        <li style="margin-top:10px;"><b>Using Integer.MAX_VALUE as infinity</b>
+          <p style="color:#e44d26;">❌ <code>MAX_VALUE + 1</code> overflows to negative → wrong min comparison</p>
+          <p style="color:#4caf50;">✅ Use <code>amount + 1</code> as infinity — safe and sufficient</p>
+        </li>
+        <li style="margin-top:10px;"><b>Iterating RIGHT TO LEFT (0/1 knapsack style)</b>
+          <p style="color:#e44d26;">❌ Prevents coin reuse → each coin used at most once → wrong answer</p>
+          <p style="color:#4caf50;">✅ LEFT TO RIGHT for unlimited coins</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use / 12. When NOT</span>
+      <span class="sec-num">STEP 11-12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Use when:</b></p>
+      <ul>
+        <li>✅ "Minimum coins/items to reach target" with unlimited supply</li>
+        <li>✅ "Number of ways to make change"</li>
+        <li>✅ Any unbounded knapsack variant</li>
+      </ul>
+      <p style="margin-top:8px;"><b>Don't use when:</b></p>
+      <ul>
+        <li>❌ Each item used at most once → 0/1 Knapsack (#43)</li>
+        <li>❌ Greedy works (e.g., US coin system [1,5,10,25] — greedy happens to be optimal)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="takeaway">
+    💡 "Coin Change = Unbounded Knapsack with min. dp[a] = min(dp[a-coin] + 1) for each coin. LEFT TO RIGHT allows reuse. Greedy fails — always use DP."
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>0/1 Knapsack (#43): maximize value, each item once. Coin Change (#44): minimize coins, unlimited copies.</p>
+      <p style="margin-top:8px;">Next: <b>"Partition Equal Subset Sum"</b> — can you split an array into two subsets with equal sum? This is 0/1 Knapsack disguised as a partition problem. Target = totalSum / 2.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Unbounded Knapsack (coin change) → 0/1 Knapsack disguised as partition (subset sum)</p>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem43.html">← Problem #43</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(44)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem45.html">Problem #45 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY="dsa-roadmap-progress";const PROBLEM_NUM=44;
+function loadProgress(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{};}catch{return{};}}
+function saveProgress(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}
+function toggleDone(n){const p=loadProgress();if(p[n]==="done")delete p[n];else p[n]="done";saveProgress(p);updateUI();}
+function updateUI(){const p=loadProgress(),btn=document.getElementById("mark-done-btn");if(p[PROBLEM_NUM]==="done"){btn.textContent="✔ Completed";btn.classList.add("completed");}else{btn.textContent="☐ Mark as Done";btn.classList.remove("completed");}updateReadProgress();}
+function updateReadProgress(){const p=loadProgress();if(p[PROBLEM_NUM]==="done"){document.getElementById("section-pct").textContent="100%";document.getElementById("section-bar").style.width="100%";return;}const s=document.querySelectorAll(".section, .takeaway"),t=s.length;if(t===0)return;let v=0;s.forEach(sec=>{if(sec.getBoundingClientRect().top<window.innerHeight)v++;});const pct=Math.min(100,Math.round((v/t)*100));document.getElementById("section-pct").textContent=pct+"%";document.getElementById("section-bar").style.width=pct+"%";}
+window.addEventListener("scroll",updateReadProgress);updateUI();
+</script>
+</body>
+</html>

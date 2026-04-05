@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#42 — Longest Increasing Stock Prices | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 5: Mastery</span>
+    <span class="problem-id">Problem #42 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #42: Longest Increasing Stock Prices</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#42 — Longest Increasing Stock Prices</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: DP (LIS — Longest Increasing Subsequence)</p>
+
+  <!-- SECTION 0 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek stock analyst ho. Daily closing prices hain:</p>
+      <p><code>[10, 9, 2, 5, 3, 7, 101, 18]</code></p>
+      <p>Boss bola: <b>"Sabse lamba increasing trend dhundho — consecutive nahi, subsequence."</b></p>
+      <ul>
+        <li>[2, 5, 7, 101] → length 4 ✓ (increasing subsequence)</li>
+        <li>[2, 3, 7, 18] → length 4 ✓</li>
+        <li>[2, 5, 7, 18] → length 4 ✓</li>
+      </ul>
+      <p style="color:#4caf50;margin-top:8px;">Answer: <b>4</b> (longest increasing subsequence length)</p>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #300 — Longest Increasing Subsequence. Classic DP with O(n log n) optimization.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Find the length of the longest <b>strictly increasing subsequence</b></li>
+        <li>Subsequence = elements in original order, but not necessarily contiguous</li>
+        <li>[2,5,7,101] from [10,9,<b>2</b>,<b>5</b>,3,<b>7</b>,<b>101</b>,18] — skip elements, keep order</li>
+      </ul>
+      <p style="margin-top:10px;"><b>How this differs from previous DP:</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Problem</th>
+            <th style="background:#22223a;color:#888;padding:5px;">dp[i] depends on</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Transition</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">#39 Stairs</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">dp[i-1], dp[i-2]</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Fixed neighbors</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">#41 Robber</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">dp[i-1], dp[i-2]</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Fixed neighbors</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">#42 LIS</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">ALL dp[j] where j &lt; i</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Scan all previous elements</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;color:#6c63ff;font-size:12px;">💡 LIS is the first DP where each state depends on ALL previous states (not just 1-2 neighbors). This makes it O(n²).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Generate all subsequences, check if increasing, track max length.</b></p>
+      <p>2ⁿ subsequences → O(2ⁿ). Way too slow.</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 DP approach: for each element, find the longest increasing subsequence ENDING at that element.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>O(n²) DP approach:</b></p>
+      <ul>
+        <li><code>dp[i]</code> = length of LIS ending at index i</li>
+        <li>For each i, look at ALL j &lt; i where <code>nums[j] &lt; nums[i]</code></li>
+        <li><code>dp[i] = max(dp[j] + 1)</code> for all valid j</li>
+        <li>Base: <code>dp[i] = 1</code> (element itself is a subsequence of length 1)</li>
+      </ul>
+<pre><code><span class="keyword">for</span> i = <span class="number">0</span> to n-<span class="number">1</span>:
+    dp[i] = <span class="number">1</span>
+    <span class="keyword">for</span> j = <span class="number">0</span> to i-<span class="number">1</span>:
+        <span class="keyword">if</span> nums[j] &lt; nums[i]:
+            dp[i] = max(dp[i], dp[j] + <span class="number">1</span>)
+answer = max(dp[<span class="number">0</span>]...dp[n-<span class="number">1</span>])</code></pre>
+
+      <p style="margin-top:14px;"><b>O(n log n) optimization (Binary Search + Patience Sorting):</b></p>
+      <ul>
+        <li>Maintain a "tails" array: <code>tails[i]</code> = smallest tail element of all increasing subsequences of length i+1</li>
+        <li>For each element: binary search in tails to find where it fits</li>
+        <li>If larger than all tails → append (extend longest subsequence)</li>
+        <li>Else → replace the first tail that's ≥ current element (keep tails as small as possible)</li>
+        <li>Length of tails array = LIS length</li>
+      </ul>
+      <p style="color:#4caf50;margin-top:10px;">💡 Two approaches: O(n²) DP (intuitive, good for interviews) and O(n log n) binary search (optimal, impressive to show).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>DP recipe:</b></p>
+      <ol>
+        <li><b>State:</b> <code>dp[i]</code> = LIS length ending at index i</li>
+        <li><b>Recurrence:</b> <code>dp[i] = 1 + max(dp[j])</code> for all j &lt; i where nums[j] &lt; nums[i]</li>
+        <li><b>Base:</b> <code>dp[i] = 1</code> for all i</li>
+        <li><b>Order:</b> Left to right (each i scans all j &lt; i)</li>
+        <li><b>Answer:</b> <code>max(dp[0..n-1])</code> — NOT dp[n-1]! LIS might not end at the last element.</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>nums = [10, 9, 2, 5, 3, 7, 101, 18]</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">i</th>
+            <th style="background:#22223a;color:#888;padding:5px;">nums[i]</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Valid j's (nums[j] &lt; nums[i])</th>
+            <th style="background:#22223a;color:#888;padding:5px;">dp[i]</th>
+            <th style="background:#22223a;color:#888;padding:5px;">LIS ending here</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">10</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">none</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">[10]</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">9</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">none (10>9)</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">[9]</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">none</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">[2]</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">j=2 (2&lt;5, dp=1)</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">2</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">[2,5]</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">j=2 (2&lt;3, dp=1)</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">[2,3]</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">7</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">j=2(1),3(2),4(2) → max=2</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">3</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">[2,5,7] or [2,3,7]</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">6</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">101</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">all valid → max dp=3 (j=5)</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">4</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">[2,5,7,101]</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">7</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">18</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">j=2(1),3(2),4(2),5(3) → max=3</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">4</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">[2,5,7,18]</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#4caf50;"><b>Result: max(dp) = 4</b> ✓</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>O(n log n) Binary Search approach — how it works:</b></p>
+<pre><code><span class="comment">Process [10, 9, 2, 5, 3, 7, 101, 18]:</span>
+<span class="comment">tails = []</span>
+
+<span class="comment">10: tails=[] → append → [10]</span>
+<span class="comment"> 9: 9 < 10 → replace 10 → [9]</span>
+<span class="comment"> 2: 2 < 9  → replace 9  → [2]</span>
+<span class="comment"> 5: 5 > 2  → append    → [2, 5]</span>
+<span class="comment"> 3: 3 < 5  → replace 5 → [2, 3]</span>
+<span class="comment"> 7: 7 > 3  → append    → [2, 3, 7]</span>
+<span class="comment">101: 101>7 → append    → [2, 3, 7, 101]</span>
+<span class="comment">18: 18<101 → replace   → [2, 3, 7, 18]</span>
+
+<span style="color:#4caf50;">tails.length = 4 = LIS length ✓</span></code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">Note: tails array is NOT the actual LIS — it's a helper structure. Its LENGTH equals the LIS length. Binary search finds the replacement position in O(log n).</p>
+
+      <p style="margin-top:14px;"><b>O(n²) vs O(n log n):</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">Approach</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Time</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Space</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Interview</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">DP (scan all previous)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">O(n²)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">O(n)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Start here (intuitive)</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Binary Search + tails</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(n log n)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">O(n)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Mention as optimization</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag"><span class="label">DP:</span><span class="value">O(n²)</span></div>
+        <div class="complexity-tag"><span class="label">Binary Search:</span><span class="value">O(n log n)</span></div>
+        <div class="complexity-tag"><span class="label">Space:</span><span class="value">O(n)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>O(n²) DP:</b></p>
+<pre><code><span class="keyword">public static int</span> <span class="type">lengthOfLIS</span>(<span class="type">int</span>[] nums) {
+    <span class="type">int</span> n = nums.length;
+    <span class="type">int</span>[] dp = <span class="keyword">new</span> <span class="type">int</span>[n];
+    Arrays.fill(dp, <span class="number">1</span>);
+    <span class="type">int</span> maxLen = <span class="number">1</span>;
+
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt; n; i++) {
+        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; i; j++) {
+            <span class="keyword">if</span> (nums[j] &lt; nums[i])
+                dp[i] = Math.max(dp[i], dp[j] + <span class="number">1</span>);
+        }
+        maxLen = Math.max(maxLen, dp[i]);
+    }
+    <span class="keyword">return</span> maxLen;
+}</code></pre>
+
+      <p style="margin-top:14px;"><b>O(n log n) Binary Search:</b></p>
+<pre><code><span class="keyword">public static int</span> <span class="type">lengthOfLIS_BS</span>(<span class="type">int</span>[] nums) {
+    List&lt;Integer&gt; tails = <span class="keyword">new</span> ArrayList&lt;&gt;();
+    <span class="keyword">for</span> (<span class="type">int</span> num : nums) {
+        <span class="type">int</span> pos = Collections.binarySearch(tails, num);
+        <span class="keyword">if</span> (pos &lt; <span class="number">0</span>) pos = -(pos + <span class="number">1</span>);
+        <span class="keyword">if</span> (pos == tails.size()) tails.add(num);
+        <span class="keyword">else</span> tails.set(pos, num);
+    }
+    <span class="keyword">return</span> tails.size();
+}</code></pre>
+      <p style="margin-top:6px;color:#888;font-size:11px;">💡 <code>Collections.binarySearch</code> returns negative insertion point if not found. Convert with <code>-(pos+1)</code>.</p>
+    </div>
+  </div>
+
+  <!-- Remaining sections -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead><tr><th style="background:#22223a;color:#888;padding:8px;">Case</th><th style="background:#22223a;color:#888;padding:8px;">Input</th><th style="background:#22223a;color:#888;padding:8px;">LIS</th><th style="background:#22223a;color:#888;padding:8px;">Note</th></tr></thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Already sorted</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">[1,2,3,4]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Entire array is the LIS</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Reverse sorted</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">[4,3,2,1]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Each element alone</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All same</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">[5,5,5]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Strictly increasing — equal doesn't count</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single element</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">[7]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Trivial</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Returning dp[n-1] instead of max(dp)</b>
+          <p style="color:#e44d26;">❌ LIS might not end at the last element. [1,3,2] → LIS=[1,3] ends at index 1, not 2.</p>
+          <p style="color:#4caf50;">✅ Answer = max of entire dp array</p>
+        </li>
+        <li style="margin-top:10px;"><b>Using ≤ instead of &lt; for strictly increasing</b>
+          <p style="color:#e44d26;">❌ [1,1,1] with ≤ gives LIS=3 (wrong — equal is not increasing)</p>
+          <p style="color:#4caf50;">✅ Use strict <code>&lt;</code> for strictly increasing</p>
+        </li>
+        <li style="margin-top:10px;"><b>Confusing subsequence with subarray</b>
+          <p style="color:#888;">Subsequence: elements in order, not necessarily contiguous. Subarray: contiguous.</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>✅ "Longest increasing/decreasing subsequence"</li>
+        <li>✅ "Minimum number of deletions to make sorted"</li>
+        <li>✅ "Russian doll envelopes" (2D LIS)</li>
+        <li>✅ "Longest chain of pairs"</li>
+        <li>✅ Any problem asking for longest subsequence with a monotonic property</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ "Longest increasing SUBARRAY" (contiguous) — use simple scan, not DP</li>
+        <li>❌ "Find the actual LIS" (not just length) — need to trace back through dp or maintain parent pointers</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="takeaway">
+    💡 "LIS: dp[i] = 1 + max(dp[j]) for all j < i where nums[j] < nums[i]. Answer = max of entire dp array. O(n²) DP or O(n log n) with binary search on tails."
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>DP progression so far: Fibonacci (#39) → Grid (#40) → Include/Exclude (#41) → LIS (#42).</p>
+      <p style="margin-top:8px;">Next: the king of DP — <b>0/1 Knapsack</b>. Given items with weights and values, and a bag with limited capacity, maximize value. This is the foundation for Coin Change (#44), Subset Sum (#45), and many more.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ LIS (1D, scan all previous) → 0/1 Knapsack (2D, items × capacity) — DP gets a second dimension!</p>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem41.html">← Problem #41</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(42)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem43.html">Problem #43 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY="dsa-roadmap-progress";const PROBLEM_NUM=42;
+function loadProgress(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{};}catch{return{};}}
+function saveProgress(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}
+function toggleDone(n){const p=loadProgress();if(p[n]==="done")delete p[n];else p[n]="done";saveProgress(p);updateUI();}
+function updateUI(){const p=loadProgress(),btn=document.getElementById("mark-done-btn");if(p[PROBLEM_NUM]==="done"){btn.textContent="✔ Completed";btn.classList.add("completed");}else{btn.textContent="☐ Mark as Done";btn.classList.remove("completed");}updateReadProgress();}
+function updateReadProgress(){const p=loadProgress();if(p[PROBLEM_NUM]==="done"){document.getElementById("section-pct").textContent="100%";document.getElementById("section-bar").style.width="100%";return;}const s=document.querySelectorAll(".section, .takeaway"),t=s.length;if(t===0)return;let v=0;s.forEach(sec=>{if(sec.getBoundingClientRect().top<window.innerHeight)v++;});const pct=Math.min(100,Math.round((v/t)*100));document.getElementById("section-pct").textContent=pct+"%";document.getElementById("section-bar").style.width=pct+"%";}
+window.addEventListener("scroll",updateReadProgress);updateUI();
+</script>
+</body>
+</html>

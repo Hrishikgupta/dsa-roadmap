@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#9 — Shortest Refueling Stop on Highway | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 2: Core Patterns</span>
+    <span class="problem-id">Problem #9 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #9: Shortest Refueling Stop on Highway</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#9 — Shortest Refueling Stop on Highway</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Sliding Window (Variable Size)</p>
+
+  <!-- SECTION 0: Real-World Scenario -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek highway pe drive kar rahe ho. Har kilometer pe ek toll booth hai jahan kuch fuel milta hai:</p>
+      <p><code>[2, 3, 1, 2, 4, 3]</code> (litres of fuel at each stop)</p>
+      <p>Tumhe minimum <b>7 litres</b> fuel collect karna hai to reach the destination.</p>
+      <p>Question: <b>Kam se kam kitne consecutive stops pe rukna padega to collect ≥ 7 litres?</b></p>
+      <p style="margin-top:8px;">Possible answers:</p>
+      <ul>
+        <li>[2,3,1,2] = 8 ≥ 7 → length 4</li>
+        <li>[3,1,2,4] = 10 ≥ 7 → length 4</li>
+        <li>[4,3] = 7 ≥ 7 → length <b>2</b> ✓ (shortest!)</li>
+      </ul>
+      <p style="color:#4caf50;margin-top:8px;">💡 Window size fixed nahi hai — it depends on when the sum condition is met. Expand karo jab tak condition na mile, shrink karo jab mil jaaye.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Problem Understanding -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given an array of positive integers and a target sum</li>
+        <li>Find the <b>minimum length</b> subarray whose sum is <b>≥ target</b></li>
+        <li>If no such subarray exists, return 0</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Input → Output:</b></p>
+      <ul>
+        <li>Input: <code>int target</code>, <code>int[] nums</code> (all positive)</li>
+        <li>Output: <code>int</code> — minimum length (or 0 if impossible)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>This is LeetCode #209 — Minimum Size Subarray Sum</b></p>
+      <p style="margin-top:10px;"><b>Key difference from Problem #8:</b></p>
+      <table style="width:100%;font-size:12px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Aspect</th>
+            <th style="background:#22223a;color:#888;padding:8px;">#8 Fixed Window</th>
+            <th style="background:#22223a;color:#888;padding:8px;">#9 Variable Window</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Window size</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Given (k)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#ffc107;">Unknown — depends on data</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">When to slide</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Every step</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">When condition is met</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Both edges move?</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Together (fixed gap)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Independently (expand/shrink)</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Goal</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Max/min aggregate of fixed size</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Shortest/longest window meeting condition</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Brute Force Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>First instinct:</b> Try every possible subarray, check if sum ≥ target, track minimum length.</p>
+<pre><code><span class="comment">// Brute Force — O(n²)</span>
+<span class="type">int</span> minLen = Integer.MAX_VALUE;
+<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) {
+    <span class="type">int</span> sum = <span class="number">0</span>;
+    <span class="keyword">for</span> (<span class="type">int</span> j = i; j &lt; n; j++) {
+        sum += nums[j];
+        <span class="keyword">if</span> (sum &gt;= target) {
+            minLen = Math.min(minLen, j - i + <span class="number">1</span>);
+            <span class="keyword">break</span>; <span class="comment">// no need to extend further</span>
+        }
+    }
+}
+<span class="keyword">return</span> minLen == Integer.MAX_VALUE ? <span class="number">0</span> : minLen;</code></pre>
+      <p>O(n²) — the <code>break</code> helps but worst case is still quadratic.</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 Jab hum inner loop mein sum ≥ target paate hain aur break karte hain, toh next iteration mein phir se scratch se start karte hain. Kya hum pichle kaam ko reuse kar sakte hain?</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Optimization Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Key Insight — The Caterpillar Analogy:</b></p>
+      <p>Imagine a caterpillar on the array. It has a head (right) and tail (left).</p>
+      <ul>
+        <li><b>Hungry?</b> (sum &lt; target) → Stretch head forward (expand right) to eat more</li>
+        <li><b>Full?</b> (sum ≥ target) → Pull tail forward (shrink left) to see if you can be shorter while still full</li>
+      </ul>
+
+      <p style="margin-top:12px;"><b>Why this works with positive numbers:</b></p>
+      <ul>
+        <li>All elements are positive → expanding always increases sum, shrinking always decreases sum</li>
+        <li>So the window behaves predictably — no surprises</li>
+        <li>Left pointer never goes back, right pointer never goes back → each element visited at most twice → O(n)</li>
+      </ul>
+
+      <p style="margin-top:12px;"><b>The two-phase loop:</b></p>
+<pre><code><span class="comment">// Right pointer expands (outer loop)</span>
+<span class="keyword">for</span> (right = <span class="number">0</span>; right &lt; n; right++) {
+    windowSum += nums[right];  <span class="comment">// expand</span>
+
+    <span class="comment">// Left pointer shrinks (inner while)</span>
+    <span class="keyword">while</span> (windowSum &gt;= target) {
+        update answer;
+        windowSum -= nums[left]; <span class="comment">// shrink</span>
+        left++;
+    }
+}</code></pre>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern identified: <b>Variable-Size Sliding Window — expand right, shrink left when condition met</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Final Approach -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach (Pattern-Based)</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Pattern Name:</b> Sliding Window — Variable Size (Shrinkable)</p>
+      <p style="margin-top:10px;"><b>Algorithm:</b></p>
+      <ol>
+        <li><code>left = 0</code>, <code>windowSum = 0</code>, <code>minLen = Integer.MAX_VALUE</code></li>
+        <li>For <code>right = 0</code> to <code>n - 1</code>:
+          <ul>
+            <li><code>windowSum += nums[right]</code> (expand window)</li>
+            <li>While <code>windowSum &gt;= target</code>:
+              <ul>
+                <li><code>minLen = Math.min(minLen, right - left + 1)</code></li>
+                <li><code>windowSum -= nums[left]</code> (shrink from left)</li>
+                <li><code>left++</code></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>Return <code>minLen == MAX_VALUE ? 0 : minLen</code></li>
+      </ol>
+      <p style="margin-top:10px;color:#888;font-size:11px;">💡 The while loop inside the for loop looks like O(n²), but it's not — left moves at most n times total across ALL iterations of the outer loop.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Step-by-Step Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Input:</b> <code>nums = [2, 3, 1, 2, 4, 3]</code>, <code>target = 7</code></p>
+      <table style="width:100%;font-size:11px;margin-top:10px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:6px;">R</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Add</th>
+            <th style="background:#22223a;color:#888;padding:6px;">wSum</th>
+            <th style="background:#22223a;color:#888;padding:6px;">≥7?</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Window</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Shrink?</th>
+            <th style="background:#22223a;color:#888;padding:6px;">L</th>
+            <th style="background:#22223a;color:#888;padding:6px;">minLen</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">+2</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">No</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;"><code>[<span style="color:#6c63ff;">2</span>]</code></td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">—</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">∞</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">+3</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">5</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">No</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;"><code>[<span style="color:#6c63ff;">2,3</span>]</code></td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">—</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">∞</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">+1</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">6</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">No</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;"><code>[<span style="color:#6c63ff;">2,3,1</span>]</code></td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">—</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">∞</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">+2</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">8</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Yes!</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;"><code>[<span style="color:#4caf50;">2,3,1,2</span>]</code></td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#ffc107;">len=4, shrink: -2, wSum=6</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">4</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">4</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">+4</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">10</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Yes!</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;"><code>[<span style="color:#4caf50;">3,1,2,4</span>]</code></td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#ffc107;">len=4→shrink -3→wSum=7→len=3→shrink -1→wSum=6</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">3</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">5</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">+3</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">9</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Yes!</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;"><code>[<span style="color:#4caf50;">2,4,3</span>]</code></td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#ffc107;">len=3→shrink -2→wSum=7→len=2→shrink -4→wSum=3</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">5</td>
+            <td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">2 ✓</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#4caf50;"><b>Result: minLen = 2</b> (subarray [4, 3], sum = 7)</p>
+      <p style="color:#888;font-size:11px;">Left moved 5 times total, right moved 6 times. Total work ≈ 11 = O(n), not O(n²).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Internal Mechanics -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Why it's O(n) despite the nested while loop:</b></p>
+      <ul>
+        <li>The <code>right</code> pointer moves from 0 to n-1 → n moves total</li>
+        <li>The <code>left</code> pointer also moves from 0 to at most n-1 → n moves total</li>
+        <li>Left never goes back, right never goes back</li>
+        <li>Total pointer movements = n + n = 2n = <b>O(n)</b></li>
+      </ul>
+      <p style="margin-top:8px;color:#888;font-size:11px;">This is called "amortized O(n)" — the inner while loop runs many times in some iterations but zero times in others. Total across all iterations = O(n).</p>
+
+      <p style="margin-top:14px;"><b>Why this only works with positive numbers:</b></p>
+      <ul>
+        <li>Positive numbers guarantee: expanding → sum increases, shrinking → sum decreases</li>
+        <li>This monotonic behavior lets us confidently shrink when sum ≥ target</li>
+        <li>With negative numbers, shrinking could INCREASE the sum → the greedy shrink logic breaks</li>
+        <li>For arrays with negatives, you'd need prefix sum + binary search or deque-based approaches</li>
+      </ul>
+
+      <p style="margin-top:14px;"><b>Variable window — two sub-patterns:</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">Goal</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Shrink when?</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Update answer when?</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Example</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Shortest window</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Condition IS met</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Before/during shrink</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">This problem (#9)</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Longest window</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Condition is VIOLATED</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">After ensuring valid</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Problem #10 (next)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Complexity Analysis -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag">
+          <span class="label">Time:</span>
+          <span class="value">O(n)</span>
+        </div>
+        <div class="complexity-tag">
+          <span class="label">Space:</span>
+          <span class="value">O(1)</span>
+        </div>
+      </div>
+      <table style="width:100%;font-size:12px;margin-top:12px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Approach</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Time</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Space</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Brute Force</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">O(n²)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">O(1)</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Prefix Sum + Binary Search</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#ffc107;">O(n log n)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">O(n)</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Variable Sliding Window</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(n)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(1)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Java Implementation -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">public class</span> <span class="type">MinSubarraySum</span> {
+
+    <span class="keyword">public static int</span> <span class="type">minSubArrayLen</span>(<span class="type">int</span> target, <span class="type">int</span>[] nums) {
+        <span class="type">int</span> left = <span class="number">0</span>;
+        <span class="type">int</span> windowSum = <span class="number">0</span>;
+        <span class="type">int</span> minLen = Integer.MAX_VALUE;
+
+        <span class="keyword">for</span> (<span class="type">int</span> right = <span class="number">0</span>; right &lt; nums.length; right++) {
+            windowSum += nums[right];
+
+            <span class="keyword">while</span> (windowSum &gt;= target) {
+                minLen = Math.min(minLen, right - left + <span class="number">1</span>);
+                windowSum -= nums[left];
+                left++;
+            }
+        }
+
+        <span class="keyword">return</span> minLen == Integer.MAX_VALUE ? <span class="number">0</span> : minLen;
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        <span class="type">int</span>[] fuel = {<span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">4</span>, <span class="number">3</span>};
+        System.out.println(minSubArrayLen(<span class="number">7</span>, fuel)); <span class="comment">// 2</span>
+    }
+}</code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 12 lines of logic. The beauty of sliding window — simple code, powerful result.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 9: Edge Cases -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Case</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Input</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Target</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Output</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Why</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Impossible</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,1,1]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">100</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Total sum = 3 &lt; 100</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single element enough</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1, 10, 2]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">7</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">10 alone ≥ 7</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Entire array needed</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,2,3]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">6</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Sum of all = 6 = target</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All same elements</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[3,3,3,3]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">7</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Need 3 elements (9 ≥ 7)</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Target = 0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,2]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0 (or 1)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Depends on problem definition</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 10: Common Mistakes -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Using <code>if</code> instead of <code>while</code> for shrinking</b>
+          <p style="color:#e44d26;">❌ <code>if (windowSum >= target)</code> — only shrinks once, might miss shorter windows</p>
+          <p style="color:#4caf50;">✅ <code>while (windowSum >= target)</code> — keeps shrinking until condition breaks</p>
+        </li>
+        <li style="margin-top:10px;"><b>Updating answer AFTER shrinking</b>
+          <p style="color:#e44d26;">❌ Shrink first, then record length → misses the valid window before shrink</p>
+          <p style="color:#4caf50;">✅ Record length first, THEN shrink</p>
+        </li>
+        <li style="margin-top:10px;"><b>Applying this to arrays with negative numbers</b>
+          <p style="color:#e44d26;">❌ Shrinking doesn't guarantee sum decreases with negatives</p>
+          <p style="color:#888;">For negatives, use prefix sum + sorted structure or deque</p>
+        </li>
+        <li style="margin-top:10px;"><b>Returning minLen without checking if it was updated</b>
+          <p style="color:#e44d26;">❌ Returns Integer.MAX_VALUE when no valid subarray exists</p>
+          <p style="color:#4caf50;">✅ <code>return minLen == MAX_VALUE ? 0 : minLen</code></p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 11: When to Use This Pattern -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Signals to पहचान (identify) this pattern:</b></p>
+      <ul>
+        <li>✅ "Shortest/smallest subarray with sum ≥ X"</li>
+        <li>✅ "Longest subarray with sum ≤ X" (flip the shrink condition)</li>
+        <li>✅ "Minimum window containing all characters" (Problem #12)</li>
+        <li>✅ "Longest substring without repeating characters" (Problem #10)</li>
+        <li>✅ Any problem asking for shortest/longest contiguous subarray meeting a condition</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Variable window template:</b></p>
+<pre><code><span class="type">int</span> left = <span class="number">0</span>;
+<span class="keyword">for</span> (<span class="type">int</span> right = <span class="number">0</span>; right &lt; n; right++) {
+    <span class="comment">// 1. Expand: add nums[right] to window state</span>
+
+    <span class="keyword">while</span> (<span class="comment">/* window is valid / condition met */</span>) {
+        <span class="comment">// 2. Update answer (for shortest)</span>
+        <span class="comment">// 3. Shrink: remove nums[left] from window state</span>
+        left++;
+    }
+    <span class="comment">// For longest: update answer here (window just became invalid)</span>
+}</code></pre>
+    </div>
+  </div>
+
+  <!-- SECTION 12: When NOT to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ Array contains negative numbers (sum isn't monotonic with window size)</li>
+        <li>❌ Non-contiguous elements needed ("pick any k elements" → sorting/heap)</li>
+        <li>❌ Window size is fixed → use fixed sliding window (#8), simpler</li>
+        <li>❌ "Maximum subarray sum" (any size) → Kadane's algorithm, not sliding window</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 13: Key Takeaway -->
+  <div class="takeaway">
+    💡 "Variable window = caterpillar. Hungry? Expand right. Full? Shrink left. Both pointers only move forward → O(n)."
+  </div>
+
+  <!-- SECTION 14: Bridge to Next Problem -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Ab tak humne sliding window ke dono flavors dekhe:</p>
+      <ul>
+        <li>#8: Fixed size — window slides, size constant</li>
+        <li>#9: Variable size — expand/shrink based on sum condition</li>
+      </ul>
+      <p style="margin-top:10px;">Next problem mein condition sum nahi, balki <b>uniqueness</b> hogi:</p>
+      <p style="margin-top:8px;"><b>"Find the longest substring without repeating characters"</b></p>
+      <p style="margin-top:8px;">Window expand karo jab tak characters unique hain. Repeat mile? Shrink karo. But tracking ke liye <b>HashMap</b> chahiye (Problem #2 ka pattern combine hoga).</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Variable window + sum condition → Variable window + HashMap (uniqueness condition) — combining patterns!</p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem8.html">← Problem #8</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(9)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem10.html">Problem #10 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "dsa-roadmap-progress";
+const PROBLEM_NUM = 9;
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+
+function saveProgress(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function toggleDone(num) {
+  const prog = loadProgress();
+  if (prog[num] === "done") { delete prog[num]; }
+  else { prog[num] = "done"; }
+  saveProgress(prog);
+  updateUI();
+}
+
+function updateUI() {
+  const prog = loadProgress();
+  const btn = document.getElementById("mark-done-btn");
+  if (prog[PROBLEM_NUM] === "done") {
+    btn.textContent = "✔ Completed";
+    btn.classList.add("completed");
+  } else {
+    btn.textContent = "☐ Mark as Done";
+    btn.classList.remove("completed");
+  }
+  updateReadProgress();
+}
+
+function updateReadProgress() {
+  const prog = loadProgress();
+  if (prog[PROBLEM_NUM] === "done") {
+    document.getElementById("section-pct").textContent = "100%";
+    document.getElementById("section-bar").style.width = "100%";
+    return;
+  }
+  const sections = document.querySelectorAll(".section, .takeaway");
+  const total = sections.length;
+  if (total === 0) return;
+  let visible = 0;
+  sections.forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    if (rect.top < window.innerHeight) visible++;
+  });
+  const pct = Math.min(100, Math.round((visible / total) * 100));
+  document.getElementById("section-pct").textContent = pct + "%";
+  document.getElementById("section-bar").style.width = pct + "%";
+}
+
+window.addEventListener("scroll", updateReadProgress);
+updateUI();
+</script>
+</body>
+</html>

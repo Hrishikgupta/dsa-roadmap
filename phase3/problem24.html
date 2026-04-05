@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#24 — Merge Sort — Divide the Army, Conquer the War | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 3: Intermediate</span>
+    <span class="problem-id">Problem #24 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #24: Merge Sort — Divide the Army, Conquer the War</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#24 — Merge Sort — Divide the Army, Conquer the War</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Divide and Conquer</p>
+
+  <!-- SECTION 0: Real-World Scenario -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek general ho. Tumhari army mein 8 soldiers hain, unordered:</p>
+      <p><code>[38, 27, 43, 3, 9, 82, 10, 76]</code></p>
+      <p>Tumhe unhe rank order mein line up karna hai. Strategy:</p>
+      <ol>
+        <li><b>Divide:</b> Army ko do halves mein split karo</li>
+        <li><b>Conquer:</b> Har half ko apne lieutenant ko de do — "sort karo" (recursion!)</li>
+        <li><b>Merge:</b> Dono sorted halves ko merge karo (Problem #5 ka two-pointer merge!)</li>
+      </ol>
+      <p style="color:#4caf50;margin-top:8px;">Result: <code>[3, 9, 10, 27, 38, 43, 76, 82]</code></p>
+      <p style="color:#888;font-size:11px;margin-top:4px;">Merge Sort — the most important O(n log n) sorting algorithm. Foundation for many advanced problems.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Problem Understanding -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What is Divide and Conquer?</b></p>
+      <ol>
+        <li><b>Divide:</b> Split the problem into smaller subproblems</li>
+        <li><b>Conquer:</b> Solve each subproblem recursively</li>
+        <li><b>Combine:</b> Merge the solutions of subproblems into the final answer</li>
+      </ol>
+
+      <p style="margin-top:10px;"><b>How Merge Sort applies D&C:</b></p>
+      <ul>
+        <li>Divide: split array into two halves at midpoint</li>
+        <li>Conquer: recursively sort each half</li>
+        <li>Combine: merge two sorted halves (this is Problem #5's two-pointer merge!)</li>
+      </ul>
+
+      <p style="margin-top:10px;"><b>Connection to previous problems:</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">From</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Concept</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Used Here</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">#5</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Two-pointer merge of sorted arrays</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">The "combine" step</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">#20</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Recursion — trust the function</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">"Sort each half" = trust recursion handles it</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;color:#6c63ff;font-size:12px;">💡 Merge Sort = Recursion (#20) + Merge (#5). Two things you already know, combined into something powerful.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Brute Force Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Simple sorting approaches:</b></p>
+      <ul>
+        <li>Bubble Sort: O(n²) — compare adjacent, swap, repeat</li>
+        <li>Selection Sort: O(n²) — find min, place at front, repeat</li>
+        <li>Insertion Sort: O(n²) — insert each element into sorted portion</li>
+      </ul>
+      <p>All O(n²). For n = 1,000,000 → 10¹² operations. Way too slow.</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 Can we do better? Yes — by dividing the problem. Sorting n elements is hard. Sorting n/2 elements is easier. Sorting 1 element is trivial. Then merge the sorted pieces.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Optimization Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Key Insight — Why splitting helps:</b></p>
+      <ul>
+        <li>Sorting n items: hard (O(n²) with simple methods)</li>
+        <li>Sorting n/2 items: 4× easier (n/2)² = n²/4</li>
+        <li>Sorting 1 item: trivial (already sorted!)</li>
+        <li>Merging two sorted halves: O(n) — we proved this in Problem #5</li>
+      </ul>
+
+      <p style="margin-top:12px;"><b>The math — why O(n log n):</b></p>
+<pre><code><span class="comment">Level 0: 1 array of size n         → merge cost: n</span>
+<span class="comment">Level 1: 2 arrays of size n/2      → merge cost: n</span>
+<span class="comment">Level 2: 4 arrays of size n/4      → merge cost: n</span>
+<span class="comment">...                                              </span>
+<span class="comment">Level k: n arrays of size 1        → merge cost: n</span>
+
+<span class="comment">How many levels? log₂(n)</span>
+<span class="comment">Cost per level: O(n)</span>
+<span class="comment">Total: O(n) × O(log n) = O(n log n)</span></code></pre>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>Divide and Conquer — split in half, solve recursively, merge in O(n) → total O(n log n)</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Final Approach -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach (Pattern-Based)</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Algorithm:</b></p>
+      <ol>
+        <li><b>Base case:</b> array of size ≤ 1 → already sorted, return</li>
+        <li><b>Divide:</b> find mid = (left + right) / 2</li>
+        <li><b>Conquer:</b>
+          <ul>
+            <li>mergeSort(arr, left, mid)</li>
+            <li>mergeSort(arr, mid+1, right)</li>
+          </ul>
+        </li>
+        <li><b>Combine:</b> merge the two sorted halves into one sorted array</li>
+      </ol>
+      <p style="margin-top:10px;"><b>The merge step</b> (same as Problem #5):</p>
+      <ul>
+        <li>Two pointers: one on each sorted half</li>
+        <li>Compare, pick smaller, advance that pointer</li>
+        <li>Copy remaining elements</li>
+        <li>Copy merged result back to original array</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Step-by-Step Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Input:</b> <code>[38, 27, 43, 3, 9, 82, 10, 76]</code></p>
+<pre><code><span class="comment">DIVIDE phase (top-down):</span>
+
+[38, 27, 43, 3, 9, 82, 10, 76]
+         /                \
+[38, 27, 43, 3]    [9, 82, 10, 76]
+    /      \           /       \
+[38, 27]  [43, 3]  [9, 82]  [10, 76]
+  / \      / \      / \       / \
+[38][27] [43][3]  [9][82]  [10][76]
+
+<span style="color:#4caf50;">MERGE phase (bottom-up):</span>
+
+[38][27] → <span style="color:#4caf50;">[27, 38]</span>    [43][3] → <span style="color:#4caf50;">[3, 43]</span>
+[9][82] → <span style="color:#4caf50;">[9, 82]</span>     [10][76] → <span style="color:#4caf50;">[10, 76]</span>
+
+[27, 38] + [3, 43] → <span style="color:#4caf50;">[3, 27, 38, 43]</span>
+[9, 82] + [10, 76] → <span style="color:#4caf50;">[9, 10, 76, 82]</span>
+
+[3, 27, 38, 43] + [9, 10, 76, 82]
+→ <span style="color:#4caf50;">[3, 9, 10, 27, 38, 43, 76, 82]</span> ✓</code></pre>
+      <p style="margin-top:10px;color:#888;font-size:11px;">3 levels of splitting (log₂8 = 3). Each level does O(n) merge work. Total: 3 × 8 = 24 operations ≈ O(n log n).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Internal Mechanics -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Merge Sort vs Quick Sort:</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Aspect</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Merge Sort</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Quick Sort</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Divide</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Split at midpoint (easy)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Partition around pivot (hard)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Combine</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Merge two sorted halves (hard)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Nothing (elements already in place)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Worst case</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(n log n) always</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#e44d26;">O(n²) (bad pivot)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Space</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#ffc107;">O(n) extra</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(log n) (in-place)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Stable?</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Yes</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#e44d26;">No</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Best for</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Linked lists, external sort, stability needed</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Arrays, in-memory, average case</td></tr>
+        </tbody>
+      </table>
+
+      <p style="margin-top:14px;"><b>Why Merge Sort matters beyond sorting:</b></p>
+      <ul>
+        <li>The merge step can be modified to extract information DURING the merge</li>
+        <li>Problem #25 (next): Count Inversions — count how many pairs are out of order, using modified merge</li>
+        <li>This "extract info during merge" technique is a powerful interview pattern</li>
+      </ul>
+
+      <p style="margin-top:14px;"><b>Stability explained:</b></p>
+      <ul>
+        <li>Stable sort: equal elements maintain their original relative order</li>
+        <li>Merge Sort is stable because during merge, when elements are equal, we pick from the LEFT half first</li>
+        <li>This matters when sorting objects by multiple keys (sort by name, then by age — stable sort preserves name order within same age)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Complexity Analysis -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag">
+          <span class="label">Time:</span>
+          <span class="value">O(n log n)</span>
+        </div>
+        <div class="complexity-tag">
+          <span class="label">Space:</span>
+          <span class="value">O(n)</span>
+        </div>
+      </div>
+      <p style="margin-top:10px;"><b>Recurrence:</b> T(n) = 2·T(n/2) + O(n) → O(n log n) by Master Theorem.</p>
+      <p><b>Space:</b> O(n) for the temporary merge array + O(log n) recursion stack.</p>
+      <table style="width:100%;font-size:12px;margin-top:10px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Algorithm</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Time</th>
+            <th style="background:#22223a;color:#888;padding:8px;">n = 1,000,000</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Bubble/Selection/Insertion</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">O(n²)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">10¹²</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Merge Sort</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(n log n)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">~20,000,000</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:6px;color:#888;font-size:11px;">50,000× faster for 1 million elements. That's the power of divide and conquer.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Java Implementation -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">import</span> java.util.Arrays;
+
+<span class="keyword">public class</span> <span class="type">MergeSort</span> {
+
+    <span class="keyword">public static void</span> <span class="type">mergeSort</span>(<span class="type">int</span>[] arr, <span class="type">int</span> left, <span class="type">int</span> right) {
+        <span class="keyword">if</span> (left &gt;= right) <span class="keyword">return</span>; <span class="comment">// base case: 0 or 1 element</span>
+
+        <span class="type">int</span> mid = left + (right - left) / <span class="number">2</span>;
+
+        mergeSort(arr, left, mid);       <span class="comment">// sort left half</span>
+        mergeSort(arr, mid + <span class="number">1</span>, right);  <span class="comment">// sort right half</span>
+        merge(arr, left, mid, right);    <span class="comment">// merge sorted halves</span>
+    }
+
+    <span class="keyword">private static void</span> <span class="type">merge</span>(<span class="type">int</span>[] arr, <span class="type">int</span> left, <span class="type">int</span> mid, <span class="type">int</span> right) {
+        <span class="type">int</span>[] temp = <span class="keyword">new</span> <span class="type">int</span>[right - left + <span class="number">1</span>];
+        <span class="type">int</span> i = left, j = mid + <span class="number">1</span>, k = <span class="number">0</span>;
+
+        <span class="keyword">while</span> (i &lt;= mid &amp;&amp; j &lt;= right) {
+            <span class="keyword">if</span> (arr[i] &lt;= arr[j]) {
+                temp[k++] = arr[i++];
+            } <span class="keyword">else</span> {
+                temp[k++] = arr[j++];
+            }
+        }
+
+        <span class="keyword">while</span> (i &lt;= mid) temp[k++] = arr[i++];
+        <span class="keyword">while</span> (j &lt;= right) temp[k++] = arr[j++];
+
+        System.arraycopy(temp, <span class="number">0</span>, arr, left, temp.length);
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        <span class="type">int</span>[] arr = {<span class="number">38</span>, <span class="number">27</span>, <span class="number">43</span>, <span class="number">3</span>, <span class="number">9</span>, <span class="number">82</span>, <span class="number">10</span>, <span class="number">76</span>};
+        mergeSort(arr, <span class="number">0</span>, arr.length - <span class="number">1</span>);
+        System.out.println(Arrays.toString(arr));
+        <span class="comment">// [3, 9, 10, 27, 38, 43, 76, 82]</span>
+    }
+}</code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 <code>left + (right - left) / 2</code> instead of <code>(left + right) / 2</code> — avoids integer overflow when left + right > Integer.MAX_VALUE.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 9: Edge Cases -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Case</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Input</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Already sorted</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,2,3,4]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Still O(n log n) — merge sort doesn't skip</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Reverse sorted</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[4,3,2,1]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Still O(n log n) — consistent performance</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All same</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[5,5,5,5]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Works fine — stable sort preserves order</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single element</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[42]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Base case — returns immediately</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Odd length</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[3,1,2]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Halves are unequal size — works fine</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 10: Common Mistakes -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Integer overflow in mid calculation</b>
+          <p style="color:#e44d26;">❌ <code>(left + right) / 2</code> — overflows when left + right > 2³¹</p>
+          <p style="color:#4caf50;">✅ <code>left + (right - left) / 2</code> — safe</p>
+        </li>
+        <li style="margin-top:10px;"><b>Not copying merged result back to original array</b>
+          <p style="color:#e44d26;">❌ Merge into temp but forget <code>System.arraycopy</code> back</p>
+          <p style="color:#4caf50;">✅ Always copy temp back: <code>System.arraycopy(temp, 0, arr, left, temp.length)</code></p>
+        </li>
+        <li style="margin-top:10px;"><b>Wrong boundary in recursive calls</b>
+          <p style="color:#e44d26;">❌ <code>mergeSort(arr, left, mid-1)</code> and <code>mergeSort(arr, mid, right)</code> — can cause infinite recursion when left==right</p>
+          <p style="color:#4caf50;">✅ <code>mergeSort(arr, left, mid)</code> and <code>mergeSort(arr, mid+1, right)</code></p>
+        </li>
+        <li style="margin-top:10px;"><b>Using <code>&lt;</code> instead of <code>&lt;=</code> in merge for stability</b>
+          <p style="color:#4caf50;">✅ <code>arr[i] <= arr[j]</code> — pick from left half when equal → maintains stability</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 11: When to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Signals to पहचान (identify):</b></p>
+      <ul>
+        <li>✅ "Sort an array" — when stability or guaranteed O(n log n) is needed</li>
+        <li>✅ "Count inversions" / "Count something during merge" (Problem #25)</li>
+        <li>✅ Sorting linked lists — merge sort is ideal (no random access needed)</li>
+        <li>✅ External sorting — data too large for memory, sort chunks and merge</li>
+        <li>✅ Any problem where "split, solve halves, combine" structure fits</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Divide and Conquer family:</b></p>
+      <ul>
+        <li>Merge Sort — split at mid, merge sorted halves</li>
+        <li>Quick Sort — partition around pivot, sort partitions</li>
+        <li>Binary Search — eliminate half each step</li>
+        <li>Closest pair of points — geometric D&C</li>
+        <li>Strassen's matrix multiplication — D&C on matrices</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 12: When NOT to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ Space is critical — merge sort needs O(n) extra. Use Quick Sort or Heap Sort for O(1) extra.</li>
+        <li>❌ Nearly sorted data — Insertion Sort is O(n) on nearly sorted. Merge Sort is still O(n log n).</li>
+        <li>❌ Small arrays (n < 20) — overhead of recursion. Use Insertion Sort. (Java's Arrays.sort does this hybrid.)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 13: Key Takeaway -->
+  <div class="takeaway">
+    💡 "Divide and Conquer: split the problem, trust recursion to solve halves, merge the results. Merge Sort = O(n) merge × O(log n) levels = O(n log n)."
+  </div>
+
+  <!-- SECTION 14: Bridge to Next Problem -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Ab tum Merge Sort samajh gaye — split, sort halves, merge.</p>
+      <p style="margin-top:10px;">Next problem mein hum merge step ko <b>modify</b> karenge to extract extra information:</p>
+      <p style="margin-top:8px;"><b>"Count Inversions in a Ranking List"</b> — how many pairs (i,j) exist where i &lt; j but arr[i] &gt; arr[j]?</p>
+      <ul>
+        <li>Brute force: O(n²) — check every pair</li>
+        <li>Modified Merge Sort: during merge, when right element is picked before left → count inversions</li>
+        <li>Same O(n log n) as merge sort, but now it counts inversions too</li>
+      </ul>
+      <p style="color:#6c63ff;margin-top:12px;">→ Merge Sort (sort) → Modified Merge Sort (sort + extract info) — same tool, more power!</p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem23.html">← Problem #23</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(24)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem25.html">Problem #25 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "dsa-roadmap-progress";
+const PROBLEM_NUM = 24;
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+
+function saveProgress(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function toggleDone(num) {
+  const prog = loadProgress();
+  if (prog[num] === "done") { delete prog[num]; }
+  else { prog[num] = "done"; }
+  saveProgress(prog);
+  updateUI();
+}
+
+function updateUI() {
+  const prog = loadProgress();
+  const btn = document.getElementById("mark-done-btn");
+  if (prog[PROBLEM_NUM] === "done") {
+    btn.textContent = "✔ Completed";
+    btn.classList.add("completed");
+  } else {
+    btn.textContent = "☐ Mark as Done";
+    btn.classList.remove("completed");
+  }
+  updateReadProgress();
+}
+
+function updateReadProgress() {
+  const prog = loadProgress();
+  if (prog[PROBLEM_NUM] === "done") {
+    document.getElementById("section-pct").textContent = "100%";
+    document.getElementById("section-bar").style.width = "100%";
+    return;
+  }
+  const sections = document.querySelectorAll(".section, .takeaway");
+  const total = sections.length;
+  if (total === 0) return;
+  let visible = 0;
+  sections.forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    if (rect.top < window.innerHeight) visible++;
+  });
+  const pct = Math.min(100, Math.round((visible / total) * 100));
+  document.getElementById("section-pct").textContent = pct + "%";
+  document.getElementById("section-bar").style.width = pct + "%";
+}
+
+window.addEventListener("scroll", updateReadProgress);
+updateUI();
+</script>
+</body>
+</html>

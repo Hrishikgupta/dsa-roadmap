@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#46 — Longest Common Subsequence of Two Playlists | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 5: Mastery</span>
+    <span class="problem-id">Problem #46 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #46: Longest Common Subsequence of Two Playlists</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#46 — Longest Common Subsequence of Two Playlists</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: DP (Two String DP — LCS)</p>
+
+  <!-- SECTION 0 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Do friends ke music playlists hain. Kitne songs common hain (in same relative order)?</p>
+<pre><code><span class="comment">Playlist A: "abcde"
+Playlist B: "ace"
+
+Common subsequence: "ace" (length 3)
+  a_c_e  ← from A (skip b, d)
+  ace    ← from B (all match)</span></code></pre>
+      <p style="margin-top:8px;">Question: <b>"Longest common subsequence (LCS) ki length kya hai?"</b></p>
+      <p style="color:#4caf50;">Answer: <b>3</b> ("ace")</p>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #1143 — Longest Common Subsequence. Foundation for Edit Distance, Diff tools, DNA alignment.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given two strings, find the length of their longest common subsequence</li>
+        <li>Subsequence = characters in order, not necessarily contiguous</li>
+        <li>"ace" is a subsequence of "abcde" (skip b, d)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>This is a new DP structure — Two-String DP:</b></p>
+      <ul>
+        <li>Previous DP: 1D (stairs, robber) or items × capacity (knapsack)</li>
+        <li>LCS: <code>dp[i][j]</code> = LCS length of <code>s1[0..i-1]</code> and <code>s2[0..j-1]</code></li>
+        <li>Two strings = two dimensions</li>
+      </ul>
+      <p style="margin-top:10px;"><b>DP recipe:</b></p>
+      <ol>
+        <li><b>State:</b> <code>dp[i][j]</code> = LCS of first i chars of s1 and first j chars of s2</li>
+        <li><b>Recurrence:</b>
+          <ul>
+            <li>If <code>s1[i-1] == s2[j-1]</code>: <code>dp[i][j] = dp[i-1][j-1] + 1</code> (match! extend LCS)</li>
+            <li>Else: <code>dp[i][j] = max(dp[i-1][j], dp[i][j-1])</code> (skip one char from either string)</li>
+          </ul>
+        </li>
+        <li><b>Base:</b> <code>dp[0][j] = 0</code>, <code>dp[i][0] = 0</code> (empty string has LCS 0)</li>
+        <li><b>Order:</b> Row by row, left to right</li>
+        <li><b>Answer:</b> <code>dp[m][n]</code></li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Generate all subsequences of s1 (2^m), check each against s2.</b> Exponential.</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 At each position, if chars match → both advance + LCS grows. If not → try skipping from s1 OR s2, take the better one. Classic overlapping subproblems.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>The two cases at each (i, j):</b></p>
+<pre><code><span class="keyword">if</span> s1[i-<span class="number">1</span>] == s2[j-<span class="number">1</span>]:
+    <span class="comment">// Characters match! This char is part of LCS.</span>
+    dp[i][j] = dp[i-<span class="number">1</span>][j-<span class="number">1</span>] + <span class="number">1</span>  <span class="comment">// diagonal + 1</span>
+<span class="keyword">else</span>:
+    <span class="comment">// Don't match. Best LCS without one of the chars.</span>
+    dp[i][j] = max(dp[i-<span class="number">1</span>][j], dp[i][j-<span class="number">1</span>])  <span class="comment">// max(top, left)</span></code></pre>
+      <p style="margin-top:10px;"><b>Intuition:</b></p>
+      <ul>
+        <li><b>Match:</b> "Great, both strings contributed this character. LCS grows by 1. Move both pointers."</li>
+        <li><b>No match:</b> "One of these chars isn't in the LCS. Try dropping from s1 (go up) or s2 (go left). Take the better result."</li>
+      </ul>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>Two-String DP — match → diagonal+1, no match → max(top, left). The foundation for Edit Distance, Diff, DNA alignment.</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>s1 = "abcde", s2 = "ace"</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:6px;"></th>
+            <th style="background:#22223a;color:#888;padding:6px;">""</th>
+            <th style="background:#22223a;color:#888;padding:6px;">a</th>
+            <th style="background:#22223a;color:#888;padding:6px;">c</th>
+            <th style="background:#22223a;color:#888;padding:6px;">e</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#888;">""</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#888;">a</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">1 ↖</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#888;">b</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#888;">c</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">2 ↖</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#888;">d</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#888;">e</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">3 ↖</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#4caf50;"><b>Result: dp[5][3] = 3</b> ✓ (LCS = "ace")</p>
+      <p style="color:#888;font-size:11px;">↖ marks where characters matched (diagonal + 1). Other cells take max(top, left).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Two-String DP family:</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Problem</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Match case</th>
+            <th style="background:#22223a;color:#888;padding:5px;">No-match case</th>
+            <th style="background:#22223a;color:#888;padding:5px;">LC</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">LCS (this)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">diag + 1</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">max(top, left)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">#1143</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Edit Distance (#47)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">diag (no cost)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">1 + min(top, left, diag)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">#72</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Longest Common Substring</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">diag + 1</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">0 (reset — must be contiguous)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">—</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;color:#888;font-size:11px;">Same 2D table structure. Only the match/no-match formulas change. Master LCS → Edit Distance is one step away.</p>
+
+      <p style="margin-top:14px;"><b>Real-world LCS applications:</b></p>
+      <ul>
+        <li><code>git diff</code> — finds common lines between file versions</li>
+        <li>DNA sequence alignment — find common gene patterns</li>
+        <li>Spell checkers — similarity between words</li>
+        <li>Plagiarism detection — common text sequences</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag"><span class="label">Time:</span><span class="value">O(m × n)</span></div>
+        <div class="complexity-tag"><span class="label">Space:</span><span class="value">O(m × n)</span></div>
+      </div>
+      <p style="margin-top:10px;">m = len(s1), n = len(s2). Can optimize space to O(min(m,n)) with rolling array (only need previous row).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">public class</span> <span class="type">LongestCommonSubsequence</span> {
+
+    <span class="keyword">public static int</span> <span class="type">longestCommonSubsequence</span>(String s1, String s2) {
+        <span class="type">int</span> m = s1.length(), n = s2.length();
+        <span class="type">int</span>[][] dp = <span class="keyword">new</span> <span class="type">int</span>[m + <span class="number">1</span>][n + <span class="number">1</span>];
+
+        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= m; i++) {
+            <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">1</span>; j &lt;= n; j++) {
+                <span class="keyword">if</span> (s1.charAt(i - <span class="number">1</span>) == s2.charAt(j - <span class="number">1</span>)) {
+                    dp[i][j] = dp[i - <span class="number">1</span>][j - <span class="number">1</span>] + <span class="number">1</span>;
+                } <span class="keyword">else</span> {
+                    dp[i][j] = Math.max(dp[i - <span class="number">1</span>][j], dp[i][j - <span class="number">1</span>]);
+                }
+            }
+        }
+        <span class="keyword">return</span> dp[m][n];
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        System.out.println(longestCommonSubsequence(<span class="string">"abcde"</span>, <span class="string">"ace"</span>)); <span class="comment">// 3</span>
+    }
+}</code></pre>
+    </div>
+  </div>
+
+  <!-- Remaining sections -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead><tr><th style="background:#22223a;color:#888;padding:8px;">s1</th><th style="background:#22223a;color:#888;padding:8px;">s2</th><th style="background:#22223a;color:#888;padding:8px;">LCS</th><th style="background:#22223a;color:#888;padding:8px;">Note</th></tr></thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"abc"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"abc"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Identical strings</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"abc"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"def"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No common chars</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">""</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"abc"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Empty string</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"abcba"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"abcba"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Palindrome — LCS with itself = full length</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Confusing subsequence with substring</b>
+          <p style="color:#888;">Subsequence: skip chars allowed. Substring: must be contiguous. LCS ≠ Longest Common Substring.</p>
+        </li>
+        <li style="margin-top:10px;"><b>Off-by-one with 1-indexed dp</b>
+          <p style="color:#4caf50;">✅ dp is (m+1)×(n+1). Access chars with <code>s1.charAt(i-1)</code>, not <code>s1.charAt(i)</code>.</p>
+        </li>
+        <li style="margin-top:10px;"><b>Using max(top, left, diagonal) for no-match</b>
+          <p style="color:#e44d26;">❌ Diagonal is always ≤ max(top, left) for LCS. Including it is redundant but not wrong — just unnecessary.</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use / 12. When NOT</span>
+      <span class="sec-num">STEP 11-12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Use when:</b> ✅ "Longest common subsequence" ✅ "Minimum deletions to make strings equal" (= m+n - 2×LCS) ✅ "Shortest common supersequence" ✅ Any two-string comparison problem</p>
+      <p style="margin-top:8px;"><b>Don't use when:</b> ❌ "Longest common substring" (contiguous — different recurrence, reset to 0 on mismatch) ❌ Single string problems (use 1D DP)</p>
+    </div>
+  </div>
+
+  <div class="takeaway">
+    💡 "LCS: two strings → 2D DP. Match → diagonal + 1. No match → max(top, left). This table structure is the foundation for Edit Distance, Diff tools, and DNA alignment."
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>LCS: match → +1, no match → max(skip from s1, skip from s2).</p>
+      <p style="margin-top:8px;">Next: <b>"Edit Distance — Autocorrect Engine"</b> — minimum operations (insert, delete, replace) to transform one string into another. Same 2D table, but no-match case has THREE options (insert, delete, replace) instead of two.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ LCS (max common, 2 choices on mismatch) → Edit Distance (min operations, 3 choices on mismatch)</p>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem45.html">← Problem #45</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(46)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem47.html">Problem #47 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY="dsa-roadmap-progress";const PROBLEM_NUM=46;
+function loadProgress(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{};}catch{return{};}}
+function saveProgress(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}
+function toggleDone(n){const p=loadProgress();if(p[n]==="done")delete p[n];else p[n]="done";saveProgress(p);updateUI();}
+function updateUI(){const p=loadProgress(),btn=document.getElementById("mark-done-btn");if(p[PROBLEM_NUM]==="done"){btn.textContent="✔ Completed";btn.classList.add("completed");}else{btn.textContent="☐ Mark as Done";btn.classList.remove("completed");}updateReadProgress();}
+function updateReadProgress(){const p=loadProgress();if(p[PROBLEM_NUM]==="done"){document.getElementById("section-pct").textContent="100%";document.getElementById("section-bar").style.width="100%";return;}const s=document.querySelectorAll(".section, .takeaway"),t=s.length;if(t===0)return;let v=0;s.forEach(sec=>{if(sec.getBoundingClientRect().top<window.innerHeight)v++;});const pct=Math.min(100,Math.round((v/t)*100));document.getElementById("section-pct").textContent=pct+"%";document.getElementById("section-bar").style.width=pct+"%";}
+window.addEventListener("scroll",updateReadProgress);updateUI();
+</script>
+</body>
+</html>

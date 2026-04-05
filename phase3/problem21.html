@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#21 — Generate All Subsets of a Menu | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 3: Intermediate</span>
+    <span class="problem-id">Problem #21 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #21: Generate All Subsets of a Menu</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#21 — Generate All Subsets of a Menu</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Recursion (Include/Exclude)</p>
+
+  <!-- SECTION 0: Real-World Scenario -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek restaurant app bana rahe ho. Menu mein 3 items hain: <code>[Pizza, Burger, Pasta]</code></p>
+      <p>Customer ko saare possible meal combos dikhane hain — koi bhi subset of items choose kar sakta hai (including nothing).</p>
+      <p style="margin-top:8px;">All subsets:</p>
+<pre><code><span class="comment">[]                    ← nothing (empty set)
+[Pizza]               ← just one item
+[Burger]
+[Pasta]
+[Pizza, Burger]       ← two items
+[Pizza, Pasta]
+[Burger, Pasta]
+[Pizza, Burger, Pasta] ← all items</span></code></pre>
+      <p style="margin-top:8px;">Total: <b>2³ = 8 subsets</b> for 3 items.</p>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #78 — Subsets. Foundation for backtracking and DP.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Problem Understanding -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given an array of distinct integers, return all possible subsets (the power set)</li>
+        <li>Include the empty set</li>
+        <li>No duplicate subsets</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Input → Output:</b></p>
+      <ul>
+        <li>Input: <code>int[] nums</code> (distinct elements)</li>
+        <li>Output: <code>List&lt;List&lt;Integer&gt;&gt;</code> — all subsets</li>
+      </ul>
+      <p style="margin-top:10px;"><b>The key insight — binary decision tree:</b></p>
+      <p>For each element, you have exactly <b>two choices</b>: include it or exclude it.</p>
+<pre><code><span class="comment">                    []
+                 /      \
+          [1]              []          ← include 1 or not?
+         /    \          /    \
+     [1,2]    [1]     [2]     []      ← include 2 or not?
+     / \      / \     / \     / \
+ [1,2,3][1,2][1,3][1][2,3][2][3][]   ← include 3 or not?</span></code></pre>
+      <p style="margin-top:8px;">Leaves of this tree = all 2ⁿ subsets. Each path from root to leaf = a sequence of include/exclude decisions.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Brute Force Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Iterative approach (bit manipulation):</b></p>
+      <ul>
+        <li>For n elements, there are 2ⁿ subsets</li>
+        <li>Each subset can be represented by an n-bit number (1 = include, 0 = exclude)</li>
+        <li>For [1,2,3]: 000=[], 001=[3], 010=[2], 011=[2,3], 100=[1], 101=[1,3], 110=[1,2], 111=[1,2,3]</li>
+      </ul>
+<pre><code><span class="comment">// Iterative — O(n × 2ⁿ)</span>
+<span class="keyword">for</span> (<span class="type">int</span> mask = <span class="number">0</span>; mask &lt; (<span class="number">1</span> &lt;&lt; n); mask++) {
+    List&lt;Integer&gt; subset = <span class="keyword">new</span> ArrayList&lt;&gt;();
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) {
+        <span class="keyword">if</span> ((mask &amp; (<span class="number">1</span> &lt;&lt; i)) != <span class="number">0</span>) subset.add(nums[i]);
+    }
+    result.add(subset);
+}</code></pre>
+      <p>Works, but doesn't teach recursive thinking. The recursive approach is more important for interviews because it generalizes to backtracking.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Optimization Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Key Insight — The Buffet Line Analogy:</b></p>
+      <p>You're walking through a buffet. At each dish station, you decide: <b>take it or skip it</b>.</p>
+      <ul>
+        <li>Station 1 (Pizza): Take → [Pizza] path. Skip → [] path.</li>
+        <li>Station 2 (Burger): For EACH existing path, again take or skip.</li>
+        <li>Station 3 (Pasta): Same — take or skip for each path.</li>
+        <li>After the last station, every path you took = one unique subset.</li>
+      </ul>
+
+      <p style="margin-top:12px;"><b>Recursive structure:</b></p>
+<pre><code><span class="type">generateSubsets</span>(index, currentSubset):
+    <span class="keyword">if</span> index == n:           <span class="comment">// Base: processed all elements</span>
+        add currentSubset to result
+        <span class="keyword">return</span>
+
+    <span class="comment">// Choice 1: INCLUDE nums[index]</span>
+    currentSubset.add(nums[index])
+    <span class="type">generateSubsets</span>(index + <span class="number">1</span>, currentSubset)
+    currentSubset.removeLast()   <span class="comment">// BACKTRACK (undo the choice)</span>
+
+    <span class="comment">// Choice 2: EXCLUDE nums[index]</span>
+    <span class="type">generateSubsets</span>(index + <span class="number">1</span>, currentSubset)</code></pre>
+
+      <p style="margin-top:10px;color:#e44d26;"><b>⚠️ The backtrack step is critical:</b></p>
+      <ul>
+        <li>After exploring the "include" branch, we must UNDO the addition before exploring "exclude"</li>
+        <li>This is called <b>backtracking</b> — undo your choice to try the other option</li>
+        <li>Without it, the "exclude" branch would still have the element in currentSubset</li>
+      </ul>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>Include/Exclude recursion with backtracking — the foundation of all subset/combination problems</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Final Approach -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach (Pattern-Based)</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Pattern:</b> Recursion — Include/Exclude (Binary Decision Tree)</p>
+      <p style="margin-top:10px;"><b>Algorithm:</b></p>
+      <ol>
+        <li>Start with empty <code>current</code> list and <code>index = 0</code></li>
+        <li>At each index, make two recursive calls:
+          <ul>
+            <li>Include <code>nums[index]</code> → recurse with index+1</li>
+            <li>Exclude (backtrack) → recurse with index+1</li>
+          </ul>
+        </li>
+        <li>When <code>index == n</code> → add a copy of <code>current</code> to result</li>
+      </ol>
+      <p style="margin-top:10px;color:#888;font-size:11px;">💡 Must add a COPY (<code>new ArrayList&lt;&gt;(current)</code>), not the reference. Otherwise all entries in result point to the same (eventually empty) list.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Step-by-Step Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Input:</b> <code>nums = [1, 2, 3]</code></p>
+<pre><code><span class="comment">Call tree (I = include, E = exclude):</span>
+
+                        <span style="color:#6c63ff;">f(0, [])</span>
+                    /                \
+            <span style="color:#4caf50;">I: f(1, [1])</span>           <span style="color:#ffc107;">E: f(1, [])</span>
+            /          \            /          \
+     <span style="color:#4caf50;">I: f(2,[1,2])</span>  <span style="color:#ffc107;">E: f(2,[1])</span>  <span style="color:#4caf50;">I: f(2,[2])</span>  <span style="color:#ffc107;">E: f(2,[])</span>
+      /      \      /     \     /     \     /     \
+  <span style="color:#4caf50;">[1,2,3]</span> <span style="color:#ffc107;">[1,2]</span> <span style="color:#4caf50;">[1,3]</span> <span style="color:#ffc107;">[1]</span>  <span style="color:#4caf50;">[2,3]</span> <span style="color:#ffc107;">[2]</span>  <span style="color:#4caf50;">[3]</span>  <span style="color:#ffc107;">[]</span></code></pre>
+      <p style="margin-top:10px;"><b>Execution order (DFS — left branch first):</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:6px;">#</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Action</th>
+            <th style="background:#22223a;color:#888;padding:6px;">current</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Added to result?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Include 1, Include 2, Include 3 → base</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[1,2,3]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">✓</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Backtrack 3, Exclude 3 → base</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[1,2]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">✓</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Backtrack 2, Exclude 2, Include 3 → base</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[1,3]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">✓</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Backtrack 3, Exclude 3 → base</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[1]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">✓</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">5-8</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Same pattern for Exclude 1 branch</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[2,3],[2],[3],[]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">✓✓✓✓</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#4caf50;"><b>Result: [[1,2,3],[1,2],[1,3],[1],[2,3],[2],[3],[]]</b> — all 8 subsets ✓</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Internal Mechanics -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Why backtracking is essential:</b></p>
+<pre><code><span class="comment">// WITHOUT backtrack (WRONG):</span>
+current = [1]
+include 2 → current = [1, 2]
+<span class="comment">// Now explore "exclude 2" branch...</span>
+<span class="comment">// But current is STILL [1, 2]! Should be [1]!</span>
+
+<span class="comment">// WITH backtrack (CORRECT):</span>
+current = [1]
+include 2 → current = [1, 2]
+  <span class="comment">// ... explore include branch ...</span>
+current.removeLast() → current = [1]  <span class="comment">// UNDO!</span>
+<span class="comment">// Now explore "exclude 2" with correct state [1]</span></code></pre>
+
+      <p style="margin-top:14px;"><b>Include/Exclude vs other subset generation methods:</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Method</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Approach</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Best for</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Include/Exclude</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Binary tree — take or skip each element</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Subsets, DP foundation</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Cascading</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Start with [[]], add each element to all existing subsets</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Iterative, easy to understand</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Bit manipulation</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Each number 0 to 2ⁿ-1 = a subset</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">When n ≤ 20</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;color:#888;font-size:11px;">Include/Exclude is the most important because it directly maps to backtracking (#36-38) and DP (#41, #43).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Complexity Analysis -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag">
+          <span class="label">Time:</span>
+          <span class="value">O(n × 2ⁿ)</span>
+        </div>
+        <div class="complexity-tag">
+          <span class="label">Space:</span>
+          <span class="value">O(n)</span>
+        </div>
+      </div>
+      <p style="margin-top:10px;"><b>Time:</b> 2ⁿ subsets, each takes O(n) to copy into result.</p>
+      <p><b>Space:</b> O(n) recursion depth + O(n) for current list. Output space O(n × 2ⁿ) not counted.</p>
+      <p style="margin-top:6px;color:#888;font-size:11px;">This is optimal — you MUST generate 2ⁿ subsets, so O(2ⁿ) is unavoidable.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Java Implementation -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">import</span> java.util.*;
+
+<span class="keyword">public class</span> <span class="type">Subsets</span> {
+
+    <span class="keyword">public static</span> List&lt;List&lt;Integer&gt;&gt; <span class="type">subsets</span>(<span class="type">int</span>[] nums) {
+        List&lt;List&lt;Integer&gt;&gt; result = <span class="keyword">new</span> ArrayList&lt;&gt;();
+        generate(nums, <span class="number">0</span>, <span class="keyword">new</span> ArrayList&lt;&gt;(), result);
+        <span class="keyword">return</span> result;
+    }
+
+    <span class="keyword">private static void</span> <span class="type">generate</span>(<span class="type">int</span>[] nums, <span class="type">int</span> idx,
+                                  List&lt;Integer&gt; current,
+                                  List&lt;List&lt;Integer&gt;&gt; result) {
+        <span class="keyword">if</span> (idx == nums.length) {
+            result.add(<span class="keyword">new</span> ArrayList&lt;&gt;(current)); <span class="comment">// add COPY</span>
+            <span class="keyword">return</span>;
+        }
+
+        <span class="comment">// Include nums[idx]</span>
+        current.add(nums[idx]);
+        generate(nums, idx + <span class="number">1</span>, current, result);
+        current.remove(current.size() - <span class="number">1</span>); <span class="comment">// BACKTRACK</span>
+
+        <span class="comment">// Exclude nums[idx]</span>
+        generate(nums, idx + <span class="number">1</span>, current, result);
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        System.out.println(subsets(<span class="keyword">new</span> <span class="type">int</span>[]{<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>}));
+        <span class="comment">// [[1,2,3],[1,2],[1,3],[1],[2,3],[2],[3],[]]</span>
+    }
+}</code></pre>
+    </div>
+  </div>
+
+  <!-- SECTION 9: Edge Cases -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Case</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Input</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Output</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Count</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Empty</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[[]]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[[1],[]]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">With duplicates</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,2,2]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Needs Subsets II (LC #90)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Sort + skip dups</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Large n</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">n=20</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2²⁰ = 1,048,576 subsets</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">~1M — still feasible</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 10: Common Mistakes -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Adding reference instead of copy to result</b>
+          <p style="color:#e44d26;">❌ <code>result.add(current)</code> → all entries point to same list (ends up all empty)</p>
+          <p style="color:#4caf50;">✅ <code>result.add(new ArrayList&lt;&gt;(current))</code> → snapshot copy</p>
+        </li>
+        <li style="margin-top:10px;"><b>Forgetting to backtrack</b>
+          <p style="color:#e44d26;">❌ No <code>current.remove()</code> after include branch → exclude branch has wrong state</p>
+          <p style="color:#4caf50;">✅ Always undo: <code>current.remove(current.size() - 1)</code></p>
+        </li>
+        <li style="margin-top:10px;"><b>Using wrong index for removal</b>
+          <p style="color:#e44d26;">❌ <code>current.remove(idx)</code> → removes by index in the ORIGINAL array, not the current list</p>
+          <p style="color:#4caf50;">✅ <code>current.remove(current.size() - 1)</code> → always remove the last added element</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 11: When to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Signals to पहचान (identify):</b></p>
+      <ul>
+        <li>✅ "Generate all subsets" / "Power set"</li>
+        <li>✅ "All combinations" / "All possible selections"</li>
+        <li>✅ "For each element, choose to include or not"</li>
+        <li>✅ "2ⁿ possibilities" — binary decision at each step</li>
+      </ul>
+      <p style="margin-top:10px;"><b>This pattern evolves into:</b></p>
+      <ul>
+        <li>#22: Permutations — instead of include/exclude, try each remaining element at each position</li>
+        <li>#36-38: Backtracking — include/exclude with constraints (pruning)</li>
+        <li>#41, #43: DP — include/exclude with optimization (memoization)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 12: When NOT to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ "Find ONE subset with sum = target" — use DP, not generate all subsets</li>
+        <li>❌ n > 20 — 2²⁰ ≈ 1M is feasible, 2³⁰ ≈ 1B is not</li>
+        <li>❌ "Permutations" — different pattern (order matters, #22)</li>
+        <li>❌ "Combinations of size k" — use k-limited recursion, not full power set</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 13: Key Takeaway -->
+  <div class="takeaway">
+    💡 "Subsets = binary decision tree. Each element: include or exclude. Backtrack after include branch. 2ⁿ leaves = 2ⁿ subsets."
+  </div>
+
+  <!-- SECTION 14: Bridge to Next Problem -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Subsets mein har element ke liye 2 choices the: include or exclude. Order didn't matter — [1,2] and [2,1] are the same subset.</p>
+      <p style="margin-top:10px;">Next problem mein <b>order matters</b>:</p>
+      <p style="margin-top:8px;"><b>"Generate all permutations of a lock code"</b> — [1,2,3] and [3,2,1] are DIFFERENT permutations.</p>
+      <ul>
+        <li>Subsets: 2ⁿ results (include/exclude)</li>
+        <li>Permutations: n! results (arrange in all possible orders)</li>
+        <li>Instead of "take or skip", it's "which element goes at this position?"</li>
+      </ul>
+      <p style="color:#6c63ff;margin-top:12px;">→ Include/Exclude (subsets, 2ⁿ) → Arrange all orders (permutations, n!) — recursion gets more branches!</p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem20.html">← Problem #20</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(21)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem22.html">Problem #22 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "dsa-roadmap-progress";
+const PROBLEM_NUM = 21;
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+
+function saveProgress(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function toggleDone(num) {
+  const prog = loadProgress();
+  if (prog[num] === "done") { delete prog[num]; }
+  else { prog[num] = "done"; }
+  saveProgress(prog);
+  updateUI();
+}
+
+function updateUI() {
+  const prog = loadProgress();
+  const btn = document.getElementById("mark-done-btn");
+  if (prog[PROBLEM_NUM] === "done") {
+    btn.textContent = "✔ Completed";
+    btn.classList.add("completed");
+  } else {
+    btn.textContent = "☐ Mark as Done";
+    btn.classList.remove("completed");
+  }
+  updateReadProgress();
+}
+
+function updateReadProgress() {
+  const prog = loadProgress();
+  if (prog[PROBLEM_NUM] === "done") {
+    document.getElementById("section-pct").textContent = "100%";
+    document.getElementById("section-bar").style.width = "100%";
+    return;
+  }
+  const sections = document.querySelectorAll(".section, .takeaway");
+  const total = sections.length;
+  if (total === 0) return;
+  let visible = 0;
+  sections.forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    if (rect.top < window.innerHeight) visible++;
+  });
+  const pct = Math.min(100, Math.round((visible / total) * 100));
+  document.getElementById("section-pct").textContent = pct + "%";
+  document.getElementById("section-bar").style.width = pct + "%";
+}
+
+window.addEventListener("scroll", updateReadProgress);
+updateUI();
+</script>
+</body>
+</html>

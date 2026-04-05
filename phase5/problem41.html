@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#41 — Robbing Houses Without Getting Caught | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 5: Mastery</span>
+    <span class="problem-id">Problem #41 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #41: Robbing Houses Without Getting Caught</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#41 — Robbing Houses Without Getting Caught</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: DP (Include/Exclude)</p>
+
+  <!-- SECTION 0 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek (fictional!) thief ho. Street pe houses hain with cash:</p>
+      <p><code>[2, 7, 9, 3, 1]</code></p>
+      <p>Rule: <b>Adjacent houses have connected alarms.</b> If you rob two adjacent houses, alarm triggers.</p>
+      <p style="margin-top:8px;">Question: <b>"Maximum kitna paisa loot sakte ho without triggering alarm?"</b></p>
+      <ul>
+        <li>Rob houses 0,2,4: 2+9+1 = 12</li>
+        <li>Rob houses 1,3: 7+3 = 10</li>
+        <li>Rob houses 0,2: 2+9 = 11</li>
+        <li><span style="color:#4caf50;">Rob houses 1,2? NO — adjacent!</span></li>
+      </ul>
+      <p style="color:#4caf50;margin-top:8px;">Answer: <b>12</b> (houses 0, 2, 4)</p>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #198 — House Robber. Classic Include/Exclude DP.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given array of non-negative integers (money in each house)</li>
+        <li>Can't rob two adjacent houses</li>
+        <li>Maximize total money robbed</li>
+      </ul>
+      <p style="margin-top:10px;"><b>The Include/Exclude decision at each house:</b></p>
+      <ul>
+        <li><b>Rob house i (include):</b> take nums[i] + best from house i-2 (skip neighbor)</li>
+        <li><b>Skip house i (exclude):</b> take best from house i-1 (as if house i doesn't exist)</li>
+        <li>Take the max of both choices</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Recurrence:</b> <code>dp[i] = max(dp[i-1], dp[i-2] + nums[i])</code></p>
+      <p style="margin-top:10px;"><b>Connection to previous:</b></p>
+      <ul>
+        <li>#21 (Subsets): Include/Exclude recursion → generate all subsets</li>
+        <li>#41 (House Robber): Include/Exclude DP → OPTIMIZE (find max, not generate all)</li>
+        <li>Same decision tree, but instead of exploring all branches, we pick the best at each step</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Recursion — try all valid subsets:</b></p>
+<pre><code><span class="type">int</span> rob(<span class="type">int</span>[] nums, <span class="type">int</span> i) {
+    <span class="keyword">if</span> (i &lt; <span class="number">0</span>) <span class="keyword">return</span> <span class="number">0</span>;
+    <span class="keyword">return</span> Math.max(
+        rob(nums, i - <span class="number">1</span>),              <span class="comment">// skip house i</span>
+        rob(nums, i - <span class="number">2</span>) + nums[i]    <span class="comment">// rob house i</span>
+    );
+}</code></pre>
+      <p>O(2ⁿ) — same overlapping subproblems as Climbing Stairs. rob(3) gets called from rob(5) and rob(4).</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 Same fix: memoize or bottom-up. And since dp[i] only depends on dp[i-1] and dp[i-2] → space optimize to O(1).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Bottom-up DP:</b></p>
+<pre><code>dp[<span class="number">0</span>] = nums[<span class="number">0</span>]
+dp[<span class="number">1</span>] = max(nums[<span class="number">0</span>], nums[<span class="number">1</span>])
+<span class="keyword">for</span> i = <span class="number">2</span> to n-<span class="number">1</span>:
+    dp[i] = max(dp[i-<span class="number">1</span>], dp[i-<span class="number">2</span>] + nums[i])</code></pre>
+      <p style="margin-top:10px;"><b>Space-optimized (two variables):</b></p>
+<pre><code><span class="type">int</span> prev2 = <span class="number">0</span>, prev1 = <span class="number">0</span>;
+<span class="keyword">for</span> (<span class="type">int</span> num : nums) {
+    <span class="type">int</span> curr = Math.max(prev1, prev2 + num);
+    prev2 = prev1;
+    prev1 = curr;
+}
+<span class="keyword">return</span> prev1;</code></pre>
+      <p style="margin-top:8px;">O(n) time, O(1) space. Same pattern as Climbing Stairs (#39) — Fibonacci-like with a twist (max instead of sum).</p>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>Include/Exclude DP — at each element: max(skip it, take it + best from 2 back). Fibonacci structure with optimization.</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>DP recipe:</b></p>
+      <ol>
+        <li><b>State:</b> <code>dp[i]</code> = max money robbing from houses 0 to i</li>
+        <li><b>Recurrence:</b> <code>dp[i] = max(dp[i-1], dp[i-2] + nums[i])</code></li>
+        <li><b>Base:</b> <code>dp[0] = nums[0]</code>, <code>dp[1] = max(nums[0], nums[1])</code></li>
+        <li><b>Order:</b> Left to right</li>
+        <li><b>Answer:</b> <code>dp[n-1]</code></li>
+      </ol>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 The space-optimized version (prev2, prev1) is the cleanest. prev2 = dp[i-2], prev1 = dp[i-1].</p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>nums = [2, 7, 9, 3, 1]</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:6px;">i</th>
+            <th style="background:#22223a;color:#888;padding:6px;">nums[i]</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Skip (prev1)</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Rob (prev2+nums[i])</th>
+            <th style="background:#22223a;color:#888;padding:6px;">dp[i] = max</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Decision</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0+2=2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Rob</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">7</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0+7=7</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">7</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Rob (skip house 0)</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">9</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">7</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2+9=11</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">11</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Rob (houses 0,2)</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">11</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">7+3=10</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">11</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Skip (11 > 10)</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">11</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">11+1=12</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">12</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Rob (houses 0,2,4)</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#4caf50;"><b>Result: 12</b> ✓ (rob houses 0, 2, 4 → 2+9+1)</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Include/Exclude DP pattern — appears in many problems:</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Problem</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Include</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Exclude</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Combine</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">House Robber (this)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">dp[i-2] + nums[i]</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">dp[i-1]</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">max</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">0/1 Knapsack (#43)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">dp[i-1][w-wt] + val</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">dp[i-1][w]</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">max</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Subset Sum (#45)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">dp[i-1][s-nums[i]]</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">dp[i-1][s]</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">OR</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;color:#888;font-size:11px;">Same structure: for each item, decide include or exclude. The combine function (max, min, OR, +) changes per problem.</p>
+
+      <p style="margin-top:14px;"><b>House Robber variants:</b></p>
+      <ul>
+        <li>House Robber I (this) — linear street</li>
+        <li>House Robber II (LC #213) — circular street (first and last are adjacent)</li>
+        <li>House Robber III (LC #337) — houses form a tree</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag"><span class="label">Time:</span><span class="value">O(n)</span></div>
+        <div class="complexity-tag"><span class="label">Space:</span><span class="value">O(1)</span></div>
+      </div>
+      <p style="margin-top:10px;">Single pass. Two variables (prev1, prev2). Same as Climbing Stairs optimization.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">public class</span> <span class="type">HouseRobber</span> {
+
+    <span class="keyword">public static int</span> <span class="type">rob</span>(<span class="type">int</span>[] nums) {
+        <span class="type">int</span> prev2 = <span class="number">0</span>, prev1 = <span class="number">0</span>;
+
+        <span class="keyword">for</span> (<span class="type">int</span> num : nums) {
+            <span class="type">int</span> curr = Math.max(prev1, prev2 + num);
+            prev2 = prev1;
+            prev1 = curr;
+        }
+
+        <span class="keyword">return</span> prev1;
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        System.out.println(rob(<span class="keyword">new</span> <span class="type">int</span>[]{<span class="number">2</span>,<span class="number">7</span>,<span class="number">9</span>,<span class="number">3</span>,<span class="number">1</span>})); <span class="comment">// 12</span>
+        System.out.println(rob(<span class="keyword">new</span> <span class="type">int</span>[]{<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">1</span>})); <span class="comment">// 4</span>
+    }
+}</code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 4 lines of logic. prev2 = "best if I robbed 2 houses ago", prev1 = "best up to previous house". curr = max(skip, rob).</p>
+    </div>
+  </div>
+
+  <!-- Remaining sections -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead><tr><th style="background:#22223a;color:#888;padding:8px;">Case</th><th style="background:#22223a;color:#888;padding:8px;">Input</th><th style="background:#22223a;color:#888;padding:8px;">Output</th><th style="background:#22223a;color:#888;padding:8px;">Note</th></tr></thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single house</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">[5]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Rob it</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Two houses</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">[3,7]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">7</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Rob the bigger one</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All same</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">[5,5,5,5]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">10</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Rob alternating: 5+5</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Decreasing</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">[10,1,1,1]</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">11</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Rob 10+1 (houses 0,2 or 0,3)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Thinking you must rob every other house</b>
+          <p style="color:#e44d26;">❌ You CAN skip multiple houses in a row. [1,100,1,1,100] → rob houses 1 and 4 (skip 2,3)</p>
+          <p style="color:#4caf50;">✅ The DP naturally handles this — "skip" means take dp[i-1] which might have skipped too</p>
+        </li>
+        <li style="margin-top:10px;"><b>Greedy approach (always rob the biggest)</b>
+          <p style="color:#e44d26;">❌ [2,1,1,2] → greedy picks 2,2=4 but optimal is 2+1=3? No, 2+2=4 is correct here. But [1,3,1,3,1] → greedy picks 3,3=6 but 1+1+1=3 is worse. Greedy works here but fails on [2,7,9,3,1].</p>
+          <p style="color:#4caf50;">✅ DP is the only correct approach — greedy doesn't generalize</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>✅ "Max/min value with no-adjacent constraint"</li>
+        <li>✅ "Include or exclude each element" with optimization</li>
+        <li>✅ "Delete and earn" (LC #740) — same pattern, group by value</li>
+        <li>✅ Any problem where taking an item "blocks" nearby items</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ No adjacency constraint — just sum everything (no DP needed)</li>
+        <li>❌ Circular arrangement (House Robber II) — need to run DP twice (exclude first or exclude last)</li>
+        <li>❌ Tree structure (House Robber III) — need tree DP, not linear DP</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="takeaway">
+    💡 "Include/Exclude DP: dp[i] = max(skip it = dp[i-1], take it = dp[i-2] + nums[i]). Same Fibonacci structure as Climbing Stairs, but with max instead of sum."
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>House Robber was 1D Include/Exclude with a simple constraint (no adjacent).</p>
+      <p style="margin-top:8px;">Next: <b>"Longest Increasing Stock Prices"</b> — find the longest subsequence where each element is larger than the previous. This is the <b>Longest Increasing Subsequence (LIS)</b> — a different DP structure where dp[i] depends on ALL previous elements, not just i-1 and i-2.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Include/Exclude DP (depends on i-1, i-2) → LIS DP (depends on all j &lt; i where nums[j] &lt; nums[i])</p>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem40.html">← Problem #40</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(41)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem42.html">Problem #42 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY="dsa-roadmap-progress";const PROBLEM_NUM=41;
+function loadProgress(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{};}catch{return{};}}
+function saveProgress(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}
+function toggleDone(n){const p=loadProgress();if(p[n]==="done")delete p[n];else p[n]="done";saveProgress(p);updateUI();}
+function updateUI(){const p=loadProgress(),btn=document.getElementById("mark-done-btn");if(p[PROBLEM_NUM]==="done"){btn.textContent="✔ Completed";btn.classList.add("completed");}else{btn.textContent="☐ Mark as Done";btn.classList.remove("completed");}updateReadProgress();}
+function updateReadProgress(){const p=loadProgress();if(p[PROBLEM_NUM]==="done"){document.getElementById("section-pct").textContent="100%";document.getElementById("section-bar").style.width="100%";return;}const s=document.querySelectorAll(".section, .takeaway"),t=s.length;if(t===0)return;let v=0;s.forEach(sec=>{if(sec.getBoundingClientRect().top<window.innerHeight)v++;});const pct=Math.min(100,Math.round((v/t)*100));document.getElementById("section-pct").textContent=pct+"%";document.getElementById("section-bar").style.width=pct+"%";}
+window.addEventListener("scroll",updateReadProgress);updateUI();
+</script>
+</body>
+</html>

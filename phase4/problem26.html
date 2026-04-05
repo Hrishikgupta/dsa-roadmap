@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#26 — Company Org Chart — Max Depth | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 4: Advanced</span>
+    <span class="problem-id">Problem #26 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #26: Company Org Chart — Max Depth</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#26 — Company Org Chart — Max Depth</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Tree DFS (Recursion on Trees)</p>
+
+  <!-- SECTION 0 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>HR ne poochha: <b>"Company hierarchy kitni levels deep hai?"</b></p>
+<pre><code><span class="comment">         3 (CEO)
+        / \
+       9   20 (VPs)
+      /  \
+     15   7  (Directors)</span></code></pre>
+      <p>Answer: <b>3 levels</b> (CEO → VP → Director)</p>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #104 — Maximum Depth of Binary Tree. Your gateway to tree thinking.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Binary Tree basics:</b></p>
+      <ul>
+        <li>Each node has at most 2 children: left and right</li>
+        <li>Top = root. No children = leaf. Depth = nodes on longest root-to-leaf path.</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Node structure:</b></p>
+<pre><code><span class="keyword">class</span> <span class="type">TreeNode</span> {
+    <span class="type">int</span> val;
+    TreeNode left, right;
+    <span class="type">TreeNode</span>(<span class="type">int</span> val) { <span class="keyword">this</span>.val = val; }
+}</code></pre>
+      <p style="margin-top:10px;"><b>Why trees are perfect for recursion:</b></p>
+      <ul>
+        <li>Every subtree IS a tree — perfect recursive structure</li>
+        <li>Depth of tree = 1 + max(depth of left subtree, depth of right subtree)</li>
+        <li>This is "trust the function" from Problem #20!</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Connection:</b> Recursion (#20) meets a new data structure. DFS uses the call stack implicitly (#15).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>BFS (level-order):</b> Process level by level with a queue, count levels. O(n) time, O(n) space.</p>
+      <p>Works, but recursive DFS is simpler and more elegant for this problem.</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 Depth = 1 + max(left depth, right depth). Base: null = 0. That's 3 lines of recursion.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization — The Universal Tree Template</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="type">int</span> solve(TreeNode node) {
+    <span class="keyword">if</span> (node == <span class="keyword">null</span>) <span class="keyword">return</span> BASE_VALUE;     <span class="comment">// base case</span>
+    <span class="type">int</span> leftResult  = solve(node.left);      <span class="comment">// recurse left</span>
+    <span class="type">int</span> rightResult = solve(node.right);     <span class="comment">// recurse right</span>
+    <span class="keyword">return</span> COMBINE(leftResult, rightResult); <span class="comment">// combine</span>
+}</code></pre>
+      <p style="margin-top:8px;">For max depth: BASE = 0, COMBINE = 1 + max(left, right).</p>
+      <p style="margin-top:10px;"><b>This template solves 80% of tree problems. Change BASE and COMBINE:</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Problem</th>
+            <th style="background:#22223a;color:#888;padding:5px;">BASE</th>
+            <th style="background:#22223a;color:#888;padding:5px;">COMBINE</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Max Depth (this)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">1 + max(L, R)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Count Nodes</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">1 + L + R</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Sum of Nodes</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">node.val + L + R</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Is Balanced (#27)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Check |L-R| ≤ 1, return height</td></tr>
+        </tbody>
+      </table>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>Tree DFS — recurse left, recurse right, combine. This 3-line template solves 80% of tree problems.</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Tree: [3, 9, 20, null, null, 15, 7]</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:6px;">Call</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Node</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Left</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Right</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Return</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1-2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">9's children (null)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0, 0</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">9</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">1+max(0,0)=1</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">4-5</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">15, 7 (leaves)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1, 1</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">6</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">20</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">1+max(1,1)=2</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">7</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#6c63ff;">3 (root)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#6c63ff;">1+max(1,2)=3</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#4caf50;"><b>Result: maxDepth = 3</b> ✓</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics — DFS vs BFS</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Aspect</th>
+            <th style="background:#22223a;color:#888;padding:5px;">DFS</th>
+            <th style="background:#22223a;color:#888;padding:5px;">BFS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Traversal</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Go deep, backtrack</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Level by level</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Data structure</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Call stack (recursion)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Queue</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Space</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">O(h) — height</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">O(w) — max width</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Best for</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Depth, path, subtree</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Level-order, shortest path</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag"><span class="label">Time:</span><span class="value">O(n)</span></div>
+        <div class="complexity-tag"><span class="label">Space:</span><span class="value">O(h)</span></div>
+      </div>
+      <p style="margin-top:10px;">Visit every node once. Space = recursion depth = height. Balanced: O(log n). Skewed: O(n).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">public class</span> <span class="type">MaxDepth</span> {
+
+    <span class="keyword">public static int</span> <span class="type">maxDepth</span>(TreeNode root) {
+        <span class="keyword">if</span> (root == <span class="keyword">null</span>) <span class="keyword">return</span> <span class="number">0</span>;
+        <span class="type">int</span> left  = maxDepth(root.left);
+        <span class="type">int</span> right = maxDepth(root.right);
+        <span class="keyword">return</span> <span class="number">1</span> + Math.max(left, right);
+    }
+
+    <span class="comment">// One-liner:</span>
+    <span class="comment">// return root == null ? 0 : 1 + Math.max(maxDepth(root.left), maxDepth(root.right));</span>
+}</code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 3 lines of logic. The simplest tree problem — but the template it teaches is used everywhere.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 9 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead><tr><th style="background:#22223a;color:#888;padding:8px;">Case</th><th style="background:#22223a;color:#888;padding:8px;">Depth</th><th style="background:#22223a;color:#888;padding:8px;">Note</th></tr></thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">null</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Empty tree</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single node</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Just root</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Left-skewed 1→2→3→4</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Basically a linked list. Space O(n).</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Perfect binary tree</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">log₂(n+1)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Best case for space: O(log n)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 10 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Forgetting null check</b> → NullPointerException on root.left</li>
+        <li style="margin-top:8px;"><b>Trying to trace every recursive call</b> → Trust the function. Verify base + combine. Done.</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 11-12 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use / 12. When NOT</span>
+      <span class="sec-num">STEP 11-12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Use:</b> ✅ Max/min depth, count nodes, sum nodes, any "answer = f(left answer, right answer)" tree problem.</p>
+      <p style="margin-top:8px;"><b>Don't use:</b> ❌ Level-order traversal → BFS. ❌ Very deep trees (>10K) → iterative DFS with explicit stack.</p>
+    </div>
+  </div>
+
+  <div class="takeaway">
+    💡 "Tree DFS = recurse left, recurse right, combine. Base: null → 0. This 3-line template solves 80% of tree problems."
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Next: same DFS template + validation condition. <b>"Is This a Balanced Team Structure?"</b> — check |leftHeight - rightHeight| ≤ 1 at EVERY node. Uses sentinel -1 for early termination.</p>
+      <p style="color:#6c63ff;margin-top:8px;">→ DFS compute (#26) → DFS validate (#27) → DFS search (#28 LCA)</p>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <a class="nav-btn" href="../phase3/problem25.html">← Problem #25</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(26)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem27.html">Problem #27 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY="dsa-roadmap-progress";const PROBLEM_NUM=26;
+function loadProgress(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{};}catch{return{};}}
+function saveProgress(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}
+function toggleDone(n){const p=loadProgress();if(p[n]==="done")delete p[n];else p[n]="done";saveProgress(p);updateUI();}
+function updateUI(){const p=loadProgress(),btn=document.getElementById("mark-done-btn");if(p[PROBLEM_NUM]==="done"){btn.textContent="✔ Completed";btn.classList.add("completed");}else{btn.textContent="☐ Mark as Done";btn.classList.remove("completed");}updateReadProgress();}
+function updateReadProgress(){const p=loadProgress();if(p[PROBLEM_NUM]==="done"){document.getElementById("section-pct").textContent="100%";document.getElementById("section-bar").style.width="100%";return;}const s=document.querySelectorAll(".section, .takeaway"),t=s.length;if(t===0)return;let v=0;s.forEach(sec=>{if(sec.getBoundingClientRect().top<window.innerHeight)v++;});const pct=Math.min(100,Math.round((v/t)*100));document.getElementById("section-pct").textContent=pct+"%";document.getElementById("section-bar").style.width=pct+"%";}
+window.addEventListener("scroll",updateReadProgress);updateUI();
+</script>
+</body>
+</html>

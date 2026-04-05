@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#39 — Climbing Stairs — How Many Ways? | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 5: Mastery</span>
+    <span class="problem-id">Problem #39 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #39: Climbing Stairs — How Many Ways?</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#39 — Climbing Stairs — How Many Ways?</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: DP (Fibonacci Pattern)</p>
+
+  <!-- SECTION 0 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek staircase pe ho with n steps. Har baar tum 1 step ya 2 steps chadh sakte ho.</p>
+      <p style="margin-top:8px;"><b>"Top tak pahunchne ke kitne distinct ways hain?"</b></p>
+<pre><code><span class="comment">n=1: [1]                           → 1 way</span>
+<span class="comment">n=2: [1,1] [2]                     → 2 ways</span>
+<span class="comment">n=3: [1,1,1] [1,2] [2,1]          → 3 ways</span>
+<span class="comment">n=4: [1,1,1,1] [1,1,2] [1,2,1] [2,1,1] [2,2] → 5 ways</span>
+
+<span style="color:#4caf50;">1, 2, 3, 5, 8, 13... — it's Fibonacci!</span></code></pre>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #70 — Climbing Stairs. The gentlest intro to Dynamic Programming.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What is Dynamic Programming (DP)?</b></p>
+      <ul>
+        <li>DP = Recursion + Memoization (remember what you've already computed)</li>
+        <li>Or equivalently: build the answer bottom-up from smaller subproblems</li>
+        <li>Works when a problem has <b>overlapping subproblems</b> (same subproblem solved multiple times)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Why this problem is DP:</b></p>
+      <ul>
+        <li>To reach step n, you came from step n-1 (took 1 step) or step n-2 (took 2 steps)</li>
+        <li>So: <code>ways(n) = ways(n-1) + ways(n-2)</code></li>
+        <li>This is the Fibonacci recurrence! And it has overlapping subproblems:</li>
+      </ul>
+<pre><code><span class="comment">ways(5) = ways(4) + ways(3)</span>
+<span class="comment">ways(4) = ways(3) + ways(2)  ← ways(3) computed TWICE!</span>
+<span class="comment">ways(3) = ways(2) + ways(1)  ← ways(2) computed TWICE!</span></code></pre>
+      <p style="margin-top:10px;"><b>Three approaches (evolution of thinking):</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Approach</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Time</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Space</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Idea</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Plain Recursion</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#e44d26;">O(2ⁿ)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">O(n)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Recomputes same subproblems</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Top-down DP (Memoization)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(n)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">O(n)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Recursion + cache results</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Bottom-up DP (Tabulation)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(n)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(1)*</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Build from base cases up</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;color:#888;font-size:11px;">*O(1) because we only need the last 2 values, not the entire array.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Plain recursion — O(2ⁿ):</b></p>
+<pre><code><span class="type">int</span> climbStairs(<span class="type">int</span> n) {
+    <span class="keyword">if</span> (n &lt;= <span class="number">2</span>) <span class="keyword">return</span> n;
+    <span class="keyword">return</span> climbStairs(n - <span class="number">1</span>) + climbStairs(n - <span class="number">2</span>);
+}</code></pre>
+      <p>Works but exponential — for n=45, takes billions of calls. The problem: <code>climbStairs(3)</code> is computed millions of times.</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 What if we REMEMBER the result of climbStairs(3) the first time, and just look it up next time? That's memoization — and that's DP.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Step 1: Top-down DP (Memoization) — add a cache to recursion:</b></p>
+<pre><code><span class="type">int</span>[] memo = <span class="keyword">new</span> <span class="type">int</span>[n + <span class="number">1</span>];
+<span class="type">int</span> climb(<span class="type">int</span> n) {
+    <span class="keyword">if</span> (n &lt;= <span class="number">2</span>) <span class="keyword">return</span> n;
+    <span class="keyword">if</span> (memo[n] != <span class="number">0</span>) <span class="keyword">return</span> memo[n]; <span class="comment">// already computed!</span>
+    memo[n] = climb(n-<span class="number">1</span>) + climb(n-<span class="number">2</span>);
+    <span class="keyword">return</span> memo[n];
+}</code></pre>
+      <p>O(n) time, O(n) space. Each subproblem computed exactly once.</p>
+
+      <p style="margin-top:14px;"><b>Step 2: Bottom-up DP (Tabulation) — no recursion, just a loop:</b></p>
+<pre><code><span class="type">int</span>[] dp = <span class="keyword">new</span> <span class="type">int</span>[n + <span class="number">1</span>];
+dp[<span class="number">1</span>] = <span class="number">1</span>; dp[<span class="number">2</span>] = <span class="number">2</span>;
+<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">3</span>; i &lt;= n; i++)
+    dp[i] = dp[i-<span class="number">1</span>] + dp[i-<span class="number">2</span>];
+<span class="keyword">return</span> dp[n];</code></pre>
+
+      <p style="margin-top:14px;"><b>Step 3: Space-optimized — only need last 2 values:</b></p>
+<pre><code><span class="type">int</span> a = <span class="number">1</span>, b = <span class="number">2</span>;
+<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">3</span>; i &lt;= n; i++) {
+    <span class="type">int</span> c = a + b;
+    a = b; b = c;
+}
+<span class="keyword">return</span> b;</code></pre>
+      <p>O(n) time, O(1) space. Optimal.</p>
+      <p style="color:#4caf50;margin-top:10px;">💡 DP thinking: <b>Define recurrence → Memoize (top-down) → Tabulate (bottom-up) → Optimize space.</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>The DP recipe (use for EVERY DP problem):</b></p>
+      <ol>
+        <li><b>Define state:</b> What does dp[i] represent? → "number of ways to reach step i"</li>
+        <li><b>Recurrence:</b> How does dp[i] relate to smaller subproblems? → <code>dp[i] = dp[i-1] + dp[i-2]</code></li>
+        <li><b>Base cases:</b> What are the smallest subproblems? → <code>dp[1] = 1, dp[2] = 2</code></li>
+        <li><b>Order:</b> Fill dp from small to large (bottom-up) or recurse with memo (top-down)</li>
+        <li><b>Answer:</b> Which dp value is the answer? → <code>dp[n]</code></li>
+      </ol>
+      <p style="margin-top:8px;color:#888;font-size:11px;">This 5-step recipe works for ALL DP problems in Phase 5. The hard part is step 1 and 2 — defining state and recurrence.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>n = 5 (bottom-up):</b></p>
+      <table style="width:100%;font-size:12px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">i</th>
+            <th style="background:#22223a;color:#888;padding:8px;">dp[i-1]</th>
+            <th style="background:#22223a;color:#888;padding:8px;">dp[i-2]</th>
+            <th style="background:#22223a;color:#888;padding:8px;">dp[i]</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Meaning</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Base: [1]</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">2</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Base: [1,1] [2]</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2+1 = 3</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">5</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3+2 = 5</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">8</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">5+3 = 8</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#4caf50;"><b>Result: dp[5] = 8 ways</b> ✓</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Top-down vs Bottom-up:</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Aspect</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Top-down (Memo)</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Bottom-up (Tabulation)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Style</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Recursion + cache</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Iterative loop</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Computes</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Only needed subproblems</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">All subproblems (small→large)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Stack overflow risk</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#e44d26;">Yes (deep recursion)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">No (iterative)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Space optimization</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Harder</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Easier (see which values are needed)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Interview</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Easier to derive (start from recursion)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">More efficient (preferred final answer)</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:12px;"><b>DP problems in Phase 5:</b></p>
+      <table style="width:100%;font-size:9px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:4px;">#</th>
+            <th style="background:#22223a;color:#888;padding:4px;">Problem</th>
+            <th style="background:#22223a;color:#888;padding:4px;">DP Type</th>
+            <th style="background:#22223a;color:#888;padding:4px;">State</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:3px 4px;border-bottom:1px solid #2a2a4a;color:#4caf50;">39</td><td style="padding:3px 4px;border-bottom:1px solid #2a2a4a;">Climbing Stairs</td><td style="padding:3px 4px;border-bottom:1px solid #2a2a4a;">Fibonacci</td><td style="padding:3px 4px;border-bottom:1px solid #2a2a4a;">dp[i] = ways to step i</td></tr>
+          <tr><td style="padding:3px 4px;border-bottom:1px solid #2a2a4a;">40</td><td style="padding:3px 4px;border-bottom:1px solid #2a2a4a;">Min Cost Path</td><td style="padding:3px 4px;border-bottom:1px solid #2a2a4a;">2D Grid DP</td><td style="padding:3px 4px;border-bottom:1px solid #2a2a4a;">dp[i][j] = min cost to (i,j)</td></tr>
+          <tr><td style="padding:3px 4px;border-bottom:1px solid #2a2a4a;">41</td><td style="padding:3px 4px;border-bottom:1px solid #2a2a4a;">House Robber</td><td style="padding:3px 4px;border-bottom:1px solid #2a2a4a;">Include/Exclude</td><td style="padding:3px 4px;border-bottom:1px solid #2a2a4a;">dp[i] = max rob up to house i</td></tr>
+          <tr><td style="padding:3px 4px;border-bottom:1px solid #2a2a4a;">43-45</td><td style="padding:3px 4px;border-bottom:1px solid #2a2a4a;">Knapsack family</td><td style="padding:3px 4px;border-bottom:1px solid #2a2a4a;">0/1 & Unbounded</td><td style="padding:3px 4px;border-bottom:1px solid #2a2a4a;">dp[i][w] = max value with capacity w</td></tr>
+          <tr><td style="padding:3px 4px;border-bottom:1px solid #2a2a4a;">46-47</td><td style="padding:3px 4px;border-bottom:1px solid #2a2a4a;">LCS, Edit Distance</td><td style="padding:3px 4px;border-bottom:1px solid #2a2a4a;">Two-string DP</td><td style="padding:3px 4px;border-bottom:1px solid #2a2a4a;">dp[i][j] = answer for s[0..i], t[0..j]</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag"><span class="label">Time:</span><span class="value">O(n)</span></div>
+        <div class="complexity-tag"><span class="label">Space:</span><span class="value">O(1)</span></div>
+      </div>
+      <p style="margin-top:10px;">With space optimization (two variables). Without: O(n) for dp array.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Bottom-up (space-optimized):</b></p>
+<pre><code><span class="keyword">public class</span> <span class="type">ClimbingStairs</span> {
+
+    <span class="keyword">public static int</span> <span class="type">climbStairs</span>(<span class="type">int</span> n) {
+        <span class="keyword">if</span> (n &lt;= <span class="number">2</span>) <span class="keyword">return</span> n;
+        <span class="type">int</span> a = <span class="number">1</span>, b = <span class="number">2</span>;
+        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">3</span>; i &lt;= n; i++) {
+            <span class="type">int</span> c = a + b;
+            a = b;
+            b = c;
+        }
+        <span class="keyword">return</span> b;
+    }
+}</code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 5 lines of logic. From O(2ⁿ) recursion to O(n)/O(1) DP — that's the power of dynamic programming.</p>
+    </div>
+  </div>
+
+  <!-- Remaining sections -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead><tr><th style="background:#22223a;color:#888;padding:8px;">n</th><th style="background:#22223a;color:#888;padding:8px;">Ways</th><th style="background:#22223a;color:#888;padding:8px;">Note</th></tr></thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Only [1]</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">[1,1] or [2]</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">45</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1,836,311,903</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Near int max — watch for overflow</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1 (or 0)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Depends on definition — "already at top"</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Using plain recursion without memoization</b>
+          <p style="color:#e44d26;">❌ O(2ⁿ) — TLE for n > 30</p>
+          <p style="color:#4caf50;">✅ Always memoize or use bottom-up</p>
+        </li>
+        <li style="margin-top:10px;"><b>Wrong base cases</b>
+          <p style="color:#e44d26;">❌ dp[0] = 0, dp[1] = 1 → dp[2] = 1 (wrong, should be 2)</p>
+          <p style="color:#4caf50;">✅ dp[1] = 1, dp[2] = 2 (or dp[0] = 1, dp[1] = 1 depending on convention)</p>
+        </li>
+        <li style="margin-top:10px;"><b>Not recognizing the Fibonacci pattern</b>
+          <p style="color:#888;">Many DP problems are "Fibonacci in disguise" — decode message, tiling, etc. Recognize the recurrence.</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>✅ "How many ways to reach ___?"</li>
+        <li>✅ "Minimum/maximum cost to reach ___?"</li>
+        <li>✅ Problem has overlapping subproblems (same computation repeated)</li>
+        <li>✅ Problem has optimal substructure (optimal solution uses optimal sub-solutions)</li>
+        <li>✅ Recurrence relation can be defined: dp[i] = f(dp[i-1], dp[i-2], ...)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ No overlapping subproblems — plain recursion or greedy is enough</li>
+        <li>❌ "Generate all solutions" — DP counts/optimizes, backtracking generates</li>
+        <li>❌ Problem doesn't have optimal substructure — greedy might work instead</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="takeaway">
+    💡 "DP = recursion + memory. Define state → write recurrence → base cases → fill bottom-up → optimize space. This recipe solves every DP problem."
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Climbing Stairs was 1D DP (one variable: step number).</p>
+      <p style="margin-top:8px;">Next: <b>"Minimum Cost to Reach Home"</b> — 2D DP on a grid. <code>dp[i][j]</code> = min cost to reach cell (i,j). Each cell depends on the cell above and the cell to the left.</p>
+      <p style="margin-top:8px;">Same DP recipe, but now the state has TWO dimensions (row and column).</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ 1D DP (stairs) → 2D DP (grid) — same recipe, more dimensions!</p>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <a class="nav-btn" href="../phase4/problem38.html">← Problem #38</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(39)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem40.html">Problem #40 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY="dsa-roadmap-progress";const PROBLEM_NUM=39;
+function loadProgress(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{};}catch{return{};}}
+function saveProgress(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}
+function toggleDone(n){const p=loadProgress();if(p[n]==="done")delete p[n];else p[n]="done";saveProgress(p);updateUI();}
+function updateUI(){const p=loadProgress(),btn=document.getElementById("mark-done-btn");if(p[PROBLEM_NUM]==="done"){btn.textContent="✔ Completed";btn.classList.add("completed");}else{btn.textContent="☐ Mark as Done";btn.classList.remove("completed");}updateReadProgress();}
+function updateReadProgress(){const p=loadProgress();if(p[PROBLEM_NUM]==="done"){document.getElementById("section-pct").textContent="100%";document.getElementById("section-bar").style.width="100%";return;}const s=document.querySelectorAll(".section, .takeaway"),t=s.length;if(t===0)return;let v=0;s.forEach(sec=>{if(sec.getBoundingClientRect().top<window.innerHeight)v++;});const pct=Math.min(100,Math.round((v/t)*100));document.getElementById("section-pct").textContent=pct+"%";document.getElementById("section-bar").style.width=pct+"%";}
+window.addEventListener("scroll",updateReadProgress);updateUI();
+</script>
+</body>
+</html>

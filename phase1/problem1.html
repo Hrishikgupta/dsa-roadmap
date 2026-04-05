@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#1 — Finding the Best Sale Day (Max Profit) | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 1: Foundation</span>
+    <span class="problem-id">Problem #1 of 50</span>
+  </div>
+</div>
+
+<!-- Problem Progress -->
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #1: Finding the Best Sale Day (Max Profit)</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#1 — Finding the Best Sale Day (Max Profit)</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Linear Scan / Tracking Variables</p>
+
+  <!-- SECTION 0: Real-World Scenario -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek shopkeeper ho. Tumhare paas last 7 days ke product prices hain:</p>
+      <p><code>[7, 1, 5, 3, 6, 4]</code></p>
+      <p>Tum ek hi baar buy kar sakte ho aur ek hi baar sell — lekin <b>buy pehle hona chahiye sell se</b>.</p>
+      <p>Question: <b>Maximum kitna profit ho sakta hai?</b></p>
+      <p style="color:#4caf50;margin-top:8px;">Answer: Buy at ₹1 (day 2), Sell at ₹6 (day 5) → Profit = ₹5</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Problem Understanding -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given an array of prices (each index = a day)</li>
+        <li>Find the maximum difference <code>prices[j] - prices[i]</code> where <code>j > i</code></li>
+        <li>If no profit possible, return <code>0</code></li>
+      </ul>
+      <p style="margin-top:10px;"><b>Input → Output Clarity:</b></p>
+      <ul>
+        <li>Input: <code>int[] prices</code> — array of daily prices</li>
+        <li>Output: <code>int</code> — maximum profit (or 0)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Constraints to note:</b></p>
+      <ul>
+        <li>Buy MUST happen before sell (left to right order matters)</li>
+        <li>Only ONE transaction allowed (one buy + one sell)</li>
+        <li>Prices are non-negative</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Brute Force Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>First instinct:</b> Try every possible pair (buy day, sell day)</p>
+      <ul>
+        <li>For each day <code>i</code> (buy), check every day <code>j > i</code> (sell)</li>
+        <li>Calculate <code>prices[j] - prices[i]</code></li>
+        <li>Track the maximum</li>
+      </ul>
+<pre><code><span class="comment">// Brute Force — O(n²)</span>
+<span class="type">int</span> maxProfit = <span class="number">0</span>;
+<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; prices.length; i++) {
+    <span class="keyword">for</span> (<span class="type">int</span> j = i + <span class="number">1</span>; j &lt; prices.length; j++) {
+        <span class="type">int</span> profit = prices[j] - prices[i];
+        maxProfit = Math.max(maxProfit, profit);
+    }
+}
+<span class="keyword">return</span> maxProfit;</code></pre>
+      <p><b>Problem:</b> Two nested loops → <code>O(n²)</code>. For <code>n = 100,000</code> that's 10 billion operations. TLE guaranteed.</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 Sochne ka point: Kya hume sach mein har pair check karna zaroori hai?</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Optimization Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Key Insight:</b> Jab tum left-to-right traverse kar rahe ho, tumhe sirf ek cheez track karni hai:</p>
+      <ul>
+        <li>Ab tak ka <b>minimum price</b> (best day to buy so far)</li>
+      </ul>
+      <p>Har day pe tum pooch rahe ho:</p>
+      <ul>
+        <li>"Agar main aaj sell karun, aur maine ab tak ke sabse saste din pe buy kiya hota, toh kitna profit hota?"</li>
+        <li><code>profit = today's price - minimum price so far</code></li>
+      </ul>
+      <p style="margin-top:10px;"><b>Why does this work?</b></p>
+      <ul>
+        <li>Minimum price hamesha left side pe hoga (past mein) — so buy-before-sell condition automatically satisfied</li>
+        <li>Har element ko sirf ek baar dekhna padta hai → <code>O(n)</code></li>
+      </ul>
+      <p style="color:#4caf50;margin-top:8px;">💡 Pattern identified: <b>Linear Scan with Tracking Variable</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Final Approach -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach (Pattern-Based)</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Pattern Name:</b> Linear Scan / Tracking Variables</p>
+      <p><b>Why this pattern fits:</b></p>
+      <ul>
+        <li>We need to find a relationship between current element and something from the past</li>
+        <li>Instead of looking back (nested loop), we carry the past forward in a variable</li>
+        <li>One variable (<code>minPrice</code>) replaces an entire inner loop</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Algorithm:</b></p>
+      <ol>
+        <li>Initialize <code>minPrice = Integer.MAX_VALUE</code></li>
+        <li>Initialize <code>maxProfit = 0</code></li>
+        <li>For each price in array:
+          <ul>
+            <li>If price &lt; minPrice → update minPrice</li>
+            <li>Else → calculate profit, update maxProfit if bigger</li>
+          </ul>
+        </li>
+        <li>Return maxProfit</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Step-by-Step Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Input:</b> <code>[7, 1, 5, 3, 6, 4]</code></p>
+      <table style="width:100%;font-size:12px;margin-top:10px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Day</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Price</th>
+            <th style="background:#22223a;color:#888;padding:8px;">minPrice</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Profit Today</th>
+            <th style="background:#22223a;color:#888;padding:8px;">maxProfit</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">7</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">7 ✓</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#ffc107;">New min found</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">1 ✓</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#ffc107;">New min found</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">5-1 = 4</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#6c63ff;">4 ✓</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Profit updated</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3-1 = 2</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#888;">No update</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">6</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">6-1 = 5</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#6c63ff;">5 ✓</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Profit updated</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">4-1 = 3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#888;">No update</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:12px;color:#4caf50;"><b>Result: maxProfit = 5</b> (Buy at 1, Sell at 6)</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Internal Mechanics -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Behind the scenes — why this is O(n):</b></p>
+      <ul>
+        <li>Single pass: pointer moves left → right, never goes back</li>
+        <li><code>minPrice</code> acts as a "memory" of the best buy opportunity seen so far</li>
+        <li>At each step, we make a <b>greedy decision</b>: "Is today's price a new minimum? Or can I profit from it?"</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Why we don't need to look back:</b></p>
+      <ul>
+        <li>If a new minimum appears at index <code>k</code>, any future sell will always prefer this minimum over older ones</li>
+        <li>The old minimum is "dominated" — it can never produce a better result than the new one for future sells</li>
+        <li>This is the core idea of <b>tracking variables</b>: compress the past into a single value</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Complexity Analysis -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag">
+          <span class="label">Time:</span>
+          <span class="value">O(n)</span>
+        </div>
+        <div class="complexity-tag">
+          <span class="label">Space:</span>
+          <span class="value">O(1)</span>
+        </div>
+      </div>
+      <p style="margin-top:12px;"><b>Comparison with Brute Force:</b></p>
+      <table style="width:100%;font-size:12px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Approach</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Time</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Space</th>
+            <th style="background:#22223a;color:#888;padding:8px;">n = 100,000</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Brute Force</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">O(n²)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">O(1)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">10,000,000,000 ops</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Optimized</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(n)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">O(1)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">100,000 ops</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;color:#888;font-size:11px;">100,000x faster. Yahi hai optimization ka power.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Java Implementation -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">public class</span> <span class="type">BestTimeToBuySellStock</span> {
+
+    <span class="keyword">public static int</span> <span class="type">maxProfit</span>(<span class="type">int</span>[] prices) {
+        <span class="type">int</span> minPrice = Integer.MAX_VALUE;
+        <span class="type">int</span> maxProfit = <span class="number">0</span>;
+
+        <span class="keyword">for</span> (<span class="type">int</span> price : prices) {
+            <span class="keyword">if</span> (price &lt; minPrice) {
+                minPrice = price;
+            } <span class="keyword">else</span> {
+                maxProfit = Math.max(maxProfit, price - minPrice);
+            }
+        }
+        <span class="keyword">return</span> maxProfit;
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        <span class="type">int</span>[] prices = {<span class="number">7</span>, <span class="number">1</span>, <span class="number">5</span>, <span class="number">3</span>, <span class="number">6</span>, <span class="number">4</span>};
+        System.out.println(<span class="string">"Max Profit: "</span> + maxProfit(prices)); <span class="comment">// Output: 5</span>
+    }
+}</code></pre>
+    </div>
+  </div>
+
+  <!-- SECTION 9: Edge Cases -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Case</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Input</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Output</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Why</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Decreasing prices</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[7,6,4,3,1]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No profit possible — never sell</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single element</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[5]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Can't buy and sell on same day</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All same prices</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[3,3,3,3]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No price difference</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Min at start, max at end</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,2,3,4,5]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Best case — buy first, sell last</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Empty array</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No data — handle gracefully</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 10: Common Mistakes -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Finding global max and global min separately</b>
+          <p style="color:#e44d26;">❌ <code>[3, 8, 1, 2]</code> → min=1, max=8, profit=7? WRONG. Min comes AFTER max here.</p>
+          <p style="color:#4caf50;">✅ Correct answer is 5 (buy at 3, sell at 8)</p>
+        </li>
+        <li style="margin-top:10px;"><b>Not handling the "no profit" case</b>
+          <p style="color:#e44d26;">❌ Returning negative profit instead of 0</p>
+          <p style="color:#4caf50;">✅ Initialize maxProfit = 0, so it naturally handles this</p>
+        </li>
+        <li style="margin-top:10px;"><b>Using if-else instead of both checks</b>
+          <p style="color:#888;">Note: Using <code>else</code> is fine here because if price IS the new minimum, selling on the same day gives 0 profit anyway. Both approaches work.</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 11: When to Use This Pattern -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Signals to पहचान (identify) this pattern:</b></p>
+      <ul>
+        <li>✅ "Find maximum/minimum difference in array"</li>
+        <li>✅ "One pass through data is enough"</li>
+        <li>✅ Current element depends on something from the LEFT side only</li>
+        <li>✅ You need to track a running min/max/sum</li>
+        <li>✅ Problem says "buy before sell" or any ordering constraint</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Real-world uses:</b></p>
+      <ul>
+        <li>Stock trading algorithms</li>
+        <li>Finding best time to buy/sell anything</li>
+        <li>Temperature difference problems</li>
+        <li>Any "best pair with ordering" problem</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 12: When NOT to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ Multiple transactions allowed (that's a different DP problem)</li>
+        <li>❌ You need to find the actual pair of indices (need slight modification)</li>
+        <li>❌ Array is unsorted and you need closest pair (different pattern)</li>
+        <li>❌ Problem requires looking at BOTH left and right context (need prefix/suffix arrays)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 13: Key Takeaway -->
+  <div class="takeaway">
+    💡 "Jab past ka sirf ek value chahiye — use a tracking variable, not a nested loop."
+  </div>
+
+  <!-- SECTION 14: Bridge to Next Problem -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Is problem mein humne seekha: <b>ek variable se past ko track karna</b>.</p>
+      <p style="margin-top:8px;">Next problem mein hum dekhenge: <b>Kya hota hai jab tumhe past ka ek value nahi, balki frequency/count track karna ho?</b></p>
+      <p style="margin-top:8px;">That's where <b>HashMap</b> comes in — Problem #2: Duplicate Customer Complaint.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Single variable tracking → Frequency map tracking (natural progression)</p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons">
+    <span class="nav-btn disabled">← Previous</span>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(1)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem2.html">Problem #2 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "dsa-roadmap-progress";
+const PROBLEM_NUM = 1;
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+
+function saveProgress(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function toggleDone(num) {
+  const prog = loadProgress();
+  if (prog[num] === "done") { delete prog[num]; }
+  else { prog[num] = "done"; }
+  saveProgress(prog);
+  updateUI();
+}
+
+function updateUI() {
+  const prog = loadProgress();
+  const btn = document.getElementById("mark-done-btn");
+  if (prog[PROBLEM_NUM] === "done") {
+    btn.textContent = "✔ Completed";
+    btn.classList.add("completed");
+  } else {
+    btn.textContent = "☐ Mark as Done";
+    btn.classList.remove("completed");
+  }
+  updateReadProgress();
+}
+
+// Track how many sections user has scrolled past
+function updateReadProgress() {
+  const prog = loadProgress();
+  if (prog[PROBLEM_NUM] === "done") {
+    document.getElementById("section-pct").textContent = "100%";
+    document.getElementById("section-bar").style.width = "100%";
+    return;
+  }
+  const sections = document.querySelectorAll(".section, .takeaway");
+  const total = sections.length;
+  if (total === 0) return;
+  let visible = 0;
+  sections.forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    if (rect.top < window.innerHeight) visible++;
+  });
+  const pct = Math.min(100, Math.round((visible / total) * 100));
+  document.getElementById("section-pct").textContent = pct + "%";
+  document.getElementById("section-bar").style.width = pct + "%";
+}
+
+window.addEventListener("scroll", updateReadProgress);
+updateUI();
+</script>
+</body>
+</html>

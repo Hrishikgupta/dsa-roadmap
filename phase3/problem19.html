@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#19 — LRU Cache for Browser History | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 3: Intermediate</span>
+    <span class="problem-id">Problem #19 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #19: LRU Cache for Browser History</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#19 — LRU Cache for Browser History</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: HashMap + Doubly Linked List</p>
+
+  <!-- SECTION 0: Real-World Scenario -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek browser bana rahe ho. Browser cache mein sirf <b>3 pages</b> fit hote hain.</p>
+      <p style="margin-top:8px;">User visits pages in this order:</p>
+      <ol>
+        <li>Visit <b>Google</b> → Cache: [Google]</li>
+        <li>Visit <b>YouTube</b> → Cache: [Google, YouTube]</li>
+        <li>Visit <b>GitHub</b> → Cache: [Google, YouTube, GitHub] (full!)</li>
+        <li>Visit <b>Twitter</b> → Cache full! Evict <b>Google</b> (least recently used) → [YouTube, GitHub, Twitter]</li>
+        <li>Visit <b>YouTube</b> again → Move to most recent → [GitHub, Twitter, YouTube]</li>
+        <li>Visit <b>Reddit</b> → Evict <b>GitHub</b> (least recently used) → [Twitter, YouTube, Reddit]</li>
+      </ol>
+      <p style="margin-top:8px;">Two operations needed, both in <b>O(1)</b>:</p>
+      <ul>
+        <li><code>get(key)</code> — fetch page from cache (and mark as recently used)</li>
+        <li><code>put(key, value)</code> — add/update page (evict LRU if full)</li>
+      </ul>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #146 — LRU Cache. Top interview question at Google, Amazon, Meta, Microsoft. Also a core system design concept.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Problem Understanding -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Design a data structure with fixed capacity</li>
+        <li><code>get(key)</code>: return value if key exists (mark as recently used), else return -1</li>
+        <li><code>put(key, value)</code>: insert or update. If at capacity, evict the least recently used item first.</li>
+        <li>Both operations must be <b>O(1)</b></li>
+      </ul>
+      <p style="margin-top:10px;"><b>Why is O(1) hard?</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">Data Structure</th>
+            <th style="background:#22223a;color:#888;padding:7px;">get</th>
+            <th style="background:#22223a;color:#888;padding:7px;">put</th>
+            <th style="background:#22223a;color:#888;padding:7px;">evict LRU</th>
+            <th style="background:#22223a;color:#888;padding:7px;">move to recent</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">HashMap alone</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(1)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(1)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#e44d26;">O(n) — no order info</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#e44d26;">O(n)</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Linked List alone</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#e44d26;">O(n) — search</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(1) — add to end</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(1) — remove head</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#e44d26;">O(n) — find node</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">HashMap + DLL</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(1)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(1)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(1)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(1)</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;color:#6c63ff;font-size:12px;">💡 Neither alone gives O(1) for everything. Together they complement each other perfectly.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Brute Force Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Approach 1: ArrayList + timestamp</b></p>
+      <ul>
+        <li>Store (key, value, lastUsedTime) in a list</li>
+        <li>On eviction: scan for minimum timestamp → O(n)</li>
+      </ul>
+      <p><b>Approach 2: LinkedHashMap (Java cheat)</b></p>
+<pre><code><span class="comment">// Java's LinkedHashMap with access-order = true does LRU automatically</span>
+<span class="keyword">class</span> <span class="type">LRUCache</span> <span class="keyword">extends</span> LinkedHashMap&lt;Integer, Integer&gt; {
+    <span class="type">int</span> capacity;
+    <span class="type">LRUCache</span>(<span class="type">int</span> cap) {
+        <span class="keyword">super</span>(cap, <span class="number">0.75f</span>, <span class="keyword">true</span>); <span class="comment">// true = access order</span>
+        <span class="keyword">this</span>.capacity = cap;
+    }
+    <span class="keyword">protected boolean</span> removeEldestEntry(Map.Entry e) {
+        <span class="keyword">return</span> size() &gt; capacity;
+    }
+}</code></pre>
+      <p style="color:#ffc107;margin-top:8px;">⚠️ Interviewers want you to build it from scratch, not use LinkedHashMap. They want to see you design the data structure.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Optimization Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Key Insight — Two data structures, each covering the other's weakness:</b></p>
+      <ul>
+        <li><b>HashMap</b>: O(1) lookup by key → solves "find the node quickly"</li>
+        <li><b>Doubly Linked List</b>: O(1) insert/delete at any position (given the node) → solves "reorder quickly"</li>
+        <li>HashMap stores <code>key → Node</code> (pointer to the DLL node)</li>
+        <li>DLL maintains usage order: head = LRU (least recent), tail = MRU (most recent)</li>
+      </ul>
+
+      <p style="margin-top:12px;"><b>Why Doubly Linked List, not Singly?</b></p>
+      <ul>
+        <li>To remove a node from the middle, you need access to its <b>previous</b> node</li>
+        <li>Singly linked: need to traverse from head to find previous → O(n)</li>
+        <li>Doubly linked: <code>node.prev</code> gives previous directly → O(1)</li>
+      </ul>
+
+      <p style="margin-top:12px;"><b>The design:</b></p>
+<pre><code><span class="comment">HashMap: key → Node</span>
+<span class="comment">DLL:    HEAD ↔ node1 ↔ node2 ↔ node3 ↔ TAIL</span>
+<span class="comment">        (LRU)                          (MRU)</span>
+<span class="comment">        dummy                          dummy</span></code></pre>
+      <p style="margin-top:6px;color:#888;font-size:11px;">💡 Dummy head and tail nodes simplify edge cases — no null checks for empty list or single element.</p>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>HashMap (O(1) lookup) + Doubly Linked List (O(1) reorder) = O(1) LRU Cache</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Final Approach -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach (Pattern-Based)</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Operations breakdown:</b></p>
+      <p style="margin-top:8px;"><b><code>get(key)</code>:</b></p>
+      <ol>
+        <li>If key not in map → return -1</li>
+        <li>Get node from map</li>
+        <li>Move node to tail (most recently used)</li>
+        <li>Return node.value</li>
+      </ol>
+      <p style="margin-top:10px;"><b><code>put(key, value)</code>:</b></p>
+      <ol>
+        <li>If key exists → update value, move to tail</li>
+        <li>If key doesn't exist:
+          <ul>
+            <li>If at capacity → remove head.next (LRU), remove from map</li>
+            <li>Create new node, add to tail, add to map</li>
+          </ul>
+        </li>
+      </ol>
+      <p style="margin-top:10px;"><b>Helper operations on DLL:</b></p>
+      <ul>
+        <li><code>addToTail(node)</code>: insert before dummy tail</li>
+        <li><code>removeNode(node)</code>: unlink from current position</li>
+        <li><code>moveToTail(node)</code>: removeNode + addToTail</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Step-by-Step Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Capacity = 2</b></p>
+      <table style="width:100%;font-size:10px;margin-top:10px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Operation</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Action</th>
+            <th style="background:#22223a;color:#888;padding:5px;">DLL (HEAD→TAIL)</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Map</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Return</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">put(1, 1)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Add node(1,1)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;"><code>H ↔ <span style="color:#6c63ff;">(1,1)</span> ↔ T</code></td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">{1→node}</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">—</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">put(2, 2)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Add node(2,2)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;"><code>H ↔ (1,1) ↔ <span style="color:#6c63ff;">(2,2)</span> ↔ T</code></td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">{1→n, 2→n}</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">—</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">get(1)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Move (1,1) to tail</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;"><code>H ↔ (2,2) ↔ <span style="color:#4caf50;">(1,1)</span> ↔ T</code></td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">same</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">1</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">put(3, 3)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#e44d26;">Full! Evict LRU (2,2)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;"><code>H ↔ (1,1) ↔ <span style="color:#6c63ff;">(3,3)</span> ↔ T</code></td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">{1→n, 3→n}</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">—</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">get(2)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Not in map</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">unchanged</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">same</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#e44d26;">-1</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">put(4, 4)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#e44d26;">Full! Evict LRU (1,1)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;"><code>H ↔ (3,3) ↔ <span style="color:#6c63ff;">(4,4)</span> ↔ T</code></td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">{3→n, 4→n}</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">—</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#4caf50;">Key moment: <code>get(1)</code> moved key 1 to tail, so when put(3,3) needed to evict, key 2 (not 1) was the LRU.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Internal Mechanics -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>DLL node removal in O(1) — the magic:</b></p>
+<pre><code><span class="comment">// Remove node from its current position</span>
+node.prev.next = node.next;
+node.next.prev = node.prev;
+<span class="comment">// That's it. Two pointer updates. O(1).</span></code></pre>
+      <p style="margin-top:8px;">This is impossible with a singly linked list (you'd need to find <code>node.prev</code> by traversing from head).</p>
+
+      <p style="margin-top:14px;"><b>Why dummy head and tail?</b></p>
+<pre><code><span class="comment">// Without dummies: need null checks everywhere</span>
+<span class="keyword">if</span> (node.prev != <span class="keyword">null</span>) node.prev.next = node.next;
+<span class="keyword">else</span> head = node.next; <span class="comment">// was the head</span>
+<span class="keyword">if</span> (node.next != <span class="keyword">null</span>) node.next.prev = node.prev;
+<span class="keyword">else</span> tail = node.prev; <span class="comment">// was the tail</span>
+
+<span class="comment">// With dummies: always works, no special cases</span>
+node.prev.next = node.next;
+node.next.prev = node.prev;</code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">Dummy nodes are a classic technique — they eliminate edge cases for empty list, single element, head/tail operations.</p>
+
+      <p style="margin-top:14px;"><b>Real-world LRU caches:</b></p>
+      <ul>
+        <li>CPU cache (L1, L2, L3) — hardware LRU</li>
+        <li>Redis — in-memory cache with LRU eviction policy</li>
+        <li>Browser cache — exactly this problem</li>
+        <li>CDN edge caches — cache popular content, evict stale</li>
+        <li>Database buffer pool — cache frequently accessed pages</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Complexity Analysis -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag">
+          <span class="label">get():</span>
+          <span class="value">O(1)</span>
+        </div>
+        <div class="complexity-tag">
+          <span class="label">put():</span>
+          <span class="value">O(1)</span>
+        </div>
+        <div class="complexity-tag">
+          <span class="label">Space:</span>
+          <span class="value">O(capacity)</span>
+        </div>
+      </div>
+      <p style="margin-top:10px;">HashMap lookup O(1) + DLL insert/remove O(1) = O(1) per operation. Space = capacity nodes + capacity map entries.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Java Implementation -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">import</span> java.util.HashMap;
+
+<span class="keyword">public class</span> <span class="type">LRUCache</span> {
+
+    <span class="keyword">class</span> <span class="type">Node</span> {
+        <span class="type">int</span> key, val;
+        Node prev, next;
+        <span class="type">Node</span>(<span class="type">int</span> k, <span class="type">int</span> v) { key = k; val = v; }
+    }
+
+    <span class="keyword">private</span> <span class="type">int</span> capacity;
+    <span class="keyword">private</span> HashMap&lt;Integer, Node&gt; map;
+    <span class="keyword">private</span> Node head, tail; <span class="comment">// dummy nodes</span>
+
+    <span class="keyword">public</span> <span class="type">LRUCache</span>(<span class="type">int</span> capacity) {
+        <span class="keyword">this</span>.capacity = capacity;
+        map = <span class="keyword">new</span> HashMap&lt;&gt;();
+        head = <span class="keyword">new</span> Node(<span class="number">0</span>, <span class="number">0</span>);
+        tail = <span class="keyword">new</span> Node(<span class="number">0</span>, <span class="number">0</span>);
+        head.next = tail;
+        tail.prev = head;
+    }
+
+    <span class="keyword">public int</span> <span class="type">get</span>(<span class="type">int</span> key) {
+        <span class="keyword">if</span> (!map.containsKey(key)) <span class="keyword">return</span> -<span class="number">1</span>;
+        Node node = map.get(key);
+        moveToTail(node);
+        <span class="keyword">return</span> node.val;
+    }
+
+    <span class="keyword">public void</span> <span class="type">put</span>(<span class="type">int</span> key, <span class="type">int</span> value) {
+        <span class="keyword">if</span> (map.containsKey(key)) {
+            Node node = map.get(key);
+            node.val = value;
+            moveToTail(node);
+        } <span class="keyword">else</span> {
+            <span class="keyword">if</span> (map.size() == capacity) {
+                Node lru = head.next;
+                removeNode(lru);
+                map.remove(lru.key);
+            }
+            Node node = <span class="keyword">new</span> Node(key, value);
+            addToTail(node);
+            map.put(key, node);
+        }
+    }
+
+    <span class="keyword">private void</span> <span class="type">addToTail</span>(Node node) {
+        node.prev = tail.prev;
+        node.next = tail;
+        tail.prev.next = node;
+        tail.prev = node;
+    }
+
+    <span class="keyword">private void</span> <span class="type">removeNode</span>(Node node) {
+        node.prev.next = node.next;
+        node.next.prev = node.prev;
+    }
+
+    <span class="keyword">private void</span> <span class="type">moveToTail</span>(Node node) {
+        removeNode(node);
+        addToTail(node);
+    }
+}</code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 The Node stores the key too — needed when evicting LRU to remove it from the HashMap. Without the key in the node, you can't do <code>map.remove(lru.key)</code>.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 9: Edge Cases -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Case</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Scenario</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Behavior</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Capacity = 1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Every new put evicts the only item</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Works — DLL has just one real node</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Update existing key</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">put(1,1) then put(1,10)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Update value + move to tail, no eviction</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">get non-existent</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">get(999)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Return -1, no side effects</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">get refreshes order</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">get(1) prevents 1 from being evicted</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Moves to tail = most recent</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Rapid evictions</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">put 100 items in capacity-3 cache</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">97 evictions, each O(1)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 10: Common Mistakes -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Not storing key in the Node</b>
+          <p style="color:#e44d26;">❌ When evicting LRU, you need <code>map.remove(lru.key)</code> — without key in node, you can't do this in O(1)</p>
+        </li>
+        <li style="margin-top:10px;"><b>Forgetting to move to tail on <code>get()</code></b>
+          <p style="color:#e44d26;">❌ get() should mark as recently used — if you don't move, eviction order is wrong</p>
+        </li>
+        <li style="margin-top:10px;"><b>Not handling <code>put()</code> for existing key</b>
+          <p style="color:#e44d26;">❌ Adding a duplicate node → map points to new node, old node orphaned in DLL</p>
+          <p style="color:#4caf50;">✅ Check if key exists first → update value + move to tail</p>
+        </li>
+        <li style="margin-top:10px;"><b>Using singly linked list</b>
+          <p style="color:#e44d26;">❌ Can't remove a node in O(1) without access to previous</p>
+          <p style="color:#4caf50;">✅ Must be doubly linked for O(1) removal</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 11: When to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Signals to पहचान (identify):</b></p>
+      <ul>
+        <li>✅ "Design a cache with eviction policy"</li>
+        <li>✅ "O(1) get and put with capacity limit"</li>
+        <li>✅ "Least recently used" / "Most recently used"</li>
+        <li>✅ Any problem needing O(1) lookup + O(1) ordered insertion/deletion</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Variants:</b></p>
+      <ul>
+        <li>LFU Cache (Least Frequently Used) — LC #460 — harder, needs frequency buckets</li>
+        <li>TTL Cache — evict based on time, not usage</li>
+        <li>LRU with expiry — combine LRU + timestamp</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 12: When NOT to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ No capacity limit — just use a HashMap</li>
+        <li>❌ Eviction based on frequency, not recency — use LFU instead</li>
+        <li>❌ Need sorted order — use TreeMap</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 13: Key Takeaway -->
+  <div class="takeaway">
+    💡 "LRU Cache = HashMap (O(1) find) + Doubly Linked List (O(1) reorder). Node stores key too — needed for eviction cleanup. Dummy head/tail eliminate edge cases."
+  </div>
+
+  <!-- SECTION 14: Bridge to Next Problem -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Ab tum Stack, Queue, HashMap, aur Linked List — sab combine karke complex data structures design kar sakte ho.</p>
+      <p style="margin-top:10px;">Ab ek completely new paradigm aata hai: <b>Recursion</b>.</p>
+      <p style="margin-top:8px;">Recursion = a function that calls itself. It's the foundation for:</p>
+      <ul>
+        <li>Trees (Phase 4)</li>
+        <li>Graphs (Phase 4)</li>
+        <li>Backtracking (Phase 4)</li>
+        <li>Dynamic Programming (Phase 5)</li>
+      </ul>
+      <p style="margin-top:8px;">Problem #20: <b>Power of Recursion — Tower of Hanoi</b> — the classic problem that teaches you to "trust the function".</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Data structures (Stack, Queue, HashMap, DLL) → Recursion (a new way of thinking) — the biggest paradigm shift in this roadmap!</p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem18.html">← Problem #18</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(19)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem20.html">Problem #20 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "dsa-roadmap-progress";
+const PROBLEM_NUM = 19;
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+
+function saveProgress(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function toggleDone(num) {
+  const prog = loadProgress();
+  if (prog[num] === "done") { delete prog[num]; }
+  else { prog[num] = "done"; }
+  saveProgress(prog);
+  updateUI();
+}
+
+function updateUI() {
+  const prog = loadProgress();
+  const btn = document.getElementById("mark-done-btn");
+  if (prog[PROBLEM_NUM] === "done") {
+    btn.textContent = "✔ Completed";
+    btn.classList.add("completed");
+  } else {
+    btn.textContent = "☐ Mark as Done";
+    btn.classList.remove("completed");
+  }
+  updateReadProgress();
+}
+
+function updateReadProgress() {
+  const prog = loadProgress();
+  if (prog[PROBLEM_NUM] === "done") {
+    document.getElementById("section-pct").textContent = "100%";
+    document.getElementById("section-bar").style.width = "100%";
+    return;
+  }
+  const sections = document.querySelectorAll(".section, .takeaway");
+  const total = sections.length;
+  if (total === 0) return;
+  let visible = 0;
+  sections.forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    if (rect.top < window.innerHeight) visible++;
+  });
+  const pct = Math.min(100, Math.round((visible / total) * 100));
+  document.getElementById("section-pct").textContent = pct + "%";
+  document.getElementById("section-bar").style.width = pct + "%";
+}
+
+window.addEventListener("scroll", updateReadProgress);
+updateUI();
+</script>
+</body>
+</html>

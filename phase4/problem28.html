@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#28 — Lowest Common Manager of Two Employees | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 4: Advanced</span>
+    <span class="problem-id">Problem #28 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #28: Lowest Common Manager of Two Employees</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#28 — Lowest Common Manager of Two Employees</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: LCA (Lowest Common Ancestor)</p>
+
+  <!-- SECTION 0: Real-World Scenario -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Do employees ke beech conflict hai. HR ko find karna hai: <b>"Inke common manager kaun hai jo sabse neeche (closest) hai?"</b></p>
+<pre><code><span class="comment">         3
+        / \
+       5   1
+      / \ / \
+     6  2 0  8
+       / \
+      7   4</span>
+
+<span class="comment">LCA(5, 1) = 3  (root is their common ancestor)</span>
+<span class="comment">LCA(5, 4) = 5  (5 is ancestor of 4, so 5 itself is LCA)</span>
+<span class="comment">LCA(6, 4) = 5  (both under 5's subtree)</span></code></pre>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #236 — Lowest Common Ancestor of a Binary Tree. Asked at every FAANG company.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Problem Understanding -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given a binary tree and two nodes p and q, find their Lowest Common Ancestor (LCA)</li>
+        <li>LCA = the deepest node that is an ancestor of both p and q</li>
+        <li>A node can be its own ancestor (if p is ancestor of q, then LCA = p)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Input → Output:</b></p>
+      <ul>
+        <li>Input: <code>TreeNode root</code>, <code>TreeNode p</code>, <code>TreeNode q</code></li>
+        <li>Output: <code>TreeNode</code> — the LCA node</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Three possible cases:</b></p>
+      <ol>
+        <li>p and q are in different subtrees → current node is LCA</li>
+        <li>p is ancestor of q → p is LCA</li>
+        <li>q is ancestor of p → q is LCA</li>
+      </ol>
+      <p style="margin-top:10px;"><b>Connection to #26-27:</b></p>
+      <ul>
+        <li>#26: DFS returns a value (height)</li>
+        <li>#27: DFS returns a value + validates (height or -1)</li>
+        <li>#28: DFS returns a node (found target or null) — same template, different return type</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Brute Force -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Approach 1: Find paths, compare — O(n) time, O(n) space</b></p>
+      <ul>
+        <li>Find path from root to p: [3, 5]</li>
+        <li>Find path from root to q: [3, 5, 2, 4]</li>
+        <li>Compare paths — last common node = 5 = LCA</li>
+      </ul>
+      <p>Works but needs two traversals + path storage. Can we do it in one pass?</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 What if DFS returns "I found p" or "I found q" or "I found both" from each subtree? The node where left finds one and right finds the other = LCA.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Optimization -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Key Insight — DFS that returns "found" signals:</b></p>
+      <ul>
+        <li>Each recursive call returns: the target node if found in that subtree, or null if not found</li>
+        <li>At each node, check left result and right result:</li>
+      </ul>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">Left result</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Right result</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Meaning</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Return</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">not null</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">not null</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">p in left, q in right (or vice versa)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">current node = LCA!</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">not null</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">null</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Both targets in left subtree</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">left result (LCA is deeper)</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">null</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">not null</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Both targets in right subtree</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">right result (LCA is deeper)</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">null</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">null</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Neither target in this subtree</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">null</td></tr>
+        </tbody>
+      </table>
+<pre><code><span class="type">TreeNode</span> lca(node, p, q):
+    <span class="keyword">if</span> node == <span class="keyword">null</span> → <span class="keyword">return null</span>
+    <span class="keyword">if</span> node == p || node == q → <span class="keyword">return</span> node  <span class="comment">// found a target!</span>
+
+    left  = lca(node.left, p, q)
+    right = lca(node.right, p, q)
+
+    <span class="keyword">if</span> left != <span class="keyword">null</span> &amp;&amp; right != <span class="keyword">null</span> → <span class="keyword">return</span> node  <span class="comment">// split point = LCA</span>
+    <span class="keyword">return</span> left != <span class="keyword">null</span> ? left : right              <span class="comment">// propagate the found one</span></code></pre>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>DFS returning found-node signals. When both sides return non-null → current node is the LCA.</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Final Approach -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach (Pattern-Based)</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Algorithm:</b></p>
+      <ol>
+        <li>If node is null → return null (not found)</li>
+        <li>If node is p or q → return node (found a target — don't go deeper)</li>
+        <li>Recurse left and right</li>
+        <li>If both non-null → this node is LCA (targets split here)</li>
+        <li>If one non-null → propagate it upward (both targets are in that subtree)</li>
+      </ol>
+      <p style="margin-top:10px;color:#888;font-size:11px;">💡 Step 2 is key: when we find p, we return p immediately without searching deeper. If q is below p, then p IS the LCA (a node is its own ancestor). This handles case 2 and 3 automatically.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Tree:</b> [3,5,1,6,2,0,8,null,null,7,4], <b>p=5, q=4</b></p>
+<pre><code><span class="comment">         3
+        / \
+       5   1
+      / \ / \
+     6  2 0  8
+       / \
+      7   4</span></code></pre>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Node</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Is p or q?</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Left result</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Right result</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Return</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">6</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">No</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">null</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">null</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">null</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">7</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">No</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">null</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">null</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">null</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">4</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Yes (q)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">node 4</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">No</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">null (7)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">node 4</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">node 4 (propagate)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">5</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Yes (p)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">node 5 (found p, return immediately)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">1 subtree</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">No</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">null</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">null</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">null</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">3 (root)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">No</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">node 5</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">null</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">node 5 (propagate left)</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#4caf50;"><b>Result: LCA(5, 4) = node 5</b> ✓ (5 is ancestor of 4, so 5 itself is the LCA)</p>
+      <p style="color:#888;font-size:11px;">Key: when we hit node 5 (which is p), we return immediately. We don't search deeper for q=4. Since 4 is below 5, 5 must be the LCA.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Internal Mechanics -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Why returning early at p/q works for the "ancestor" case:</b></p>
+      <ul>
+        <li>If p=5 and q=4, and 4 is below 5:</li>
+        <li>When DFS reaches 5, it returns 5 immediately (found p)</li>
+        <li>It never searches below 5 for q=4</li>
+        <li>But that's fine — if q is below p, then p IS the LCA by definition</li>
+        <li>The algorithm assumes both p and q exist in the tree (guaranteed by problem)</li>
+      </ul>
+      <p style="margin-top:12px;"><b>Tree DFS progression in this roadmap:</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">#</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Problem</th>
+            <th style="background:#22223a;color:#888;padding:5px;">DFS returns</th>
+            <th style="background:#22223a;color:#888;padding:5px;">COMBINE logic</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">26</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Max Depth</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">int (height)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">1 + max(L, R)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">27</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Balanced</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">int (height or -1)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">validate + 1 + max(L, R)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">28</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">LCA</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">TreeNode (found or null)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">both non-null → this is LCA</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Complexity -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag"><span class="label">Time:</span><span class="value">O(n)</span></div>
+        <div class="complexity-tag"><span class="label">Space:</span><span class="value">O(h)</span></div>
+      </div>
+      <p style="margin-top:10px;">Visit each node at most once. Space = recursion depth = height of tree.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Java Implementation -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">public class</span> <span class="type">LowestCommonAncestor</span> {
+
+    <span class="keyword">public static</span> TreeNode <span class="type">lowestCommonAncestor</span>(TreeNode root,
+                                                  TreeNode p, TreeNode q) {
+        <span class="keyword">if</span> (root == <span class="keyword">null</span> || root == p || root == q) {
+            <span class="keyword">return</span> root;
+        }
+
+        TreeNode left  = lowestCommonAncestor(root.left, p, q);
+        TreeNode right = lowestCommonAncestor(root.right, p, q);
+
+        <span class="keyword">if</span> (left != <span class="keyword">null</span> &amp;&amp; right != <span class="keyword">null</span>) <span class="keyword">return</span> root; <span class="comment">// split point</span>
+        <span class="keyword">return</span> left != <span class="keyword">null</span> ? left : right;             <span class="comment">// propagate</span>
+    }
+}</code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 7 lines of logic. One of the most elegant recursive solutions in all of DSA. Memorize this — it's asked constantly.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 9: Edge Cases -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead><tr><th style="background:#22223a;color:#888;padding:8px;">Case</th><th style="background:#22223a;color:#888;padding:8px;">p, q</th><th style="background:#22223a;color:#888;padding:8px;">LCA</th><th style="background:#22223a;color:#888;padding:8px;">Why</th></tr></thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">p is ancestor of q</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">5, 4</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Node is its own ancestor</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Different subtrees</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">5, 1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Split at root</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Same subtree</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">6, 4</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Both under 5</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">p == q</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">5, 5</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Same node — LCA is itself</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Root is one of them</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3, 7</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Root is ancestor of everything</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 10: Common Mistakes -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Not handling "node is its own ancestor"</b>
+          <p style="color:#e44d26;">❌ Only checking <code>root == null</code>, not <code>root == p || root == q</code></p>
+          <p style="color:#4caf50;">✅ The base case must include: <code>root == null || root == p || root == q</code></p>
+        </li>
+        <li style="margin-top:10px;"><b>Assuming p and q are always in different subtrees</b>
+          <p style="color:#888;">They might be in the same subtree, or one might be ancestor of the other. The algorithm handles all cases.</p>
+        </li>
+        <li style="margin-top:10px;"><b>Confusing with BST LCA (LC #235)</b>
+          <p style="color:#888;">BST LCA uses value comparison (go left if both < root, right if both > root). General tree LCA (#236) uses this DFS approach — no value comparison.</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 11-12 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>✅ "Lowest Common Ancestor" / "Nearest common parent"</li>
+        <li>✅ "Distance between two nodes" (= depth(p) + depth(q) - 2×depth(LCA))</li>
+        <li>✅ Any problem needing to find where two paths diverge in a tree</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ BST — use value-based comparison (simpler, O(h))</li>
+        <li>❌ Multiple LCA queries on same tree — preprocess with Euler tour + sparse table for O(1) per query</li>
+        <li>❌ p or q might not exist in tree — need to verify existence first (this algo assumes both exist)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="takeaway">
+    💡 "LCA = DFS returning found-node signals. Both sides non-null? You're the split point — you're the LCA. One side null? Propagate the other. 7 lines of pure elegance."
+  </div>
+
+  <!-- Bridge -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Ab tak tree DFS ke teen flavors dekhe: compute (#26), validate (#27), search (#28).</p>
+      <p style="margin-top:8px;">Next: <b>Tree BFS</b> — level-order traversal. Serialize & Deserialize a tree (#29).</p>
+      <p style="margin-top:8px;">BFS uses Queue (from #18) to process nodes level by level. This enables serialization (convert tree to string and back) — a real-world system design concept.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Tree DFS (depth-first, recursion) → Tree BFS (breadth-first, queue) — the other way to traverse trees!</p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem27.html">← Problem #27</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(28)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem29.html">Problem #29 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY="dsa-roadmap-progress";const PROBLEM_NUM=28;
+function loadProgress(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{};}catch{return{};}}
+function saveProgress(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}
+function toggleDone(n){const p=loadProgress();if(p[n]==="done")delete p[n];else p[n]="done";saveProgress(p);updateUI();}
+function updateUI(){const p=loadProgress(),btn=document.getElementById("mark-done-btn");if(p[PROBLEM_NUM]==="done"){btn.textContent="✔ Completed";btn.classList.add("completed");}else{btn.textContent="☐ Mark as Done";btn.classList.remove("completed");}updateReadProgress();}
+function updateReadProgress(){const p=loadProgress();if(p[PROBLEM_NUM]==="done"){document.getElementById("section-pct").textContent="100%";document.getElementById("section-bar").style.width="100%";return;}const s=document.querySelectorAll(".section, .takeaway"),t=s.length;if(t===0)return;let v=0;s.forEach(sec=>{if(sec.getBoundingClientRect().top<window.innerHeight)v++;});const pct=Math.min(100,Math.round((v/t)*100));document.getElementById("section-pct").textContent=pct+"%";document.getElementById("section-bar").style.width=pct+"%";}
+window.addEventListener("scroll",updateReadProgress);updateUI();
+</script>
+</body>
+</html>

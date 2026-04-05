@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#2 — Duplicate Customer Complaint | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 1: Foundation</span>
+    <span class="problem-id">Problem #2 of 50</span>
+  </div>
+</div>
+
+<!-- Problem Progress -->
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #2: Duplicate Customer Complaint</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#2 — Duplicate Customer Complaint</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Frequency Counting (HashMap)</p>
+
+  <!-- SECTION 0: Real-World Scenario -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek customer support manager ho. Tumhare paas ek list hai of complaint IDs jo aaj aaye:</p>
+      <p><code>[101, 203, 101, 305, 203, 101, 407]</code></p>
+      <p>Boss ne bola: <b>"Bata, kaunsa complaint ID sabse zyada baar aaya? Aur kitni baar?"</b></p>
+      <p style="margin-top:8px;">Simpler version pehle: <b>Kya is list mein koi duplicate hai?</b></p>
+      <p style="color:#4caf50;margin-top:8px;">Answer: Haan — 101 (3 times), 203 (2 times). Most frequent = 101.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Problem Understanding -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given an array of integers, determine if any value appears more than once</li>
+        <li>Variation 1: Return <code>true/false</code> (contains duplicate)</li>
+        <li>Variation 2: Return the first duplicate found</li>
+        <li>Variation 3: Return the element with highest frequency</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Input → Output Clarity:</b></p>
+      <ul>
+        <li>Input: <code>int[] nums</code></li>
+        <li>Output: <code>boolean</code> (for basic version) or <code>int</code> (for frequency version)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Connection to Problem #1:</b></p>
+      <ul>
+        <li>Problem #1 mein humne ek single variable (<code>minPrice</code>) se past track kiya</li>
+        <li>Ab ek variable kaafi nahi — humein <b>har element ka count</b> track karna hai</li>
+        <li>Single variable → <b>Map of variables</b> (HashMap)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Brute Force Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>First instinct:</b> For each element, check if it appears again later in the array.</p>
+<pre><code><span class="comment">// Brute Force — O(n²)</span>
+<span class="keyword">public static boolean</span> <span class="type">containsDuplicate</span>(<span class="type">int</span>[] nums) {
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; nums.length; i++) {
+        <span class="keyword">for</span> (<span class="type">int</span> j = i + <span class="number">1</span>; j &lt; nums.length; j++) {
+            <span class="keyword">if</span> (nums[i] == nums[j]) <span class="keyword">return true</span>;
+        }
+    }
+    <span class="keyword">return false</span>;
+}</code></pre>
+      <p><b>Problem:</b> Same old nested loop → <code>O(n²)</code>.</p>
+      <p style="margin-top:8px;"><b>Alternative brute force:</b> Sort the array first, then check adjacent elements.</p>
+<pre><code><span class="comment">// Sort-based — O(n log n)</span>
+Arrays.sort(nums);
+<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt; nums.length; i++) {
+    <span class="keyword">if</span> (nums[i] == nums[i - <span class="number">1</span>]) <span class="keyword">return true</span>;
+}
+<span class="keyword">return false</span>;</code></pre>
+      <p>Better — <code>O(n log n)</code>. But sorting modifies the original array. Can we do <code>O(n)</code>?</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 Sochne ka point: Kya hum "pehle dekha hai ya nahi" instantly check kar sakte hain?</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Optimization Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Key Insight:</b> Humein ek "memory" chahiye jo bata sake — "yeh element pehle aa chuka hai ya nahi?"</p>
+      <p style="margin-top:8px;">Problem #1 mein ek variable kaafi tha kyunki sirf min track karna tha. Ab har element ka record chahiye.</p>
+      <p style="margin-top:10px;"><b>What data structure gives O(1) lookup?</b></p>
+      <ul>
+        <li>Array? — Only if values are small and non-negative (index-based)</li>
+        <li><b>HashSet</b> — O(1) average lookup for "seen or not seen"</li>
+        <li><b>HashMap</b> — O(1) average lookup + stores count (frequency)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Trade-off:</b></p>
+      <table style="width:100%;font-size:12px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Approach</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Time</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Space</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Modifies Input?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Nested Loop</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">O(n²)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">O(1)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Sorting</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#ffc107;">O(n log n)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">O(1)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">Yes</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">HashSet/HashMap</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(n)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#ffc107;">O(n)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No</td></tr>
+        </tbody>
+      </table>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern identified: <b>Frequency Counting with HashMap</b> — trade space for time.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Final Approach -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach (Pattern-Based)</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Pattern Name:</b> Frequency Counting (HashMap / HashSet)</p>
+      <p><b>Why this pattern fits:</b></p>
+      <ul>
+        <li>We need to "remember" what we've seen before — that's a lookup problem</li>
+        <li>HashMap gives O(1) insert + O(1) lookup</li>
+        <li>We're trading O(n) space to eliminate the inner loop entirely</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Two variants:</b></p>
+      <ul>
+        <li><b>HashSet</b> — when you only need "seen or not" (contains duplicate)</li>
+        <li><b>HashMap</b> — when you need the count/frequency (most frequent element)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Algorithm (HashSet — duplicate check):</b></p>
+      <ol>
+        <li>Create an empty HashSet</li>
+        <li>For each element in array:
+          <ul>
+            <li>If element already in set → return <code>true</code> (duplicate found)</li>
+            <li>Else → add element to set</li>
+          </ul>
+        </li>
+        <li>If loop ends → return <code>false</code> (no duplicates)</li>
+      </ol>
+      <p style="margin-top:10px;"><b>Algorithm (HashMap — frequency count):</b></p>
+      <ol>
+        <li>Create an empty HashMap&lt;Integer, Integer&gt;</li>
+        <li>For each element: <code>map.put(num, map.getOrDefault(num, 0) + 1)</code></li>
+        <li>Iterate map to find element with highest count</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Step-by-Step Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Input:</b> <code>[101, 203, 101, 305, 203, 101, 407]</code></p>
+      <p style="margin-top:8px;"><b>Dry Run — HashSet (duplicate check):</b></p>
+      <table style="width:100%;font-size:12px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Step</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Element</th>
+            <th style="background:#22223a;color:#888;padding:8px;">In Set?</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Action</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Set State</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">101</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Add</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">{101}</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">203</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Add</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">{101, 203}</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">101</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">Yes ✓</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">DUPLICATE FOUND → return true</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">—</td></tr>
+        </tbody>
+      </table>
+
+      <p style="margin-top:16px;"><b>Dry Run — HashMap (frequency count):</b></p>
+      <table style="width:100%;font-size:12px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Step</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Element</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Map State After</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">101</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">{101→<span style="color:#6c63ff;">1</span>}</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">203</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">{101→1, 203→<span style="color:#6c63ff;">1</span>}</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">101</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">{101→<span style="color:#6c63ff;">2</span>, 203→1}</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">305</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">{101→2, 203→1, 305→<span style="color:#6c63ff;">1</span>}</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">203</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">{101→2, 203→<span style="color:#6c63ff;">2</span>, 305→1}</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">6</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">101</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">{101→<span style="color:#6c63ff;">3</span>, 203→2, 305→1}</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">7</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">407</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">{101→3, 203→2, 305→1, 407→<span style="color:#6c63ff;">1</span>}</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#4caf50;"><b>Result: Most frequent = 101 (3 times)</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Internal Mechanics -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>How HashMap works internally (simplified):</b></p>
+      <ul>
+        <li>HashMap internally ek array of "buckets" maintain karta hai</li>
+        <li>Jab tum <code>put(key, value)</code> karte ho:
+          <ul>
+            <li>Key ka <code>hashCode()</code> calculate hota hai</li>
+            <li><code>hashCode % arraySize</code> → bucket index milta hai</li>
+            <li>Us bucket mein key-value pair store hota hai</li>
+          </ul>
+        </li>
+        <li>Jab tum <code>get(key)</code> karte ho → same hash → same bucket → O(1) lookup</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Why O(1) average?</b></p>
+      <ul>
+        <li>Hash function distributes keys evenly across buckets</li>
+        <li>Worst case (all keys same bucket) → O(n), but this is extremely rare</li>
+        <li>Java 8+ uses balanced trees inside buckets when collisions exceed 8 → worst case O(log n)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>HashSet vs HashMap:</b></p>
+      <ul>
+        <li>HashSet internally IS a HashMap — it stores keys with a dummy value</li>
+        <li><code>set.add(x)</code> = <code>map.put(x, DUMMY)</code></li>
+        <li>Use HashSet when you only care about presence, HashMap when you need associated data (count, index, etc.)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Complexity Analysis -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>HashSet approach (contains duplicate):</b></p>
+      <div class="complexity-row">
+        <div class="complexity-tag">
+          <span class="label">Time:</span>
+          <span class="value">O(n)</span>
+        </div>
+        <div class="complexity-tag">
+          <span class="label">Space:</span>
+          <span class="value">O(n)</span>
+        </div>
+      </div>
+      <p style="margin-top:12px;"><b>HashMap approach (frequency count):</b></p>
+      <div class="complexity-row">
+        <div class="complexity-tag">
+          <span class="label">Time:</span>
+          <span class="value">O(n)</span>
+        </div>
+        <div class="complexity-tag">
+          <span class="label">Space:</span>
+          <span class="value">O(n)</span>
+        </div>
+      </div>
+      <p style="margin-top:12px;color:#888;font-size:11px;">Space-time trade-off: We use O(n) extra memory to bring time from O(n²) down to O(n). Almost always worth it.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Java Implementation -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Variant 1: Contains Duplicate (HashSet)</b></p>
+<pre><code><span class="keyword">import</span> java.util.HashSet;
+
+<span class="keyword">public class</span> <span class="type">DuplicateCheck</span> {
+
+    <span class="keyword">public static boolean</span> <span class="type">containsDuplicate</span>(<span class="type">int</span>[] nums) {
+        HashSet&lt;Integer&gt; seen = <span class="keyword">new</span> HashSet&lt;&gt;();
+        <span class="keyword">for</span> (<span class="type">int</span> num : nums) {
+            <span class="keyword">if</span> (!seen.add(num)) <span class="keyword">return true</span>;
+        }
+        <span class="keyword">return false</span>;
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        <span class="type">int</span>[] nums = {<span class="number">101</span>, <span class="number">203</span>, <span class="number">101</span>, <span class="number">305</span>};
+        System.out.println(containsDuplicate(nums)); <span class="comment">// true</span>
+    }
+}</code></pre>
+      <p style="margin-top:6px;color:#888;font-size:11px;">💡 Trick: <code>set.add()</code> returns <code>false</code> if element already exists. So <code>!seen.add(num)</code> is a one-liner duplicate check.</p>
+
+      <p style="margin-top:16px;"><b>Variant 2: Most Frequent Element (HashMap)</b></p>
+<pre><code><span class="keyword">import</span> java.util.HashMap;
+<span class="keyword">import</span> java.util.Map;
+
+<span class="keyword">public class</span> <span class="type">MostFrequent</span> {
+
+    <span class="keyword">public static int</span> <span class="type">mostFrequent</span>(<span class="type">int</span>[] nums) {
+        HashMap&lt;Integer, Integer&gt; freq = <span class="keyword">new</span> HashMap&lt;&gt;();
+
+        <span class="keyword">for</span> (<span class="type">int</span> num : nums) {
+            freq.put(num, freq.getOrDefault(num, <span class="number">0</span>) + <span class="number">1</span>);
+        }
+
+        <span class="type">int</span> maxCount = <span class="number">0</span>, result = nums[<span class="number">0</span>];
+        <span class="keyword">for</span> (Map.Entry&lt;Integer, Integer&gt; entry : freq.entrySet()) {
+            <span class="keyword">if</span> (entry.getValue() &gt; maxCount) {
+                maxCount = entry.getValue();
+                result = entry.getKey();
+            }
+        }
+        <span class="keyword">return</span> result;
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        <span class="type">int</span>[] complaints = {<span class="number">101</span>, <span class="number">203</span>, <span class="number">101</span>, <span class="number">305</span>, <span class="number">203</span>, <span class="number">101</span>, <span class="number">407</span>};
+        System.out.println(<span class="string">"Most frequent: "</span> + mostFrequent(complaints)); <span class="comment">// 101</span>
+    }
+}</code></pre>
+    </div>
+  </div>
+
+  <!-- SECTION 9: Edge Cases -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Case</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Input</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Output</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Why</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All unique</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,2,3,4,5]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">false</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No duplicates exist</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All same</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[7,7,7,7]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">true</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Every element is duplicate</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single element</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[42]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">false</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Need at least 2 elements for duplicate</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Empty array</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">false</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Nothing to compare</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Negative numbers</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[-1,0,-1]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">true</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">HashMap handles negatives fine</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Duplicate at end</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,2,3,4,1]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">true</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Must scan entire array</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 10: Common Mistakes -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Using <code>==</code> with Integer objects instead of <code>.equals()</code></b>
+          <p style="color:#e44d26;">❌ For Integer values > 127, <code>==</code> compares references, not values</p>
+          <p style="color:#4caf50;">✅ Use <code>int</code> primitives or <code>.equals()</code> for Integer objects</p>
+          <p style="color:#888;font-size:11px;">Our code uses <code>int[]</code> so autoboxing handles this, but be aware when using <code>Integer[]</code></p>
+        </li>
+        <li style="margin-top:10px;"><b>Forgetting <code>getOrDefault</code></b>
+          <p style="color:#e44d26;">❌ <code>map.get(num) + 1</code> → NullPointerException if key doesn't exist</p>
+          <p style="color:#4caf50;">✅ <code>map.getOrDefault(num, 0) + 1</code> → safe, returns 0 if absent</p>
+        </li>
+        <li style="margin-top:10px;"><b>Using HashMap when HashSet is enough</b>
+          <p style="color:#888;">If you only need "exists or not" → HashSet is cleaner and more readable</p>
+          <p style="color:#888;">HashMap is for when you need the count or associated data</p>
+        </li>
+        <li style="margin-top:10px;"><b>Not considering the <code>set.add()</code> return value trick</b>
+          <p style="color:#4caf50;">✅ <code>set.add(x)</code> returns <code>false</code> if x already exists — one line does both check + insert</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 11: When to Use This Pattern -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Signals to पहचान (identify) this pattern:</b></p>
+      <ul>
+        <li>✅ "Find duplicates" / "Find frequency" / "Count occurrences"</li>
+        <li>✅ "Have we seen this before?" type questions</li>
+        <li>✅ "Two Sum" — find two numbers that add to target (HashMap stores complement)</li>
+        <li>✅ "Group by" — group anagrams, group by frequency</li>
+        <li>✅ Any problem where O(1) lookup would eliminate an inner loop</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Real-world uses:</b></p>
+      <ul>
+        <li>Spam detection (seen this message before?)</li>
+        <li>Vote counting / election results</li>
+        <li>Web analytics (page visit frequency)</li>
+        <li>Caching (is this result already computed?)</li>
+        <li>Database indexing (hash indexes)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 12: When NOT to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ When space is strictly O(1) — sorting might be the only option</li>
+        <li>❌ When you need elements in sorted order — HashMap doesn't maintain order (use TreeMap)</li>
+        <li>❌ When the range of values is small and known — a simple array is faster than HashMap</li>
+        <li>❌ When you need "k-th most frequent" — HashMap alone isn't enough (need heap or bucket sort on top)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 13: Key Takeaway -->
+  <div class="takeaway">
+    💡 "Jab 'pehle dekha hai kya?' poochna ho — HashMap/HashSet lao. O(n²) turant O(n) ban jayega."
+  </div>
+
+  <!-- SECTION 14: Bridge to Next Problem -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Ab tak humne seekha:</p>
+      <ul>
+        <li>Problem #1: Single tracking variable → past ka ek value remember karna</li>
+        <li>Problem #2: HashMap/HashSet → past ke multiple values remember karna</li>
+      </ul>
+      <p style="margin-top:10px;">Next problem mein ek naya question aayega: <b>"Agar tumhe baar baar subarray ka sum poochha jaaye, toh har baar loop lagaoge?"</b></p>
+      <p style="margin-top:8px;">That's where <b>Prefix Sum</b> comes in — Problem #3: Balancing the Warehouse Stock.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Tracking one value → Tracking all values (HashMap) → Pre-computing cumulative values (Prefix Sum)</p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem1.html">← Problem #1</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(2)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem3.html">Problem #3 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "dsa-roadmap-progress";
+const PROBLEM_NUM = 2;
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+
+function saveProgress(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function toggleDone(num) {
+  const prog = loadProgress();
+  if (prog[num] === "done") { delete prog[num]; }
+  else { prog[num] = "done"; }
+  saveProgress(prog);
+  updateUI();
+}
+
+function updateUI() {
+  const prog = loadProgress();
+  const btn = document.getElementById("mark-done-btn");
+  if (prog[PROBLEM_NUM] === "done") {
+    btn.textContent = "✔ Completed";
+    btn.classList.add("completed");
+  } else {
+    btn.textContent = "☐ Mark as Done";
+    btn.classList.remove("completed");
+  }
+  updateReadProgress();
+}
+
+function updateReadProgress() {
+  const prog = loadProgress();
+  if (prog[PROBLEM_NUM] === "done") {
+    document.getElementById("section-pct").textContent = "100%";
+    document.getElementById("section-bar").style.width = "100%";
+    return;
+  }
+  const sections = document.querySelectorAll(".section, .takeaway");
+  const total = sections.length;
+  if (total === 0) return;
+  let visible = 0;
+  sections.forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    if (rect.top < window.innerHeight) visible++;
+  });
+  const pct = Math.min(100, Math.round((visible / total) * 100));
+  document.getElementById("section-pct").textContent = pct + "%";
+  document.getElementById("section-bar").style.width = pct + "%";
+}
+
+window.addEventListener("scroll", updateReadProgress);
+updateUI();
+</script>
+</body>
+</html>

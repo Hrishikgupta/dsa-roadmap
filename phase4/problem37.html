@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#37 — N-Queens — Place Queens Safely | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 4: Advanced</span>
+    <span class="problem-id">Problem #37 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #37: N-Queens — Place Queens Safely</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#37 — N-Queens — Place Queens Safely</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Backtracking (Placement + Pruning)</p>
+
+  <!-- SECTION 0 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Place N queens on an N×N chessboard so that no two queens attack each other:</p>
+<pre><code><span class="comment">4-Queens solution:          Queens attack:</span>
+<span class="comment">. Q . .                     ↑ ↗</span>
+<span class="comment">. . . Q                   ← Q →  (row, col, diagonals)</span>
+<span class="comment">Q . . .                     ↙ ↓</span>
+<span class="comment">. . Q .</span></code></pre>
+      <p style="margin-top:8px;">No two queens share the same row, column, or diagonal.</p>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #51 — N-Queens. The most famous backtracking problem in CS history.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Place N queens on N×N board — one queen per row (since each row must have exactly one)</li>
+        <li>No two queens in same column, same diagonal, or same anti-diagonal</li>
+        <li>Return all valid configurations</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Key simplification:</b> Since each row gets exactly one queen, we just need to decide WHICH COLUMN for each row. This reduces the problem from N² choices to N choices per row.</p>
+      <p style="margin-top:10px;"><b>The diagonal trick:</b></p>
+      <ul>
+        <li>All cells on the same <b>diagonal (↘)</b> have the same <code>row - col</code> value</li>
+        <li>All cells on the same <b>anti-diagonal (↙)</b> have the same <code>row + col</code> value</li>
+        <li>Track used columns, diagonals, and anti-diagonals in HashSets → O(1) conflict check</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Connection to #36:</b> Same backtracking template. Sudoku: try digits 1-9, check row/col/box. N-Queens: try columns 0 to N-1, check col/diagonal/anti-diagonal.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Brute force:</b> Try all N^N column assignments (N choices for each of N rows), check validity.</p>
+      <p>For N=8: 8⁸ = 16 million. With backtracking + pruning: only ~15,000 nodes explored.</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 Place queen row by row. For each row, try each column. If column/diagonal/anti-diagonal is already taken → skip (prune). If valid → place and move to next row.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Algorithm:</b></p>
+<pre><code><span class="type">void</span> solve(row, cols, diags, antiDiags, board, results):
+    <span class="keyword">if</span> row == N → add board to results; <span class="keyword">return</span>
+
+    <span class="keyword">for</span> col = <span class="number">0</span> to N-<span class="number">1</span>:
+        <span class="keyword">if</span> col <span class="keyword">in</span> cols || (row-col) <span class="keyword">in</span> diags || (row+col) <span class="keyword">in</span> antiDiags:
+            <span class="keyword">continue</span>  <span class="comment">// PRUNE — conflict!</span>
+
+        <span class="comment">// PLACE</span>
+        cols.add(col); diags.add(row-col); antiDiags.add(row+col)
+        board[row][col] = <span class="string">'Q'</span>
+
+        solve(row+<span class="number">1</span>, ...)  <span class="comment">// RECURSE to next row</span>
+
+        <span class="comment">// UNDO</span>
+        cols.remove(col); diags.remove(row-col); antiDiags.remove(row+col)
+        board[row][col] = <span class="string">'.'</span></code></pre>
+      <p style="color:#4caf50;margin-top:10px;">💡 Three HashSets for O(1) conflict detection: <code>cols</code>, <code>diags</code> (row-col), <code>antiDiags</code> (row+col).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Row-by-row placement:</b></p>
+      <ol>
+        <li>Process one row at a time (row 0, then 1, then 2...)</li>
+        <li>For each row, try every column</li>
+        <li>Check: is this column, diagonal, anti-diagonal free?</li>
+        <li>If yes → place queen, add to sets, recurse to next row</li>
+        <li>After recursion → undo (remove from sets, clear cell)</li>
+        <li>When row == N → all queens placed, save the board</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>N = 4:</b></p>
+<pre><code><span class="comment">Row 0: try col 0</span>
+  <span style="color:#4caf50;">Q . . .</span>   cols={0}, diags={0}, anti={0}
+  <span class="comment">Row 1: try col 0 → conflict (col). col 1 → conflict (anti-diag 0+1=1, diag 1-1=0). col 2:</span>
+    <span style="color:#4caf50;">Q . . .
+    . . Q .</span>   cols={0,2}, diags={0,-1}, anti={0,3}
+    <span class="comment">Row 2: col 0→conflict(col). col 1→conflict(anti 2+1=3). col 2→conflict(col). col 3→conflict(diag 2-3=-1).</span>
+    <span style="color:#e44d26;">ALL BLOCKED → backtrack! Undo row 1 col 2.</span>
+  <span class="comment">Row 1: try col 3:</span>
+    <span style="color:#4caf50;">Q . . .
+    . . . Q</span>   cols={0,3}, diags={0,-2}, anti={0,4}
+    <span class="comment">Row 2: col 0→conflict(col). col 1:</span>
+      <span style="color:#4caf50;">Q . . .
+      . . . Q
+      . Q . .</span>   cols={0,3,1}, diags={0,-2,1}, anti={0,4,3}
+      <span class="comment">Row 3: col 0→conflict(col). col 1→conflict(col). col 2:</span>
+        <span style="color:#e44d26;">diag 3-2=1 → conflict! col 3→conflict(col).</span>
+        <span style="color:#e44d26;">ALL BLOCKED → backtrack!</span>
+  <span class="comment">... eventually finds:</span>
+  <span style="color:#4caf50;">. Q . .
+  . . . Q
+  Q . . .
+  . . Q .</span>   ✓ <span style="color:#4caf50;">SOLUTION FOUND!</span></code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">For N=4, there are exactly 2 solutions. The algorithm finds both by continuing after the first.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Why row-col and row+col identify diagonals:</b></p>
+<pre><code><span class="comment">4×4 board — row-col values (↘ diagonal):</span>
+ 0  -1  -2  -3
+ 1   0  -1  -2
+ 2   1   0  -1
+ 3   2   1   0
+
+<span class="comment">4×4 board — row+col values (↙ anti-diagonal):</span>
+ 0   1   2   3
+ 1   2   3   4
+ 2   3   4   5
+ 3   4   5   6</code></pre>
+      <p style="margin-top:8px;">Same value = same diagonal. Store in HashSet → O(1) check.</p>
+      <p style="margin-top:12px;"><b>N-Queens solutions count:</b></p>
+      <table style="width:60%;font-size:11px;margin-top:8px;">
+        <thead><tr><th style="background:#22223a;color:#888;padding:6px;">N</th><th style="background:#22223a;color:#888;padding:6px;">Solutions</th></tr></thead>
+        <tbody>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">8</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">92</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">12</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">14,200</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag"><span class="label">Time:</span><span class="value">O(N!)</span></div>
+        <div class="complexity-tag"><span class="label">Space:</span><span class="value">O(N)</span></div>
+      </div>
+      <p style="margin-top:10px;">Row 0: N choices. Row 1: at most N-1 (one col taken). Row 2: at most N-2... ≈ N!. Space: 3 sets + recursion depth = O(N).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">import</span> java.util.*;
+
+<span class="keyword">public class</span> <span class="type">NQueens</span> {
+
+    <span class="keyword">public</span> List&lt;List&lt;String&gt;&gt; <span class="type">solveNQueens</span>(<span class="type">int</span> n) {
+        List&lt;List&lt;String&gt;&gt; results = <span class="keyword">new</span> ArrayList&lt;&gt;();
+        <span class="type">char</span>[][] board = <span class="keyword">new</span> <span class="type">char</span>[n][n];
+        <span class="keyword">for</span> (<span class="type">char</span>[] row : board) Arrays.fill(row, <span class="string">'.'</span>);
+        solve(<span class="number">0</span>, n, board, <span class="keyword">new</span> HashSet&lt;&gt;(), <span class="keyword">new</span> HashSet&lt;&gt;(), <span class="keyword">new</span> HashSet&lt;&gt;(), results);
+        <span class="keyword">return</span> results;
+    }
+
+    <span class="keyword">private void</span> <span class="type">solve</span>(<span class="type">int</span> row, <span class="type">int</span> n, <span class="type">char</span>[][] board,
+                        Set&lt;Integer&gt; cols, Set&lt;Integer&gt; diags,
+                        Set&lt;Integer&gt; antiDiags, List&lt;List&lt;String&gt;&gt; results) {
+        <span class="keyword">if</span> (row == n) {
+            List&lt;String&gt; snapshot = <span class="keyword">new</span> ArrayList&lt;&gt;();
+            <span class="keyword">for</span> (<span class="type">char</span>[] r : board) snapshot.add(<span class="keyword">new</span> String(r));
+            results.add(snapshot);
+            <span class="keyword">return</span>;
+        }
+
+        <span class="keyword">for</span> (<span class="type">int</span> col = <span class="number">0</span>; col &lt; n; col++) {
+            <span class="type">int</span> diag = row - col, anti = row + col;
+            <span class="keyword">if</span> (cols.contains(col) || diags.contains(diag)
+                || antiDiags.contains(anti)) <span class="keyword">continue</span>;
+
+            board[row][col] = <span class="string">'Q'</span>;
+            cols.add(col); diags.add(diag); antiDiags.add(anti);
+
+            solve(row + <span class="number">1</span>, n, board, cols, diags, antiDiags, results);
+
+            board[row][col] = <span class="string">'.'</span>;
+            cols.remove(col); diags.remove(diag); antiDiags.remove(anti);
+        }
+    }
+}</code></pre>
+    </div>
+  </div>
+
+  <!-- Remaining sections -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead><tr><th style="background:#22223a;color:#888;padding:8px;">N</th><th style="background:#22223a;color:#888;padding:8px;">Solutions</th><th style="background:#22223a;color:#888;padding:8px;">Note</th></tr></thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single queen on 1×1 board</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2, 3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No solution exists — board too small</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Smallest non-trivial case</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">8</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">92</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Classic chess board</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Checking only row and column, forgetting diagonals</b>
+          <p style="color:#4caf50;">✅ Must check all three: column, diagonal (row-col), anti-diagonal (row+col)</p>
+        </li>
+        <li style="margin-top:10px;"><b>Not undoing all three sets during backtrack</b>
+          <p style="color:#e44d26;">❌ Removing from cols but forgetting diags/antiDiags → false conflicts in later branches</p>
+        </li>
+        <li style="margin-top:10px;"><b>Checking rows explicitly</b>
+          <p style="color:#888;">Not needed — we place exactly one queen per row by design (row-by-row recursion).</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>✅ "Place N items with no-conflict constraints"</li>
+        <li>✅ "Find all valid configurations" on a board/grid</li>
+        <li>✅ "Graph coloring" — assign colors so no adjacent nodes share a color</li>
+        <li>✅ Any constraint satisfaction problem (CSP)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ "Count solutions" for large N — backtracking is too slow, need math/DP</li>
+        <li>❌ No constraints to prune — degenerates to brute force</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="takeaway">
+    💡 "N-Queens = row-by-row backtracking. Three HashSets (cols, row-col, row+col) give O(1) conflict check. Same template as Sudoku — different constraints."
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Sudoku: backtracking on a grid with value constraints. N-Queens: backtracking with placement constraints.</p>
+      <p style="margin-top:8px;">Next: <b>Word Search in a Grid</b> — backtracking + DFS on a grid. Find if a word exists by following adjacent cells. Combines grid DFS (#31) with backtracking (#36).</p>
+      <p style="margin-top:8px;">This is the last problem of Phase 4. After this → Phase 5: Dynamic Programming!</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Backtracking on board (N-Queens) → Backtracking + Grid DFS (Word Search) — Phase 4 finale!</p>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem36.html">← Problem #36</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(37)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem38.html">Problem #38 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY="dsa-roadmap-progress";const PROBLEM_NUM=37;
+function loadProgress(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{};}catch{return{};}}
+function saveProgress(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}
+function toggleDone(n){const p=loadProgress();if(p[n]==="done")delete p[n];else p[n]="done";saveProgress(p);updateUI();}
+function updateUI(){const p=loadProgress(),btn=document.getElementById("mark-done-btn");if(p[PROBLEM_NUM]==="done"){btn.textContent="✔ Completed";btn.classList.add("completed");}else{btn.textContent="☐ Mark as Done";btn.classList.remove("completed");}updateReadProgress();}
+function updateReadProgress(){const p=loadProgress();if(p[PROBLEM_NUM]==="done"){document.getElementById("section-pct").textContent="100%";document.getElementById("section-bar").style.width="100%";return;}const s=document.querySelectorAll(".section, .takeaway"),t=s.length;if(t===0)return;let v=0;s.forEach(sec=>{if(sec.getBoundingClientRect().top<window.innerHeight)v++;});const pct=Math.min(100,Math.round((v/t)*100));document.getElementById("section-pct").textContent=pct+"%";document.getElementById("section-bar").style.width=pct+"%";}
+window.addEventListener("scroll",updateReadProgress);updateUI();
+</script>
+</body>
+</html>

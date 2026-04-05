@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#13 — Trapping Rainwater Between Buildings | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 2: Core Patterns</span>
+    <span class="problem-id">Problem #13 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #13: Trapping Rainwater Between Buildings</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#13 — Trapping Rainwater Between Buildings</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Two Pointer (Opposite Ends) + Pre-computation</p>
+
+  <!-- SECTION 0: Real-World Scenario -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Imagine a city skyline after heavy rain. Buildings of different heights are lined up:</p>
+      <p><code>[0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1]</code></p>
+      <p>Rain falls and water gets trapped between taller buildings:</p>
+<pre><code><span class="comment">       █
+   █   ██ █
+ █ ██ ████ █
+_█_██_██████_</span>
+ 0 1 0 2 1 0 1 3 2 1 2 1
+
+<span style="color:#48c6ef;">Water fills the gaps:</span>
+<span class="comment">       █
+   █ ~ ██ █
+ █ ██ ████ █</span>
+<span style="color:#48c6ef;"> ~ = water trapped</span></code></pre>
+      <p style="margin-top:8px;">Question: <b>Total kitna water trap hoga?</b></p>
+      <p style="color:#4caf50;margin-top:8px;">Answer: <b>6 units</b></p>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #42 — Trapping Rain Water. One of the most classic hard problems. Asked at Google, Amazon, Microsoft constantly.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Problem Understanding -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given an array where each element represents the height of a bar/building</li>
+        <li>Calculate how much water can be trapped between the bars after rain</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Input → Output:</b></p>
+      <ul>
+        <li>Input: <code>int[] height</code></li>
+        <li>Output: <code>int</code> — total units of trapped water</li>
+      </ul>
+      <p style="margin-top:10px;"><b>The core insight — water at any position:</b></p>
+      <p>Water trapped at index <code>i</code> = <code>min(maxLeft, maxRight) - height[i]</code></p>
+      <ul>
+        <li><code>maxLeft</code> = tallest building to the LEFT of i (including i)</li>
+        <li><code>maxRight</code> = tallest building to the RIGHT of i (including i)</li>
+        <li>Water level at i = the shorter of the two walls</li>
+        <li>Water trapped at i = water level - building height (if positive)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Connection to previous problems:</b></p>
+      <ul>
+        <li>#3 (Prefix Sum): pre-computing cumulative data from left → same idea but with max instead of sum</li>
+        <li>#6 (Two Pointer pair sum): opposite-end pointers → same structure but different logic</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Brute Force Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>First instinct:</b> For each position, scan left for max and scan right for max.</p>
+<pre><code><span class="comment">// Brute Force — O(n²)</span>
+<span class="type">int</span> total = <span class="number">0</span>;
+<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) {
+    <span class="type">int</span> maxLeft = <span class="number">0</span>, maxRight = <span class="number">0</span>;
+    <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt;= i; j++) maxLeft = Math.max(maxLeft, height[j]);
+    <span class="keyword">for</span> (<span class="type">int</span> j = i; j &lt; n; j++) maxRight = Math.max(maxRight, height[j]);
+    total += Math.min(maxLeft, maxRight) - height[i];
+}</code></pre>
+      <p>O(n) per position × n positions = <b>O(n²)</b>.</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 Hum har position ke liye left-max aur right-max baar baar calculate kar rahe hain. Kya pehle se pre-compute kar sakte hain? (Prefix Sum #3 jaisa thinking!)</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Optimization Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Approach A: Pre-compute arrays — O(n) time, O(n) space</b></p>
+      <ul>
+        <li>Build <code>leftMax[i]</code> = max height from 0 to i (scan left → right)</li>
+        <li>Build <code>rightMax[i]</code> = max height from i to n-1 (scan right → left)</li>
+        <li>Water at i = <code>min(leftMax[i], rightMax[i]) - height[i]</code></li>
+      </ul>
+      <p style="margin-top:8px;">This is the "prefix max" approach — same idea as prefix sum but tracking max instead of sum.</p>
+
+      <p style="margin-top:14px;"><b>Approach B: Two Pointer — O(n) time, O(1) space ⭐</b></p>
+      <p>Can we avoid the two extra arrays?</p>
+      <ul>
+        <li>Use two pointers: <code>left = 0</code>, <code>right = n-1</code></li>
+        <li>Track <code>leftMax</code> and <code>rightMax</code> as we go</li>
+        <li>Key insight: <b>we only need the smaller of the two maxes</b></li>
+        <li>If <code>leftMax &lt; rightMax</code>: water at left is determined by leftMax (the bottleneck). Process left, move left++.</li>
+        <li>If <code>rightMax &lt;= leftMax</code>: water at right is determined by rightMax. Process right, move right--.</li>
+      </ul>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>Two Pointer from opposite ends + running max tracking — O(n) time, O(1) space</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Final Approach -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach (Pattern-Based)</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Pattern:</b> Two Pointer (Opposite Ends) with Running Max</p>
+      <p style="margin-top:10px;"><b>Why it works:</b></p>
+      <ul>
+        <li>If <code>height[left] &lt; height[right]</code>: the right side is guaranteed to have a wall ≥ height[right]</li>
+        <li>So the bottleneck for position <code>left</code> is <code>leftMax</code> — we know it completely</li>
+        <li>We don't need to know the exact rightMax — we just know it's big enough</li>
+        <li>Same logic flipped for the right side</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Algorithm:</b></p>
+      <ol>
+        <li><code>left = 0</code>, <code>right = n-1</code>, <code>leftMax = 0</code>, <code>rightMax = 0</code>, <code>water = 0</code></li>
+        <li>While <code>left &lt; right</code>:
+          <ul>
+            <li>If <code>height[left] &lt; height[right]</code>:
+              <ul>
+                <li>If <code>height[left] &gt;= leftMax</code>: update <code>leftMax</code></li>
+                <li>Else: <code>water += leftMax - height[left]</code></li>
+                <li><code>left++</code></li>
+              </ul>
+            </li>
+            <li>Else:
+              <ul>
+                <li>If <code>height[right] &gt;= rightMax</code>: update <code>rightMax</code></li>
+                <li>Else: <code>water += rightMax - height[right]</code></li>
+                <li><code>right--</code></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Step-by-Step Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Input:</b> <code>height = [0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1]</code></p>
+      <table style="width:100%;font-size:10px;margin-top:10px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Step</th>
+            <th style="background:#22223a;color:#888;padding:5px;">L</th>
+            <th style="background:#22223a;color:#888;padding:5px;">R</th>
+            <th style="background:#22223a;color:#888;padding:5px;">h[L]</th>
+            <th style="background:#22223a;color:#888;padding:5px;">h[R]</th>
+            <th style="background:#22223a;color:#888;padding:5px;">lMax</th>
+            <th style="background:#22223a;color:#888;padding:5px;">rMax</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Side</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Water added</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">11</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#ffc107;">0</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Left</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0 (new lMax)</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">11</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#ffc107;">1</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Left</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0 (new lMax)</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">11</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Left</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">1-0 = 1</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">1</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">11</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#ffc107;">1</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Right</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0 (new rMax)</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">1</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">10</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#ffc107;">2</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Left</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0 (new lMax)</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">1</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">6</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">10</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Left</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">2-1 = 1</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">2</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">7</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">10</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Left</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">2-0 = 2</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">4</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">8</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">6</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">10</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Left</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">2-1 = 1</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">5</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">9</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">7</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">10</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#ffc107;">2</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Right</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0 (new rMax)</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">5</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">10</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">7</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">9</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Right</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">2-1 = 1</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">6</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">11</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">7</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">8</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#ffc107;">3</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Left</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">0 (new lMax)</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">6</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#4caf50;"><b>Result: water = 6</b> ✓</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Internal Mechanics -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Why processing the shorter side is safe:</b></p>
+      <ul>
+        <li>If <code>height[left] &lt; height[right]</code>, we know there's a wall on the right that's at least <code>height[right]</code> tall</li>
+        <li>So the water at <code>left</code> is bounded by <code>leftMax</code> (we know it exactly) and something ≥ <code>height[right]</code> on the right</li>
+        <li>Since <code>height[left] &lt; height[right]</code>, the bottleneck is definitely <code>leftMax</code></li>
+        <li>We don't need to know the exact rightMax — just that it's big enough</li>
+      </ul>
+
+      <p style="margin-top:12px;"><b>Three approaches compared:</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">Approach</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Time</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Space</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Passes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Brute Force</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#e44d26;">O(n²)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(1)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">n passes of n</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Prefix Max arrays</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(n)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#ffc107;">O(n)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">3 passes</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Two Pointer</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(n)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(1)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">1 pass</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Complexity Analysis -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag">
+          <span class="label">Time:</span>
+          <span class="value">O(n)</span>
+        </div>
+        <div class="complexity-tag">
+          <span class="label">Space:</span>
+          <span class="value">O(1)</span>
+        </div>
+      </div>
+      <p style="margin-top:10px;">Single pass. Two pointers meet in the middle. Only 4 variables tracked (left, right, leftMax, rightMax).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Java Implementation -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Two Pointer — O(n) time, O(1) space:</b></p>
+<pre><code><span class="keyword">public class</span> <span class="type">TrappingRainWater</span> {
+
+    <span class="keyword">public static int</span> <span class="type">trap</span>(<span class="type">int</span>[] height) {
+        <span class="type">int</span> left = <span class="number">0</span>, right = height.length - <span class="number">1</span>;
+        <span class="type">int</span> leftMax = <span class="number">0</span>, rightMax = <span class="number">0</span>;
+        <span class="type">int</span> water = <span class="number">0</span>;
+
+        <span class="keyword">while</span> (left &lt; right) {
+            <span class="keyword">if</span> (height[left] &lt; height[right]) {
+                <span class="keyword">if</span> (height[left] &gt;= leftMax) {
+                    leftMax = height[left];
+                } <span class="keyword">else</span> {
+                    water += leftMax - height[left];
+                }
+                left++;
+            } <span class="keyword">else</span> {
+                <span class="keyword">if</span> (height[right] &gt;= rightMax) {
+                    rightMax = height[right];
+                } <span class="keyword">else</span> {
+                    water += rightMax - height[right];
+                }
+                right--;
+            }
+        }
+        <span class="keyword">return</span> water;
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        <span class="type">int</span>[] h = {<span class="number">0</span>,<span class="number">1</span>,<span class="number">0</span>,<span class="number">2</span>,<span class="number">1</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">3</span>,<span class="number">2</span>,<span class="number">1</span>,<span class="number">2</span>,<span class="number">1</span>};
+        System.out.println(trap(h)); <span class="comment">// 6</span>
+    }
+}</code></pre>
+
+      <p style="margin-top:14px;"><b>Prefix Max approach (easier to understand, O(n) space):</b></p>
+<pre><code><span class="keyword">public static int</span> <span class="type">trapPrefixMax</span>(<span class="type">int</span>[] height) {
+    <span class="type">int</span> n = height.length;
+    <span class="type">int</span>[] leftMax = <span class="keyword">new</span> <span class="type">int</span>[n];
+    <span class="type">int</span>[] rightMax = <span class="keyword">new</span> <span class="type">int</span>[n];
+
+    leftMax[<span class="number">0</span>] = height[<span class="number">0</span>];
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt; n; i++)
+        leftMax[i] = Math.max(leftMax[i-<span class="number">1</span>], height[i]);
+
+    rightMax[n-<span class="number">1</span>] = height[n-<span class="number">1</span>];
+    <span class="keyword">for</span> (<span class="type">int</span> i = n-<span class="number">2</span>; i &gt;= <span class="number">0</span>; i--)
+        rightMax[i] = Math.max(rightMax[i+<span class="number">1</span>], height[i]);
+
+    <span class="type">int</span> water = <span class="number">0</span>;
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++)
+        water += Math.min(leftMax[i], rightMax[i]) - height[i];
+
+    <span class="keyword">return</span> water;
+}</code></pre>
+      <p style="margin-top:6px;color:#888;font-size:11px;">💡 Interview tip: Explain the prefix max approach first (easier to reason about), then optimize to two pointer. Shows your thought process.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 9: Edge Cases -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Case</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Input</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Output</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Why</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Ascending</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,2,3,4,5]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No wall on right to trap water</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Descending</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[5,4,3,2,1]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No wall on left to trap water</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Flat</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[3,3,3,3]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No gaps to fill</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single valley</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[3,0,3]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">min(3,3)-0 = 3</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Empty/tiny</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1]</code> or <code>[]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Need at least 3 bars</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 10: Common Mistakes -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Confusing "water at position i" with "total water"</b>
+          <p style="color:#888;">Water at i = min(leftMax, rightMax) - height[i]. Total = sum of all positions.</p>
+        </li>
+        <li style="margin-top:10px;"><b>Not including position i itself in leftMax/rightMax</b>
+          <p style="color:#e44d26;">❌ leftMax = max of elements strictly to the left → water can be negative</p>
+          <p style="color:#4caf50;">✅ leftMax includes height[i] itself → water is always ≥ 0</p>
+        </li>
+        <li style="margin-top:10px;"><b>Two pointer: moving the wrong pointer</b>
+          <p style="color:#4caf50;">✅ Always process and move the side with the SMALLER height. The taller side acts as a guaranteed wall.</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 11: When to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Signals to पहचान (identify):</b></p>
+      <ul>
+        <li>✅ "Trapping water" / "Container" / "Area between bars"</li>
+        <li>✅ Each position depends on max from left AND max from right</li>
+        <li>✅ Need to pre-compute prefix max and suffix max</li>
+        <li>✅ Two pointer can replace prefix/suffix arrays when you only need the min of the two</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 12: When NOT to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ 2D trapping water (on a matrix) — needs BFS with priority queue</li>
+        <li>❌ "Container With Most Water" (#14) — looks similar but logic is different (area between two lines, not filling gaps)</li>
+        <li>❌ When bars can be moved/rearranged — this assumes fixed positions</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 13: Key Takeaway -->
+  <div class="takeaway">
+    💡 "Water at any point = min(tallest wall left, tallest wall right) - own height. Two pointers from ends: always process the shorter side — the taller side guarantees a wall."
+  </div>
+
+  <!-- SECTION 14: Bridge to Next Problem -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Trapping Rainwater mein hum <b>gaps fill</b> kar rahe the between buildings.</p>
+      <p style="margin-top:8px;">Next problem mein hum <b>area maximize</b> karenge between two lines:</p>
+      <p style="margin-top:8px;"><b>"Container With Most Water"</b> — two vertical lines, which pair holds the most water?</p>
+      <p style="margin-top:8px;">Same two-pointer structure, but the greedy decision is different: move the shorter line inward (hoping for a taller one).</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Fill gaps between bars (trap water) → Maximize area between two bars (container) — same tool, different problem</p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem12.html">← Problem #12</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(13)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem14.html">Problem #14 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "dsa-roadmap-progress";
+const PROBLEM_NUM = 13;
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+
+function saveProgress(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function toggleDone(num) {
+  const prog = loadProgress();
+  if (prog[num] === "done") { delete prog[num]; }
+  else { prog[num] = "done"; }
+  saveProgress(prog);
+  updateUI();
+}
+
+function updateUI() {
+  const prog = loadProgress();
+  const btn = document.getElementById("mark-done-btn");
+  if (prog[PROBLEM_NUM] === "done") {
+    btn.textContent = "✔ Completed";
+    btn.classList.add("completed");
+  } else {
+    btn.textContent = "☐ Mark as Done";
+    btn.classList.remove("completed");
+  }
+  updateReadProgress();
+}
+
+function updateReadProgress() {
+  const prog = loadProgress();
+  if (prog[PROBLEM_NUM] === "done") {
+    document.getElementById("section-pct").textContent = "100%";
+    document.getElementById("section-bar").style.width = "100%";
+    return;
+  }
+  const sections = document.querySelectorAll(".section, .takeaway");
+  const total = sections.length;
+  if (total === 0) return;
+  let visible = 0;
+  sections.forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    if (rect.top < window.innerHeight) visible++;
+  });
+  const pct = Math.min(100, Math.round((visible / total) * 100));
+  document.getElementById("section-pct").textContent = pct + "%";
+  document.getElementById("section-bar").style.width = pct + "%";
+}
+
+window.addEventListener("scroll", updateReadProgress);
+updateUI();
+</script>
+</body>
+</html>

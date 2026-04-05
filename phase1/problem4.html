@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#4 — Rotating the Security Shift Schedule | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 1: Foundation</span>
+    <span class="problem-id">Problem #4 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #4: Rotating the Security Shift Schedule</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#4 — Rotating the Security Shift Schedule</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Array Rotation (Reversal Trick)</p>
+
+  <!-- SECTION 0: Real-World Scenario -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek security company ke manager ho. 7 guards hain weekly rotation mein:</p>
+      <p><code>[A, B, C, D, E, F, G]</code> (Monday → Sunday)</p>
+      <p>Boss bola: <b>"Schedule ko 3 positions right rotate karo"</b> — taaki last 3 guards pehle aa jayein.</p>
+      <p style="margin-top:8px;">Expected result: <code>[E, F, G, A, B, C, D]</code></p>
+      <p style="margin-top:8px;">Constraint: <b>Extra array mat banao — in-place karo, O(1) space mein.</b></p>
+      <p style="color:#4caf50;margin-top:8px;">💡 Bina extra array ke array ko rotate kaise karein?</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Problem Understanding -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given an array and a number <code>k</code>, rotate the array to the right by <code>k</code> steps</li>
+        <li>Right rotation by 1: last element goes to front, everything else shifts right</li>
+        <li>Right rotation by k: do this k times (or find a smarter way)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Input → Output:</b></p>
+      <ul>
+        <li>Input: <code>int[] nums</code>, <code>int k</code></li>
+        <li>Output: modify <code>nums</code> in-place (no return value)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Key observation:</b></p>
+      <ul>
+        <li>If <code>k = array length</code>, array comes back to original → <code>k = k % n</code></li>
+        <li>Right rotate by k = last k elements move to front, first n-k elements move to back</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Connection to previous problems:</b></p>
+      <ul>
+        <li>#1, #2, #3 — we used extra space (variables, HashMap, prefix array) to optimize time</li>
+        <li>#4 — now the challenge is <b>O(1) space</b>. How to manipulate array without extra memory?</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Brute Force Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Approach 1: Rotate one step at a time — O(n × k)</b></p>
+<pre><code><span class="comment">// Rotate right by 1, k times</span>
+<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; k; i++) {
+    <span class="type">int</span> last = nums[nums.length - <span class="number">1</span>];
+    <span class="keyword">for</span> (<span class="type">int</span> j = nums.length - <span class="number">1</span>; j &gt; <span class="number">0</span>; j--) {
+        nums[j] = nums[j - <span class="number">1</span>];
+    }
+    nums[<span class="number">0</span>] = last;
+}</code></pre>
+      <p>Time: O(n × k). If k ≈ n → O(n²). Space: O(1) ✓ but too slow.</p>
+
+      <p style="margin-top:14px;"><b>Approach 2: Use extra array — O(n) time, O(n) space</b></p>
+<pre><code><span class="type">int</span>[] temp = <span class="keyword">new</span> <span class="type">int</span>[n];
+<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) {
+    temp[(i + k) % n] = nums[i];
+}
+System.arraycopy(temp, <span class="number">0</span>, nums, <span class="number">0</span>, n);</code></pre>
+      <p>Time: O(n) ✓ but Space: O(n) ✗. Boss said no extra array.</p>
+
+      <p style="color:#ffc107;margin-top:10px;">🤔 Can we get O(n) time AND O(1) space? That's where the reversal trick comes in.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Optimization Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Key Insight — The Book Analogy:</b></p>
+      <p>Imagine a book with pages [1, 2, 3, 4, 5, 6, 7]. You want last 3 pages (5,6,7) to come first.</p>
+      <ol>
+        <li>Flip the first part (1,2,3,4) → becomes (4,3,2,1)</li>
+        <li>Flip the second part (5,6,7) → becomes (7,6,5)</li>
+        <li>Now flip the ENTIRE thing: (4,3,2,1,7,6,5) → (5,6,7,1,2,3,4) ✓</li>
+      </ol>
+      <p style="margin-top:8px;">Wait — that gives left rotation. For right rotation, reverse order:</p>
+      <ol>
+        <li><b>Reverse entire array</b></li>
+        <li><b>Reverse first k elements</b></li>
+        <li><b>Reverse remaining n-k elements</b></li>
+      </ol>
+      <p style="margin-top:10px;"><b>Why does this work?</b></p>
+      <ul>
+        <li>Reversing the whole array puts the last k elements at the front — but in wrong order</li>
+        <li>Reversing the first k fixes their internal order</li>
+        <li>Reversing the remaining n-k fixes their internal order too</li>
+        <li>Three reverses = correct rotation. Each reverse is O(n) with O(1) space (just swaps).</li>
+      </ul>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern identified: <b>Reversal Trick — three reverses to rotate in-place</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Final Approach -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach (Pattern-Based)</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Pattern Name:</b> Array Rotation via Reversal Trick</p>
+      <p><b>Why this pattern fits:</b></p>
+      <ul>
+        <li>Need to rearrange array in-place with O(1) extra space</li>
+        <li>Reverse is the simplest O(n), O(1) operation on arrays — just swap from both ends</li>
+        <li>Three strategic reverses achieve any rotation</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Algorithm (Right rotate by k):</b></p>
+      <ol>
+        <li><code>k = k % n</code> (handle k &gt; n)</li>
+        <li>Reverse entire array: <code>reverse(0, n-1)</code></li>
+        <li>Reverse first k: <code>reverse(0, k-1)</code></li>
+        <li>Reverse rest: <code>reverse(k, n-1)</code></li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Step-by-Step Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Input:</b> <code>nums = [1, 2, 3, 4, 5, 6, 7]</code>, <code>k = 3</code></p>
+      <p><code>k = 3 % 7 = 3</code></p>
+
+      <table style="width:100%;font-size:12px;margin-top:12px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Step</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Operation</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Array State</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:8px;border-bottom:1px solid #2a2a4a;">Original</td>
+            <td style="padding:8px;border-bottom:1px solid #2a2a4a;">—</td>
+            <td style="padding:8px;border-bottom:1px solid #2a2a4a;"><code>[<span style="color:#ffc107;">1, 2, 3, 4</span>, <span style="color:#4caf50;">5, 6, 7</span>]</code></td>
+          </tr>
+          <tr>
+            <td style="padding:8px;border-bottom:1px solid #2a2a4a;">1</td>
+            <td style="padding:8px;border-bottom:1px solid #2a2a4a;">Reverse ALL (0 to 6)</td>
+            <td style="padding:8px;border-bottom:1px solid #2a2a4a;"><code>[<span style="color:#e44d26;">7, 6, 5</span>, <span style="color:#e44d26;">4, 3, 2, 1</span>]</code></td>
+          </tr>
+          <tr>
+            <td style="padding:8px;border-bottom:1px solid #2a2a4a;">2</td>
+            <td style="padding:8px;border-bottom:1px solid #2a2a4a;">Reverse first k=3 (0 to 2)</td>
+            <td style="padding:8px;border-bottom:1px solid #2a2a4a;"><code>[<span style="color:#4caf50;">5, 6, 7</span>, <span style="color:#e44d26;">4, 3, 2, 1</span>]</code></td>
+          </tr>
+          <tr>
+            <td style="padding:8px;border-bottom:1px solid #2a2a4a;">3</td>
+            <td style="padding:8px;border-bottom:1px solid #2a2a4a;">Reverse rest (3 to 6)</td>
+            <td style="padding:8px;border-bottom:1px solid #2a2a4a;"><code>[<span style="color:#4caf50;">5, 6, 7</span>, <span style="color:#ffc107;">1, 2, 3, 4</span>]</code> ✓</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p style="margin-top:12px;"><b>How each reverse works internally (Step 1 example):</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:6px;">Swap</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Left idx</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Right idx</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Array After</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:5px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:5px 6px;border-bottom:1px solid #2a2a4a;">6</td><td style="padding:5px 6px;border-bottom:1px solid #2a2a4a;"><code>[7, 2, 3, 4, 5, 6, 1]</code></td></tr>
+          <tr><td style="padding:5px 6px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:5px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:5px 6px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:5px 6px;border-bottom:1px solid #2a2a4a;"><code>[7, 6, 3, 4, 5, 2, 1]</code></td></tr>
+          <tr><td style="padding:5px 6px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:5px 6px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:5px 6px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:5px 6px;border-bottom:1px solid #2a2a4a;"><code>[7, 6, 5, 4, 3, 2, 1]</code> ✓</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:6px;color:#888;font-size:11px;">Two pointers move inward, swapping as they go. O(n/2) swaps = O(n). O(1) space (just one temp variable).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Internal Mechanics -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Why three reverses = rotation? (Mathematical proof)</b></p>
+      <p>Think of the array as two parts: <code>A = [1,2,3,4]</code> and <code>B = [5,6,7]</code></p>
+      <ul>
+        <li>We want: <code>B + A</code> = <code>[5,6,7,1,2,3,4]</code></li>
+        <li>Step 1: Reverse whole = <code>(AB)ʳ = Bʳ Aʳ</code> = <code>[7,6,5,4,3,2,1]</code></li>
+        <li>Step 2: Reverse first k = <code>(Bʳ)ʳ Aʳ = B Aʳ</code> = <code>[5,6,7,4,3,2,1]</code></li>
+        <li>Step 3: Reverse rest = <code>B (Aʳ)ʳ = B A</code> = <code>[5,6,7,1,2,3,4]</code> ✓</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Reverse of reverse = original.</b> That's the entire trick.</p>
+
+      <p style="margin-top:14px;"><b>Why <code>k = k % n</code>?</b></p>
+      <ul>
+        <li>Rotating by n = full circle = back to original</li>
+        <li>Rotating by n+3 = same as rotating by 3</li>
+        <li>So effective rotation = <code>k % n</code></li>
+        <li>Without this: if k = 1,000,000 and n = 7, brute force does 1M rotations. With mod: just 6.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Complexity Analysis -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag">
+          <span class="label">Time:</span>
+          <span class="value">O(n)</span>
+        </div>
+        <div class="complexity-tag">
+          <span class="label">Space:</span>
+          <span class="value">O(1)</span>
+        </div>
+      </div>
+      <p style="margin-top:12px;"><b>Breakdown:</b> 3 reverses × O(n) each = O(3n) = O(n). Only one temp variable for swapping.</p>
+      <table style="width:100%;font-size:12px;margin-top:10px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Approach</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Time</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Space</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">One-by-one rotation</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">O(n × k)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(1)</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Extra array</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(n)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">O(n)</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Reversal Trick</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(n)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(1)</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;color:#888;font-size:11px;">Best of both worlds — fast AND memory-efficient.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Java Implementation -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">import</span> java.util.Arrays;
+
+<span class="keyword">public class</span> <span class="type">RotateArray</span> {
+
+    <span class="keyword">public static void</span> <span class="type">rotate</span>(<span class="type">int</span>[] nums, <span class="type">int</span> k) {
+        <span class="type">int</span> n = nums.length;
+        k = k % n;
+        <span class="keyword">if</span> (k == <span class="number">0</span>) <span class="keyword">return</span>;
+
+        reverse(nums, <span class="number">0</span>, n - <span class="number">1</span>);
+        reverse(nums, <span class="number">0</span>, k - <span class="number">1</span>);
+        reverse(nums, k, n - <span class="number">1</span>);
+    }
+
+    <span class="keyword">private static void</span> <span class="type">reverse</span>(<span class="type">int</span>[] nums, <span class="type">int</span> left, <span class="type">int</span> right) {
+        <span class="keyword">while</span> (left &lt; right) {
+            <span class="type">int</span> temp = nums[left];
+            nums[left] = nums[right];
+            nums[right] = temp;
+            left++;
+            right--;
+        }
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        <span class="type">int</span>[] nums = {<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>};
+        rotate(nums, <span class="number">3</span>);
+        System.out.println(Arrays.toString(nums)); <span class="comment">// [5, 6, 7, 1, 2, 3, 4]</span>
+    }
+}</code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 The <code>reverse()</code> helper is reusable — you'll use it in many array problems. Keep it in your toolkit.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 9: Edge Cases -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Case</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Input</th>
+            <th style="background:#22223a;color:#888;padding:8px;">k</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Output</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Why</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">k = 0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,2,3]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,2,3]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No rotation needed</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">k = n</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,2,3]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,2,3]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Full circle → k%n = 0</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">k > n</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,2,3]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[2,3,1]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">5%3 = 2, rotate by 2</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single element</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[42]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">100</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[42]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">100%1 = 0</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Two elements</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,2]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[2,1]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Simple swap</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 10: Common Mistakes -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Forgetting <code>k = k % n</code></b>
+          <p style="color:#e44d26;">❌ If k = 1,000,000 and n = 7, reversing with k=1M causes ArrayIndexOutOfBounds</p>
+          <p style="color:#4caf50;">✅ Always normalize: <code>k = k % n</code></p>
+        </li>
+        <li style="margin-top:10px;"><b>Confusing left rotation with right rotation</b>
+          <p style="color:#888;">Right rotate by k: reverse all → reverse first k → reverse rest</p>
+          <p style="color:#888;">Left rotate by k: reverse first k → reverse rest → reverse all (or just right rotate by n-k)</p>
+        </li>
+        <li style="margin-top:10px;"><b>Wrong reverse boundaries</b>
+          <p style="color:#e44d26;">❌ <code>reverse(0, k)</code> instead of <code>reverse(0, k-1)</code></p>
+          <p style="color:#4caf50;">✅ First k elements = indices 0 to k-1. Remaining = indices k to n-1.</p>
+        </li>
+        <li style="margin-top:10px;"><b>Not handling k = 0 or empty array</b>
+          <p style="color:#4caf50;">✅ Early return if <code>k == 0</code> or <code>nums.length &lt;= 1</code></p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 11: When to Use This Pattern -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Signals to पहचान (identify) this pattern:</b></p>
+      <ul>
+        <li>✅ "Rotate array" / "Shift elements" / "Circular shift"</li>
+        <li>✅ "In-place" constraint with O(1) space</li>
+        <li>✅ "Reverse a portion of array"</li>
+        <li>✅ "Move last k elements to front" or vice versa</li>
+      </ul>
+      <p style="margin-top:10px;"><b>The reverse helper is used in:</b></p>
+      <ul>
+        <li>Reversing words in a string ("hello world" → "world hello")</li>
+        <li>Next permutation algorithm</li>
+        <li>Palindrome checking</li>
+        <li>Any in-place rearrangement problem</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 12: When NOT to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ When you need to preserve the original array (reversal modifies in-place)</li>
+        <li>❌ Linked list rotation — different approach needed (just move pointers)</li>
+        <li>❌ When the "rotation" is actually a different operation (like circular buffer — use modular indexing instead)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 13: Key Takeaway -->
+  <div class="takeaway">
+    💡 "In-place rearrangement chahiye? Reverse is your best friend. Three reverses = any rotation."
+  </div>
+
+  <!-- SECTION 14: Bridge to Next Problem -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Ab tak humne seekha:</p>
+      <ul>
+        <li>#1: Track one value (minPrice)</li>
+        <li>#2: Track all values (HashMap)</li>
+        <li>#3: Pre-compute (Prefix Sum)</li>
+        <li>#4: In-place manipulation (Reversal Trick)</li>
+      </ul>
+      <p style="margin-top:10px;">Notice: Problem #4 ke reverse helper mein humne <b>two pointers</b> use kiye — left aur right, moving inward.</p>
+      <p style="margin-top:8px;">Next problem mein hum is two-pointer idea ko properly introduce karenge: <b>Merging Two Sorted Delivery Lists</b>.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ In-place swaps (reverse) → Two Pointer technique (merge sorted arrays)</p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem3.html">← Problem #3</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(4)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem5.html">Problem #5 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "dsa-roadmap-progress";
+const PROBLEM_NUM = 4;
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+
+function saveProgress(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function toggleDone(num) {
+  const prog = loadProgress();
+  if (prog[num] === "done") { delete prog[num]; }
+  else { prog[num] = "done"; }
+  saveProgress(prog);
+  updateUI();
+}
+
+function updateUI() {
+  const prog = loadProgress();
+  const btn = document.getElementById("mark-done-btn");
+  if (prog[PROBLEM_NUM] === "done") {
+    btn.textContent = "✔ Completed";
+    btn.classList.add("completed");
+  } else {
+    btn.textContent = "☐ Mark as Done";
+    btn.classList.remove("completed");
+  }
+  updateReadProgress();
+}
+
+function updateReadProgress() {
+  const prog = loadProgress();
+  if (prog[PROBLEM_NUM] === "done") {
+    document.getElementById("section-pct").textContent = "100%";
+    document.getElementById("section-bar").style.width = "100%";
+    return;
+  }
+  const sections = document.querySelectorAll(".section, .takeaway");
+  const total = sections.length;
+  if (total === 0) return;
+  let visible = 0;
+  sections.forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    if (rect.top < window.innerHeight) visible++;
+  });
+  const pct = Math.min(100, Math.round((visible / total) * 100));
+  document.getElementById("section-pct").textContent = pct + "%";
+  document.getElementById("section-bar").style.width = pct + "%";
+}
+
+window.addEventListener("scroll", updateReadProgress);
+updateUI();
+</script>
+</body>
+</html>

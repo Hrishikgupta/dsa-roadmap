@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#11 — Checking if Two Words are Anagram Passwords | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 2: Core Patterns</span>
+    <span class="problem-id">Problem #11 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #11: Checking if Two Words are Anagram Passwords</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#11 — Checking if Two Words are Anagram Passwords</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Frequency Map Comparison</p>
+
+  <!-- SECTION 0 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tumhari company mein ek password security rule hai:</p>
+      <p><b>"New password must be an anagram of the old password."</b></p>
+      <p style="margin-top:8px;">Same characters, different arrangement. Taaki user ko yaad rahe but hackers ko guess na ho.</p>
+      <ul>
+        <li>Old: <code>"listen"</code> → New: <code>"silent"</code> → ✅ Anagram</li>
+        <li>Old: <code>"hello"</code> → New: <code>"world"</code> → ❌ Not anagram</li>
+      </ul>
+      <p style="color:#4caf50;margin-top:8px;">Question: Given two strings, check if they are anagrams.</p>
+      <p style="color:#888;font-size:11px;">This is LeetCode #242 — Valid Anagram.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Two strings are anagrams if they contain the exact same characters with the exact same frequencies.</b></p>
+      <ul>
+        <li>"listen" → {l:1, i:1, s:1, t:1, e:1, n:1}</li>
+        <li>"silent" → {s:1, i:1, l:1, e:1, n:1, t:1} → Same! ✓</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Connection to previous:</b></p>
+      <ul>
+        <li>#2: HashMap for frequency counting — same technique, now comparing TWO maps</li>
+        <li>#10: HashMap tracked last-seen index — here we track character counts</li>
+        <li>This sets up #12 (Min Window Substring) where frequency comparison happens inside a sliding window</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Sort both strings, compare — O(n log n):</b></p>
+<pre><code><span class="type">char</span>[] a = s.toCharArray(), b = t.toCharArray();
+Arrays.sort(a); Arrays.sort(b);
+<span class="keyword">return</span> Arrays.equals(a, b);</code></pre>
+      <p>Works but O(n log n). Can we do O(n)?</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 Anagram = same frequency. Frequency counting is O(n) with int[26]. Count up for one string, count down for the other. All zeros? Anagram.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Single Counter Technique:</b></p>
+      <ul>
+        <li>For each char in s: <code>count[char - 'a']++</code></li>
+        <li>For each char in t: <code>count[char - 'a']--</code></li>
+        <li>If all counts are 0 → anagram. Any count ≠ 0 → not anagram.</li>
+      </ul>
+      <p style="margin-top:8px;">Think of it as a balance sheet: s deposits characters, t withdraws them. Balance = 0 for all → anagram.</p>
+      <p style="margin-top:10px;"><b>int[26] vs HashMap:</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">Aspect</th>
+            <th style="background:#22223a;color:#888;padding:7px;">int[26]</th>
+            <th style="background:#22223a;color:#888;padding:7px;">HashMap</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Character set</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Only lowercase a-z</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Any character (Unicode)</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Speed</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Faster (array access)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Slower (hashing)</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Space</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(1) — fixed 26</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">O(k) — k unique chars</td></tr>
+        </tbody>
+      </table>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>Frequency Map Comparison — count up for one, count down for the other, check all zeros.</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>s = "anagram", t = "nagaram"</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:6px;">i</th>
+            <th style="background:#22223a;color:#888;padding:6px;">s[i]</th>
+            <th style="background:#22223a;color:#888;padding:6px;">t[i]</th>
+            <th style="background:#22223a;color:#888;padding:6px;">count++ for</th>
+            <th style="background:#22223a;color:#888;padding:6px;">count-- for</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Non-zero counts</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">a</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">n</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">a</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#e44d26;">n</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">{a:+1, n:-1}</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">n</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">a</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">n</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#e44d26;">a</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">{} (all zero!)</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2-6</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;" colspan="5">Same pattern — characters cancel out pairwise</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;">Final: all zeros → <span style="color:#4caf50;"><b>true (anagram)</b></span></p>
+      <p style="margin-top:10px;"><b>Counter-example:</b> s = "rat", t = "car" → count = {r:+1, t:+1, c:-1} → not all zeros → <span style="color:#e44d26;"><b>false</b></span></p>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag"><span class="label">Time:</span><span class="value">O(n)</span></div>
+        <div class="complexity-tag"><span class="label">Space:</span><span class="value">O(1)</span></div>
+      </div>
+      <p style="margin-top:10px;">One pass through both strings + one pass through count array (26 = constant).</p>
+      <table style="width:100%;font-size:12px;margin-top:10px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Approach</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Time</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Space</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Sort + Compare</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#ffc107;">O(n log n)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">O(n)</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Frequency Counter</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(n)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(1)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>int[26] — fastest (lowercase only):</b></p>
+<pre><code><span class="keyword">public class</span> <span class="type">ValidAnagram</span> {
+
+    <span class="keyword">public static boolean</span> <span class="type">isAnagram</span>(String s, String t) {
+        <span class="keyword">if</span> (s.length() != t.length()) <span class="keyword">return false</span>;
+
+        <span class="type">int</span>[] count = <span class="keyword">new</span> <span class="type">int</span>[<span class="number">26</span>];
+
+        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; s.length(); i++) {
+            count[s.charAt(i) - <span class="string">'a'</span>]++;
+            count[t.charAt(i) - <span class="string">'a'</span>]--;
+        }
+
+        <span class="keyword">for</span> (<span class="type">int</span> c : count) {
+            <span class="keyword">if</span> (c != <span class="number">0</span>) <span class="keyword">return false</span>;
+        }
+        <span class="keyword">return true</span>;
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        System.out.println(isAnagram(<span class="string">"anagram"</span>, <span class="string">"nagaram"</span>)); <span class="comment">// true</span>
+        System.out.println(isAnagram(<span class="string">"rat"</span>, <span class="string">"car"</span>));         <span class="comment">// false</span>
+    }
+}</code></pre>
+
+      <p style="margin-top:14px;"><b>HashMap version (Unicode-safe):</b></p>
+<pre><code><span class="keyword">public static boolean</span> <span class="type">isAnagramUnicode</span>(String s, String t) {
+    <span class="keyword">if</span> (s.length() != t.length()) <span class="keyword">return false</span>;
+    HashMap&lt;Character, Integer&gt; map = <span class="keyword">new</span> HashMap&lt;&gt;();
+    <span class="keyword">for</span> (<span class="type">char</span> c : s.toCharArray())
+        map.put(c, map.getOrDefault(c, <span class="number">0</span>) + <span class="number">1</span>);
+    <span class="keyword">for</span> (<span class="type">char</span> c : t.toCharArray()) {
+        <span class="type">int</span> val = map.getOrDefault(c, <span class="number">0</span>) - <span class="number">1</span>;
+        <span class="keyword">if</span> (val &lt; <span class="number">0</span>) <span class="keyword">return false</span>;
+        map.put(c, val);
+    }
+    <span class="keyword">return true</span>;
+}</code></pre>
+    </div>
+  </div>
+
+  <!-- SECTION 9 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead><tr><th style="background:#22223a;color:#888;padding:8px;">s</th><th style="background:#22223a;color:#888;padding:8px;">t</th><th style="background:#22223a;color:#888;padding:8px;">Result</th><th style="background:#22223a;color:#888;padding:8px;">Why</th></tr></thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"ab"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"abc"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">false</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Different lengths → instant reject</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">""</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">""</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">true</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Both empty</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"aab"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"abb"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">false</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Same chars, different frequencies</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"abc"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"abc"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">true</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Same string = trivially anagram</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 10 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Forgetting the length check</b>
+          <p style="color:#4caf50;">✅ Always check <code>s.length() != t.length()</code> first — O(1) early exit</p>
+        </li>
+        <li style="margin-top:10px;"><b>Using int[26] for non-lowercase input</b>
+          <p style="color:#4caf50;">✅ Ask interviewer about charset. Use int[128] for ASCII, HashMap for Unicode.</p>
+        </li>
+        <li style="margin-top:10px;"><b>Case sensitivity</b>
+          <p style="color:#888;">If case-insensitive: <code>s.toLowerCase()</code> first.</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 11-12 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>✅ "Check if anagram" / "Rearrange to form another string"</li>
+        <li>✅ "Group anagrams" (LC #49)</li>
+        <li>✅ "Find all anagram substrings" (LC #438 — sliding window + freq)</li>
+        <li>✅ Any problem comparing character composition of two strings</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ Order matters — anagrams ignore order by definition</li>
+        <li>❌ Subsequence check — different problem entirely</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="takeaway">
+    💡 "Anagram = same characters, same frequencies. Count up for one string, count down for the other. All zeros? Anagram."
+  </div>
+
+  <!-- Bridge -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Ab tum do strings ka frequency comparison kar sakte ho in O(n).</p>
+      <p style="margin-top:8px;">Next: frequency comparison <b>inside a sliding window</b> — "Find the smallest window in S containing all characters of T." That's Problem #12: Min Window Substring.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Frequency comparison (two strings) → Frequency comparison inside sliding window (substring search)</p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem10.html">← Problem #10</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(11)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem12.html">Problem #12 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY="dsa-roadmap-progress";const PROBLEM_NUM=11;
+function loadProgress(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{};}catch{return{};}}
+function saveProgress(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}
+function toggleDone(n){const p=loadProgress();if(p[n]==="done")delete p[n];else p[n]="done";saveProgress(p);updateUI();}
+function updateUI(){const p=loadProgress(),btn=document.getElementById("mark-done-btn");if(p[PROBLEM_NUM]==="done"){btn.textContent="✔ Completed";btn.classList.add("completed");}else{btn.textContent="☐ Mark as Done";btn.classList.remove("completed");}updateReadProgress();}
+function updateReadProgress(){const p=loadProgress();if(p[PROBLEM_NUM]==="done"){document.getElementById("section-pct").textContent="100%";document.getElementById("section-bar").style.width="100%";return;}const s=document.querySelectorAll(".section, .takeaway"),t=s.length;if(t===0)return;let v=0;s.forEach(sec=>{if(sec.getBoundingClientRect().top<window.innerHeight)v++;});const pct=Math.min(100,Math.round((v/t)*100));document.getElementById("section-pct").textContent=pct+"%";document.getElementById("section-bar").style.width=pct+"%";}
+window.addEventListener("scroll",updateReadProgress);updateUI();
+</script>
+</body>
+</html>

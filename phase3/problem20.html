@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#20 — Power of Recursion — Tower of Hanoi | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 3: Intermediate</span>
+    <span class="problem-id">Problem #20 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #20: Power of Recursion — Tower of Hanoi</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#20 — Power of Recursion — Tower of Hanoi</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Recursion (Trust the Function)</p>
+
+  <!-- SECTION 0: Real-World Scenario -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Ek ancient temple mein 3 pillars hain (A, B, C). Pillar A pe 3 golden disks hain, smallest on top:</p>
+<pre><code><span class="comment">  Pillar A      Pillar B      Pillar C</span>
+    <span style="color:#ffc107;">|</span>              |              |
+   <span style="color:#ffc107;">===</span>            |              |
+  <span style="color:#4caf50;">=====</span>           |              |
+ <span style="color:#6c63ff;">=======</span>          |              |
+___________  ___________  ___________</code></pre>
+      <p>Goal: Move all 3 disks from A to C.</p>
+      <p style="margin-top:8px;"><b>Rules:</b></p>
+      <ol>
+        <li>Only one disk can be moved at a time</li>
+        <li>Only the top disk of a pillar can be moved</li>
+        <li>A larger disk can NEVER be placed on a smaller disk</li>
+      </ol>
+      <p style="color:#4caf50;margin-top:8px;">This puzzle is impossible to solve iteratively by thinking step-by-step. But with recursion, it becomes 3 lines of logic.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Problem Understanding -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What is Recursion?</b></p>
+      <ul>
+        <li>A function that calls itself to solve a smaller version of the same problem</li>
+        <li>Every recursive solution has two parts:
+          <ul>
+            <li><b>Base case</b>: the simplest version that can be solved directly (stops recursion)</li>
+            <li><b>Recursive case</b>: break the problem into smaller subproblems + call yourself</li>
+          </ul>
+        </li>
+      </ul>
+
+      <p style="margin-top:12px;"><b>Why is this a paradigm shift?</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">Phase 1-2 (Iterative)</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Phase 3+ (Recursive)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">You control every step</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">You define the pattern, recursion handles the steps</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Loops (for, while)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Function calls itself</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Think: "how to do each step"</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Think: "if smaller problem is solved, how do I use it?"</td></tr>
+        </tbody>
+      </table>
+
+      <p style="margin-top:12px;"><b>The #1 rule of recursion:</b></p>
+      <div class="takeaway" style="margin:10px 0;">
+        🧘 "Trust the function." — Assume the recursive call works correctly. Don't trace every call in your head. Just define: base case + how to use the smaller solution.
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Brute Force Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Trying to think iteratively:</b></p>
+      <p>"Move disk 1 to C, then disk 2 to B, then disk 1 to B, then disk 3 to C, then..."</p>
+      <p style="color:#e44d26;">Your brain explodes at n=4. At n=10, it's impossible to track manually.</p>
+
+      <p style="margin-top:12px;"><b>Recursive thinking — the breakthrough:</b></p>
+      <p>Don't think about individual moves. Think about the STRUCTURE:</p>
+      <ul>
+        <li>To move n disks from A to C using B as helper:</li>
+        <li>Step 1: Move top n-1 disks from A to B (using C as helper) — <b>trust this works!</b></li>
+        <li>Step 2: Move the bottom (largest) disk from A to C — one simple move</li>
+        <li>Step 3: Move n-1 disks from B to C (using A as helper) — <b>trust this works!</b></li>
+      </ul>
+      <p style="color:#ffc107;margin-top:8px;">🤔 "But how do steps 1 and 3 work?" — That's the beauty. They work the SAME WAY, just with smaller n. Eventually n=1 (base case) and you just move one disk directly.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Optimization Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Key Insight — The Manager Analogy:</b></p>
+      <p>You're a manager. You need to move a stack of 100 files from desk A to desk C.</p>
+      <ul>
+        <li>You tell your assistant: "Move the top 99 files to desk B." (You don't care HOW — that's their problem)</li>
+        <li>You move the bottom file from A to C yourself. (One simple action)</li>
+        <li>You tell your assistant: "Now move those 99 files from B to C."</li>
+      </ul>
+      <p style="margin-top:8px;">Your assistant does the same thing — tells THEIR assistant to handle 98 files. And so on, until someone has just 1 file (base case — just move it).</p>
+
+      <p style="margin-top:12px;"><b>The recursive formula:</b></p>
+<pre><code><span class="type">hanoi</span>(n, from, to, helper):
+    <span class="keyword">if</span> n == <span class="number">1</span>:                          <span class="comment">// Base case</span>
+        move disk from → to
+        <span class="keyword">return</span>
+    <span class="type">hanoi</span>(n-<span class="number">1</span>, from, helper, to)        <span class="comment">// Move n-1 to helper</span>
+    move disk from → to                  <span class="comment">// Move largest disk</span>
+    <span class="type">hanoi</span>(n-<span class="number">1</span>, helper, to, from)        <span class="comment">// Move n-1 from helper to target</span></code></pre>
+      <p style="color:#4caf50;margin-top:10px;">💡 3 lines of logic. Solves any n. That's the power of recursion.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Final Approach -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach (Pattern-Based)</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Pattern:</b> Recursion — "Trust the Function"</p>
+      <p style="margin-top:10px;"><b>The recursive thinking template:</b></p>
+      <ol>
+        <li><b>Define the function signature:</b> What does it take? What does it do?
+          <ul><li><code>hanoi(n, from, to, helper)</code> — moves n disks from → to using helper</li></ul>
+        </li>
+        <li><b>Base case:</b> What's the simplest version?
+          <ul><li>n == 1 → just move the disk directly</li></ul>
+        </li>
+        <li><b>Recursive case:</b> Assume the function works for n-1. How do you solve for n?
+          <ul>
+            <li>Move n-1 disks out of the way (to helper)</li>
+            <li>Move the big disk (to target)</li>
+            <li>Move n-1 disks back (from helper to target)</li>
+          </ul>
+        </li>
+        <li><b>Trust:</b> Don't trace the recursion. Trust that step 1 and 3 work.</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Step-by-Step Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>hanoi(3, A, C, B)</b> — move 3 disks from A to C using B</p>
+      <table style="width:100%;font-size:11px;margin-top:10px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:6px;">Move #</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Action</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Call depth</th>
+            <th style="background:#22223a;color:#888;padding:6px;">A</th>
+            <th style="background:#22223a;color:#888;padding:6px;">B</th>
+            <th style="background:#22223a;color:#888;padding:6px;">C</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Disk 1: A → C</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#888;">h(1,A,C,B)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[2,3]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[1]</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Disk 2: A → B</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#888;">h(2,A,B,C) mid</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[3]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[2]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[1]</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Disk 1: C → B</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#888;">h(1,C,B,A)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[3]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[1,2]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[]</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">4</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Disk 3: A → C</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">h(3,A,C,B) mid</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[1,2]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">[3]</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Disk 1: B → A</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#888;">h(1,B,A,C)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[1]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[2]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[3]</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">6</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Disk 2: B → C</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#888;">h(2,B,C,A) mid</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[1]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[2,3]</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">7</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Disk 1: A → C</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#888;">h(1,A,C,B)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">[1,2,3] ✓</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#4caf50;"><b>7 moves for 3 disks.</b> Formula: 2ⁿ - 1 moves. For n=3: 2³-1 = 7 ✓</p>
+      <p style="color:#888;font-size:11px;">Move 4 (the middle) is the key moment — the largest disk finally moves. Everything before prepares for it, everything after cleans up.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Internal Mechanics -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>How recursion works under the hood — the Call Stack:</b></p>
+      <ul>
+        <li>Every function call creates a "frame" on the call stack (like Stack data structure from #15!)</li>
+        <li>Each frame stores: function parameters, local variables, return address</li>
+        <li>When function returns → frame is popped, execution resumes in the caller</li>
+      </ul>
+<pre><code><span class="comment">// Call stack for hanoi(3, A, C, B):</span>
+<span class="comment">// At the deepest point (move 1):</span>
+
+| hanoi(<span class="number">1</span>, A, C, B)  |  ← top (executing)
+| hanoi(<span class="number">2</span>, A, B, C)  |  ← waiting for sub-call
+| hanoi(<span class="number">3</span>, A, C, B)  |  ← waiting for sub-call
+|____________________|  ← bottom (main)</code></pre>
+      <p style="margin-top:8px;">Max stack depth = n. For n=3, stack goes 3 levels deep.</p>
+
+      <p style="margin-top:14px;"><b>The three pillars of recursive thinking:</b></p>
+      <ol>
+        <li><b>Base case</b> — when to stop (n == 1)</li>
+        <li><b>Recursive case</b> — how to break down (n → n-1)</li>
+        <li><b>Trust</b> — believe the function works for smaller inputs. Don't trace every call.</li>
+      </ol>
+
+      <p style="margin-top:14px;"><b>Common recursion patterns you'll see next:</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Pattern</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Description</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Problem</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Trust the function</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">This problem</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">#20</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Include/Exclude</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">For each element: take it or skip it</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">#21 (Subsets)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Permutation</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Try each element at each position</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">#22</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Multi-branch</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Multiple choices at each step</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">#23 (Phone keypad)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Divide & Conquer</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Split, solve halves, merge</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">#24 (Merge Sort)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Complexity Analysis -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag">
+          <span class="label">Time:</span>
+          <span class="value">O(2ⁿ)</span>
+        </div>
+        <div class="complexity-tag">
+          <span class="label">Space:</span>
+          <span class="value">O(n)</span>
+        </div>
+      </div>
+      <p style="margin-top:10px;"><b>Time:</b> T(n) = 2·T(n-1) + 1 → T(n) = 2ⁿ - 1 moves. Exponential — but this is provably optimal for Tower of Hanoi.</p>
+      <p><b>Space:</b> O(n) — recursion depth = n (call stack frames).</p>
+      <p style="margin-top:8px;color:#888;font-size:11px;">Not all recursive solutions are exponential. Merge Sort (#24) is O(n log n). Recursion is a technique, not a complexity class.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Java Implementation -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">public class</span> <span class="type">TowerOfHanoi</span> {
+
+    <span class="keyword">public static void</span> <span class="type">hanoi</span>(<span class="type">int</span> n, <span class="type">char</span> from, <span class="type">char</span> to, <span class="type">char</span> helper) {
+        <span class="keyword">if</span> (n == <span class="number">1</span>) {
+            System.out.println(<span class="string">"Move disk 1 from "</span> + from + <span class="string">" to "</span> + to);
+            <span class="keyword">return</span>;
+        }
+
+        hanoi(n - <span class="number">1</span>, from, helper, to);     <span class="comment">// Move n-1 to helper</span>
+        System.out.println(<span class="string">"Move disk "</span> + n + <span class="string">" from "</span> + from + <span class="string">" to "</span> + to);
+        hanoi(n - <span class="number">1</span>, helper, to, from);     <span class="comment">// Move n-1 from helper to target</span>
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        hanoi(<span class="number">3</span>, <span class="string">'A'</span>, <span class="string">'C'</span>, <span class="string">'B'</span>);
+    }
+}</code></pre>
+      <p style="margin-top:6px;"><b>Output:</b></p>
+<pre><code><span class="comment">Move disk 1 from A to C
+Move disk 2 from A to B
+Move disk 1 from C to B
+Move disk 3 from A to C
+Move disk 1 from B to A
+Move disk 2 from B to C
+Move disk 1 from A to C</span></code></pre>
+      <p style="margin-top:6px;color:#888;font-size:11px;">💡 The entire solution is 6 lines of actual logic. Recursion handles all the complexity.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 9: Edge Cases -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">n</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Moves</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Base case — just move it</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Smallest non-trivial case</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">7</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Classic example</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">10</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1,023</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Still fast</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">20</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1,048,575</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">~1 million moves</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">64</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">~1.8 × 10¹⁹</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Original legend — would take 585 billion years</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 10: Common Mistakes -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Trying to trace every recursive call</b>
+          <p style="color:#e44d26;">❌ "Let me follow hanoi(3)→hanoi(2)→hanoi(1)→..." — brain overload</p>
+          <p style="color:#4caf50;">✅ Trust the function. Just verify: base case correct? Recursive case uses smaller input? Combines correctly?</p>
+        </li>
+        <li style="margin-top:10px;"><b>Missing the base case</b>
+          <p style="color:#e44d26;">❌ No <code>if (n == 1)</code> → infinite recursion → StackOverflowError</p>
+          <p style="color:#4caf50;">✅ Always define the base case FIRST</p>
+        </li>
+        <li style="margin-top:10px;"><b>Wrong parameter order in recursive calls</b>
+          <p style="color:#e44d26;">❌ Swapping 'to' and 'helper' incorrectly → disks end up on wrong pillar</p>
+          <p style="color:#4caf50;">✅ Think: "where am I moving FROM, TO, and what's the HELPER?" for each call</p>
+        </li>
+        <li style="margin-top:10px;"><b>Confusing recursion with iteration</b>
+          <p style="color:#888;">Recursion isn't "a loop that calls itself." It's "solving a problem by solving a smaller version of itself."</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 11: When to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Signals to पहचान (identify):</b></p>
+      <ul>
+        <li>✅ Problem has a natural "smaller version of itself" structure</li>
+        <li>✅ Tree/graph traversal (every subtree is a smaller tree)</li>
+        <li>✅ "Generate all combinations/permutations/subsets"</li>
+        <li>✅ "Divide and conquer" — split, solve halves, merge</li>
+        <li>✅ Problem says "recursive" or has nested/hierarchical structure</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Recursion is the FOUNDATION for:</b></p>
+      <ul>
+        <li>Subsets, Permutations, Combinations (#21-23)</li>
+        <li>Merge Sort, Quick Sort (#24-25)</li>
+        <li>Tree DFS (#26-30)</li>
+        <li>Graph DFS (#31-34)</li>
+        <li>Backtracking (#36-38)</li>
+        <li>Dynamic Programming (#39-50)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 12: When NOT to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ Simple iteration works — don't use recursion for summing an array or finding max</li>
+        <li>❌ Very deep recursion (n > 10,000) — risk of StackOverflowError. Convert to iterative with explicit stack.</li>
+        <li>❌ Overlapping subproblems without memoization — leads to exponential time (that's where DP comes in, Phase 5)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 13: Key Takeaway -->
+  <div class="takeaway">
+    💡 "Recursion = Trust the function. Define base case. Define how to use the smaller solution. Don't trace — trust."
+  </div>
+
+  <!-- SECTION 14: Bridge to Next Problem -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Ab tum recursion ka core concept samajh gaye — "trust the function."</p>
+      <p style="margin-top:10px;">Next problem mein recursion ka pehla practical pattern aata hai: <b>Include/Exclude</b>.</p>
+      <p style="margin-top:8px;"><b>"Generate all subsets of a menu"</b> — for each item, you have two choices: include it or skip it.</p>
+      <ul>
+        <li>Menu: [A, B, C]</li>
+        <li>Subsets: [], [A], [B], [C], [AB], [AC], [BC], [ABC] — total 2ⁿ = 8</li>
+        <li>At each item: branch into "take" and "skip" → binary tree of decisions</li>
+      </ul>
+      <p style="margin-top:8px;">This is the foundation for backtracking (Phase 4) and DP (Phase 5).</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Trust the function (Hanoi) → Include/Exclude decisions (Subsets) — recursion gets practical!</p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem19.html">← Problem #19</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(20)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem21.html">Problem #21 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "dsa-roadmap-progress";
+const PROBLEM_NUM = 20;
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+
+function saveProgress(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function toggleDone(num) {
+  const prog = loadProgress();
+  if (prog[num] === "done") { delete prog[num]; }
+  else { prog[num] = "done"; }
+  saveProgress(prog);
+  updateUI();
+}
+
+function updateUI() {
+  const prog = loadProgress();
+  const btn = document.getElementById("mark-done-btn");
+  if (prog[PROBLEM_NUM] === "done") {
+    btn.textContent = "✔ Completed";
+    btn.classList.add("completed");
+  } else {
+    btn.textContent = "☐ Mark as Done";
+    btn.classList.remove("completed");
+  }
+  updateReadProgress();
+}
+
+function updateReadProgress() {
+  const prog = loadProgress();
+  if (prog[PROBLEM_NUM] === "done") {
+    document.getElementById("section-pct").textContent = "100%";
+    document.getElementById("section-bar").style.width = "100%";
+    return;
+  }
+  const sections = document.querySelectorAll(".section, .takeaway");
+  const total = sections.length;
+  if (total === 0) return;
+  let visible = 0;
+  sections.forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    if (rect.top < window.innerHeight) visible++;
+  });
+  const pct = Math.min(100, Math.round((visible / total) * 100));
+  document.getElementById("section-pct").textContent = pct + "%";
+  document.getElementById("section-bar").style.width = pct + "%";
+}
+
+window.addEventListener("scroll", updateReadProgress);
+updateUI();
+</script>
+</body>
+</html>

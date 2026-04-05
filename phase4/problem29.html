@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#29 — Serialize & Deserialize the Org Chart | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 4: Advanced</span>
+    <span class="problem-id">Problem #29 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #29: Serialize & Deserialize the Org Chart</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#29 — Serialize & Deserialize the Org Chart</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Tree BFS + Encoding</p>
+
+  <!-- SECTION 0: Scenario -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tumhe company ka org chart (tree) ek file mein save karna hai (serialize) aur baad mein file se wapas tree banana hai (deserialize).</p>
+<pre><code><span class="comment">Tree:        Serialized string:
+     1
+    / \       "1,2,3,null,null,4,5"
+   2   3
+      / \     Deserialized back:
+     4   5         same tree ✓</span></code></pre>
+      <p style="margin-top:8px;">Yeh real-world mein hota hai: database mein tree store karna, network pe tree bhejna, cache mein tree save karna.</p>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #297 — Serialize and Deserialize Binary Tree. Hard-rated but the BFS approach is very intuitive.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Understanding -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li><b>Serialize:</b> Convert a binary tree into a string</li>
+        <li><b>Deserialize:</b> Convert the string back into the exact same tree</li>
+        <li>The encoding format is your choice — just ensure round-trip works: <code>deserialize(serialize(tree)) == tree</code></li>
+      </ul>
+      <p style="margin-top:10px;"><b>Two main approaches:</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">Approach</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Traversal</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Null handling</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Complexity</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">DFS (Pre-order)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Root, Left, Right</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Mark nulls with "null"</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">O(n) / O(n)</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">BFS (Level-order)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Level by level</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Mark nulls with "null"</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">O(n) / O(n)</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;">We'll use BFS — it produces the same format as LeetCode's tree representation, making it intuitive.</p>
+      <p style="margin-top:10px;"><b>Connection to previous problems:</b></p>
+      <ul>
+        <li>#18: Queue for FIFO processing → BFS uses Queue to process level by level</li>
+        <li>#26-28: DFS on trees → now we learn BFS on trees</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Brute Force -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Why can't we just store in-order traversal?</b></p>
+      <ul>
+        <li>In-order of [1,2,3,4,5] = "2,1,4,3,5"</li>
+        <li>But multiple trees can have the same in-order traversal!</li>
+        <li>We need to encode the STRUCTURE (which nodes are null) — not just values</li>
+      </ul>
+      <p style="margin-top:8px;"><b>Solution:</b> Include null markers. BFS naturally visits level by level, including null children.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Optimization -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>BFS Serialize:</b></p>
+      <ol>
+        <li>Start with root in queue</li>
+        <li>For each node in queue:
+          <ul>
+            <li>If not null → add value to string, enqueue left and right children</li>
+            <li>If null → add "null" to string</li>
+          </ul>
+        </li>
+      </ol>
+      <p style="margin-top:10px;"><b>BFS Deserialize:</b></p>
+      <ol>
+        <li>Split string by comma → array of tokens</li>
+        <li>First token = root. Add root to queue.</li>
+        <li>For each node in queue, next two tokens are its left and right children</li>
+        <li>If token is "null" → child is null. Else → create node, enqueue it.</li>
+      </ol>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>BFS level-order with null markers — serialize writes level by level, deserialize reads level by level</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Final Approach -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach (Pattern-Based)</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Key insight for deserialize:</b> In BFS order, children come in pairs. For each parent dequeued, the next two tokens in the string are its left and right children.</p>
+      <p style="margin-top:8px;">This works because BFS processes parents in the same order they were serialized — FIFO guarantees alignment.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Serialize:</b></p>
+<pre><code><span class="comment">Tree:    1
+        / \
+       2   3
+          / \
+         4   5</span>
+
+<span class="comment">BFS Queue processing:</span>
+Dequeue 1 → write "1", enqueue 2, 3
+Dequeue 2 → write "2", enqueue null, null
+Dequeue 3 → write "3", enqueue 4, 5
+Dequeue null → write "null"
+Dequeue null → write "null"
+Dequeue 4 → write "4", enqueue null, null
+Dequeue 5 → write "5", enqueue null, null
+... (remaining nulls)
+
+<span style="color:#4caf50;">Result: "1,2,3,null,null,4,5"</span></code></pre>
+
+      <p style="margin-top:12px;"><b>Deserialize:</b> <code>"1,2,3,null,null,4,5"</code></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Parent (dequeue)</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Left token</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Right token</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">"2"</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">"3"</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Create 2 (left), 3 (right), enqueue both</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">"null"</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">"null"</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Left=null, Right=null (leaf)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">"4"</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">"5"</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Create 4 (left), 5 (right), enqueue both</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;color:#4caf50;">Tree reconstructed perfectly ✓</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Mechanics -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Why BFS alignment works:</b></p>
+      <ul>
+        <li>Serialize: parents are written in BFS order. For each parent, left child then right child are written.</li>
+        <li>Deserialize: parents are read in BFS order (queue). For each parent, next two tokens = its children.</li>
+        <li>Both use FIFO → the order matches perfectly.</li>
+      </ul>
+      <p style="margin-top:12px;"><b>BFS on trees — the template:</b></p>
+<pre><code>Queue&lt;TreeNode&gt; queue = <span class="keyword">new</span> LinkedList&lt;&gt;();
+queue.add(root);
+<span class="keyword">while</span> (!queue.isEmpty()) {
+    TreeNode node = queue.poll();
+    <span class="comment">// process node</span>
+    <span class="keyword">if</span> (node.left != <span class="keyword">null</span>) queue.add(node.left);
+    <span class="keyword">if</span> (node.right != <span class="keyword">null</span>) queue.add(node.right);
+}</code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">This BFS template is used in #29 (serialize), #30 (right view), #31-32 (graph BFS). Master it here.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Complexity -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag"><span class="label">Time:</span><span class="value">O(n)</span></div>
+        <div class="complexity-tag"><span class="label">Space:</span><span class="value">O(n)</span></div>
+      </div>
+      <p style="margin-top:10px;">Both serialize and deserialize visit each node once. Queue holds at most one level of nodes (max width).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Java -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">import</span> java.util.*;
+
+<span class="keyword">public class</span> <span class="type">Codec</span> {
+
+    <span class="keyword">public</span> String <span class="type">serialize</span>(TreeNode root) {
+        <span class="keyword">if</span> (root == <span class="keyword">null</span>) <span class="keyword">return</span> <span class="string">""</span>;
+        StringBuilder sb = <span class="keyword">new</span> StringBuilder();
+        Queue&lt;TreeNode&gt; queue = <span class="keyword">new</span> LinkedList&lt;&gt;();
+        queue.add(root);
+
+        <span class="keyword">while</span> (!queue.isEmpty()) {
+            TreeNode node = queue.poll();
+            <span class="keyword">if</span> (node == <span class="keyword">null</span>) {
+                sb.append(<span class="string">"null,"</span>);
+            } <span class="keyword">else</span> {
+                sb.append(node.val).append(<span class="string">","</span>);
+                queue.add(node.left);
+                queue.add(node.right);
+            }
+        }
+        <span class="keyword">return</span> sb.toString();
+    }
+
+    <span class="keyword">public</span> TreeNode <span class="type">deserialize</span>(String data) {
+        <span class="keyword">if</span> (data.isEmpty()) <span class="keyword">return null</span>;
+        String[] tokens = data.split(<span class="string">","</span>);
+        TreeNode root = <span class="keyword">new</span> TreeNode(Integer.parseInt(tokens[<span class="number">0</span>]));
+        Queue&lt;TreeNode&gt; queue = <span class="keyword">new</span> LinkedList&lt;&gt;();
+        queue.add(root);
+        <span class="type">int</span> i = <span class="number">1</span>;
+
+        <span class="keyword">while</span> (!queue.isEmpty()) {
+            TreeNode node = queue.poll();
+
+            <span class="keyword">if</span> (!tokens[i].equals(<span class="string">"null"</span>)) {
+                node.left = <span class="keyword">new</span> TreeNode(Integer.parseInt(tokens[i]));
+                queue.add(node.left);
+            }
+            i++;
+
+            <span class="keyword">if</span> (!tokens[i].equals(<span class="string">"null"</span>)) {
+                node.right = <span class="keyword">new</span> TreeNode(Integer.parseInt(tokens[i]));
+                queue.add(node.right);
+            }
+            i++;
+        }
+        <span class="keyword">return</span> root;
+    }
+}</code></pre>
+    </div>
+  </div>
+
+  <!-- SECTION 9-12 + Takeaway + Bridge + Nav + Script -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead><tr><th style="background:#22223a;color:#888;padding:8px;">Case</th><th style="background:#22223a;color:#888;padding:8px;">Serialized</th><th style="background:#22223a;color:#888;padding:8px;">Note</th></tr></thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">null root</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>""</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Empty string</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single node</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>"1,null,null,"</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Root with two null children</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Left-skewed</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>"1,2,null,3,null,..."</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Many nulls on right side</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Negative values</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>"-1,2,-3,..."</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">parseInt handles negatives</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Not enqueueing null children during serialize</b>
+          <p style="color:#e44d26;">❌ Skipping nulls → lose structure info → can't deserialize</p>
+          <p style="color:#4caf50;">✅ Enqueue null children too — write "null" for them</p>
+        </li>
+        <li style="margin-top:10px;"><b>Token index misalignment during deserialize</b>
+          <p style="color:#4caf50;">✅ Always consume exactly 2 tokens per dequeued parent (left + right)</p>
+        </li>
+        <li style="margin-top:10px;"><b>Trailing comma or empty token after split</b>
+          <p style="color:#4caf50;">✅ Be careful with <code>split(",")</code> — trailing comma may create empty last token</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>✅ "Serialize/Deserialize a tree" — save to file/network/database</li>
+        <li>✅ "Clone a tree" — serialize + deserialize = deep copy</li>
+        <li>✅ "Compare two trees across systems" — serialize both, compare strings</li>
+        <li>✅ BFS template reused in: right view (#30), level-order traversal, zigzag traversal</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ BST — can serialize with just pre-order (no null markers needed, structure is implied by BST property)</li>
+        <li>❌ N-ary tree — needs different encoding (child count per node)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="takeaway">
+    💡 "Serialize = BFS writing values + null markers. Deserialize = BFS reading tokens in pairs (left, right) per parent. Queue keeps parent-child alignment."
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Ab tum BFS level-order traversal samajh gaye.</p>
+      <p style="margin-top:8px;">Next: <b>"Right Side View of a Building"</b> — BFS level by level, but only keep the LAST node of each level (rightmost visible from the side).</p>
+      <p style="margin-top:8px;">Same BFS template, but instead of processing all nodes, we only care about the last node per level.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ BFS full level (serialize) → BFS last-per-level (right view) — same tool, selective output</p>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem28.html">← Problem #28</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(29)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem30.html">Problem #30 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY="dsa-roadmap-progress";const PROBLEM_NUM=29;
+function loadProgress(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{};}catch{return{};}}
+function saveProgress(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}
+function toggleDone(n){const p=loadProgress();if(p[n]==="done")delete p[n];else p[n]="done";saveProgress(p);updateUI();}
+function updateUI(){const p=loadProgress(),btn=document.getElementById("mark-done-btn");if(p[PROBLEM_NUM]==="done"){btn.textContent="✔ Completed";btn.classList.add("completed");}else{btn.textContent="☐ Mark as Done";btn.classList.remove("completed");}updateReadProgress();}
+function updateReadProgress(){const p=loadProgress();if(p[PROBLEM_NUM]==="done"){document.getElementById("section-pct").textContent="100%";document.getElementById("section-bar").style.width="100%";return;}const s=document.querySelectorAll(".section, .takeaway"),t=s.length;if(t===0)return;let v=0;s.forEach(sec=>{if(sec.getBoundingClientRect().top<window.innerHeight)v++;});const pct=Math.min(100,Math.round((v/t)*100));document.getElementById("section-pct").textContent=pct+"%";document.getElementById("section-bar").style.width=pct+"%";}
+window.addEventListener("scroll",updateReadProgress);updateUI();
+</script>
+</body>
+</html>

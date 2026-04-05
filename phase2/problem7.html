@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#7 — Triplet Combo for Gift Packing | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 2: Core Patterns</span>
+    <span class="problem-id">Problem #7 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #7: Triplet Combo for Gift Packing</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#7 — Triplet Combo for Gift Packing</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Two Pointer (3Sum)</p>
+
+  <!-- SECTION 0: Real-World Scenario -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek gift shop mein ho. Items ke weights hain:</p>
+      <p><code>[-4, -1, -1, 0, 1, 2]</code></p>
+      <p>Boss bola: <b>"Find all unique triplets (3 items) whose weights add up to exactly 0."</b></p>
+      <p style="margin-top:8px;">Yeh balance check hai — positive aur negative weights cancel hone chahiye.</p>
+      <p style="margin-top:8px;">Answer: <code>[[-1, -1, 2], [-1, 0, 1]]</code></p>
+      <p style="color:#ffc107;margin-top:8px;">⚠️ Catch: <b>Duplicate triplets not allowed.</b> [-1, -1, 2] sirf ek baar aana chahiye, chahe -1 do baar ho array mein.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Problem Understanding -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given an array, find ALL unique triplets <code>(a, b, c)</code> such that <code>a + b + c = 0</code></li>
+        <li>No duplicate triplets in the result</li>
+        <li>Order within triplet doesn't matter</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Input → Output:</b></p>
+      <ul>
+        <li>Input: <code>int[] nums</code></li>
+        <li>Output: <code>List&lt;List&lt;Integer&gt;&gt;</code> — all unique triplets</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Key difference from Problem #6:</b></p>
+      <table style="width:100%;font-size:12px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Aspect</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Problem #6 (Two Sum)</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Problem #7 (3Sum)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Numbers needed</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Results</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">One pair</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">ALL unique triplets</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Duplicates</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Not an issue</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">Must handle carefully</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Target</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Given</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Fixed at 0 (usually)</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;"><b>Core idea:</b> 3Sum = Fix one number + Two Sum on the rest. Reduce 3-number problem to 2-number problem.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Brute Force Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>First instinct:</b> Three nested loops — check every triplet.</p>
+<pre><code><span class="comment">// Brute Force — O(n³)</span>
+Set&lt;List&lt;Integer&gt;&gt; result = <span class="keyword">new</span> HashSet&lt;&gt;();
+<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++)
+  <span class="keyword">for</span> (<span class="type">int</span> j = i+<span class="number">1</span>; j &lt; n; j++)
+    <span class="keyword">for</span> (<span class="type">int</span> k = j+<span class="number">1</span>; k &lt; n; k++)
+      <span class="keyword">if</span> (nums[i]+nums[j]+nums[k] == <span class="number">0</span>) {
+        List&lt;Integer&gt; tri = Arrays.asList(nums[i],nums[j],nums[k]);
+        Collections.sort(tri);
+        result.add(tri);
+      }</code></pre>
+      <p><b>Problems:</b></p>
+      <ul>
+        <li>O(n³) — for n = 3000, that's 27 billion operations. Way too slow.</li>
+        <li>Using Set for dedup is messy and adds overhead</li>
+      </ul>
+      <p style="color:#ffc107;margin-top:8px;">🤔 Agar hum ek number fix karein, toh baaki do ke liye Problem #6 ka two pointer laga sakte hain — O(n²) total.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Optimization Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Key Insight — Reduce to a solved problem:</b></p>
+      <ul>
+        <li><code>a + b + c = 0</code> → <code>b + c = -a</code></li>
+        <li>Fix <code>a = nums[i]</code>, then find pair <code>(b, c)</code> with sum = <code>-nums[i]</code></li>
+        <li>That's exactly Problem #6 (Two Sum on sorted array)!</li>
+      </ul>
+
+      <p style="margin-top:12px;"><b>Algorithm sketch:</b></p>
+      <ol>
+        <li>Sort the array</li>
+        <li>For each <code>i</code> from 0 to n-3:
+          <ul>
+            <li>Fix <code>nums[i]</code> as the first number</li>
+            <li>Use two pointers (left = i+1, right = n-1) to find pair summing to <code>-nums[i]</code></li>
+          </ul>
+        </li>
+      </ol>
+
+      <p style="margin-top:12px;"><b>The hard part — handling duplicates:</b></p>
+      <ul>
+        <li>Array: <code>[-1, -1, 0, 1]</code> → both -1's would produce the same triplet [-1, 0, 1]</li>
+        <li>Solution: <b>Skip duplicate values</b> at two levels:
+          <ul>
+            <li>Outer loop: if <code>nums[i] == nums[i-1]</code>, skip (same first element)</li>
+            <li>Inner loop: after finding a pair, skip duplicate left and right values</li>
+          </ul>
+        </li>
+      </ul>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>Sort + Fix one + Two Pointer for remaining two + Skip duplicates</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Final Approach -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach (Pattern-Based)</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Pattern Name:</b> Sort + Fix One + Two Pointer (3Sum)</p>
+      <p style="margin-top:10px;"><b>Complete Algorithm:</b></p>
+      <ol>
+        <li>Sort the array</li>
+        <li>For <code>i = 0</code> to <code>n - 3</code>:
+          <ul>
+            <li><b>Optimization:</b> if <code>nums[i] &gt; 0</code>, break (sorted — no way three positives sum to 0)</li>
+            <li><b>Skip duplicate:</b> if <code>i &gt; 0 && nums[i] == nums[i-1]</code>, continue</li>
+            <li>Set <code>left = i + 1</code>, <code>right = n - 1</code></li>
+            <li>While <code>left &lt; right</code>:
+              <ul>
+                <li><code>sum = nums[i] + nums[left] + nums[right]</code></li>
+                <li>If <code>sum == 0</code>: add triplet, skip duplicate lefts, skip duplicate rights</li>
+                <li>If <code>sum &lt; 0</code>: <code>left++</code></li>
+                <li>If <code>sum &gt; 0</code>: <code>right--</code></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Step-by-Step Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Input:</b> <code>nums = [-1, 0, 1, 2, -1, -4]</code></p>
+      <p><b>After sort:</b> <code>[-4, -1, -1, 0, 1, 2]</code></p>
+
+      <p style="margin-top:12px;color:#6c63ff;"><b>i = 0, nums[i] = -4, target for pair = 4</b></p>
+      <table style="width:100%;font-size:11px;margin-top:6px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:6px;">L</th>
+            <th style="background:#22223a;color:#888;padding:6px;">R</th>
+            <th style="background:#22223a;color:#888;padding:6px;">nums[L]+nums[R]</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Sum with -4</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1(-1)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">5(2)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">-3</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">sum &lt; 0 → L++</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2(-1)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">5(2)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">-3</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">sum &lt; 0 → L++</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3(0)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">5(2)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">-2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">sum &lt; 0 → L++</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">4(1)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">5(2)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">-1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">L &lt; R false → done</td></tr>
+        </tbody>
+      </table>
+      <p style="color:#888;font-size:11px;">No triplet with -4. Makes sense — -4 is too negative.</p>
+
+      <p style="margin-top:14px;color:#6c63ff;"><b>i = 1, nums[i] = -1, target for pair = 1</b></p>
+      <table style="width:100%;font-size:11px;margin-top:6px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:6px;">L</th>
+            <th style="background:#22223a;color:#888;padding:6px;">R</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Sum</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2(-1)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">5(2)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">-1+(-1)+2 = 0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">✅ FOUND [-1,-1,2] → skip dup L, skip dup R</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3(0)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">4(1)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">-1+0+1 = 0</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#4caf50;">✅ FOUND [-1,0,1] → skip dup L, skip dup R</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">L &lt; R false → done</td></tr>
+        </tbody>
+      </table>
+
+      <p style="margin-top:14px;color:#6c63ff;"><b>i = 2, nums[i] = -1</b></p>
+      <p style="color:#ffc107;">⏭ SKIP — nums[2] == nums[1] (duplicate first element)</p>
+
+      <p style="margin-top:10px;color:#6c63ff;"><b>i = 3, nums[i] = 0, target for pair = 0</b></p>
+      <table style="width:100%;font-size:11px;margin-top:6px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:6px;">L</th>
+            <th style="background:#22223a;color:#888;padding:6px;">R</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Sum</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">4(1)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">5(2)</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">0+1+2 = 3</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">sum &gt; 0 → R--. L &lt; R false → done</td></tr>
+        </tbody>
+      </table>
+
+      <p style="margin-top:12px;color:#4caf50;"><b>Final Result: [[-1, -1, 2], [-1, 0, 1]]</b> ✓</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Internal Mechanics -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>How duplicate skipping works (the tricky part):</b></p>
+      <p style="margin-top:8px;"><b>Level 1 — Outer loop skip:</b></p>
+<pre><code><span class="keyword">if</span> (i &gt; <span class="number">0</span> &amp;&amp; nums[i] == nums[i - <span class="number">1</span>]) <span class="keyword">continue</span>;</code></pre>
+      <ul>
+        <li>If current first element is same as previous, all triplets starting with it were already found</li>
+        <li>Example: <code>[-1, -1, 0, 1]</code> — second -1 would produce same triplets as first -1</li>
+      </ul>
+
+      <p style="margin-top:12px;"><b>Level 2 — Inner loop skip (after finding a triplet):</b></p>
+<pre><code><span class="comment">// After adding triplet to result:</span>
+<span class="keyword">while</span> (left &lt; right &amp;&amp; nums[left] == nums[left + <span class="number">1</span>]) left++;
+<span class="keyword">while</span> (left &lt; right &amp;&amp; nums[right] == nums[right - <span class="number">1</span>]) right--;
+left++;
+right--;</code></pre>
+      <ul>
+        <li>After finding [-1, -1, 2], if there's another -1 next to left, skip it</li>
+        <li>Same for right — skip duplicate values</li>
+        <li>Then move both pointers inward to look for new pairs</li>
+      </ul>
+
+      <p style="margin-top:12px;"><b>Why <code>nums[i] &gt; 0</code> means we can break:</b></p>
+      <ul>
+        <li>Array is sorted. If nums[i] &gt; 0, then nums[left] and nums[right] are also &gt; 0</li>
+        <li>Three positive numbers can never sum to 0</li>
+        <li>Early termination — saves unnecessary iterations</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Complexity Analysis -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag">
+          <span class="label">Time:</span>
+          <span class="value">O(n²)</span>
+        </div>
+        <div class="complexity-tag">
+          <span class="label">Space:</span>
+          <span class="value">O(1)*</span>
+        </div>
+      </div>
+      <p style="margin-top:10px;"><b>Breakdown:</b></p>
+      <ul>
+        <li>Sorting: O(n log n)</li>
+        <li>Outer loop: O(n) iterations</li>
+        <li>Inner two-pointer: O(n) per iteration</li>
+        <li>Total: O(n log n) + O(n × n) = O(n²)</li>
+      </ul>
+      <p style="margin-top:8px;color:#888;font-size:11px;">*Space O(1) ignoring the output list. Sorting is in-place. Some argue O(log n) for sort's stack space.</p>
+      <table style="width:100%;font-size:12px;margin-top:10px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Approach</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Time</th>
+            <th style="background:#22223a;color:#888;padding:8px;">n = 3000</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Brute Force</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">O(n³)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">27,000,000,000</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Sort + Two Pointer</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(n²)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">9,000,000</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:6px;color:#888;font-size:11px;">3000x faster. O(n²) is the best known for 3Sum — no O(n log n) solution exists.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Java Implementation -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">import</span> java.util.*;
+
+<span class="keyword">public class</span> <span class="type">ThreeSum</span> {
+
+    <span class="keyword">public static</span> List&lt;List&lt;Integer&gt;&gt; <span class="type">threeSum</span>(<span class="type">int</span>[] nums) {
+        List&lt;List&lt;Integer&gt;&gt; result = <span class="keyword">new</span> ArrayList&lt;&gt;();
+        Arrays.sort(nums);
+        <span class="type">int</span> n = nums.length;
+
+        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n - <span class="number">2</span>; i++) {
+            <span class="comment">// Early termination</span>
+            <span class="keyword">if</span> (nums[i] &gt; <span class="number">0</span>) <span class="keyword">break</span>;
+
+            <span class="comment">// Skip duplicate first element</span>
+            <span class="keyword">if</span> (i &gt; <span class="number">0</span> &amp;&amp; nums[i] == nums[i - <span class="number">1</span>]) <span class="keyword">continue</span>;
+
+            <span class="type">int</span> left = i + <span class="number">1</span>, right = n - <span class="number">1</span>;
+
+            <span class="keyword">while</span> (left &lt; right) {
+                <span class="type">int</span> sum = nums[i] + nums[left] + nums[right];
+
+                <span class="keyword">if</span> (sum == <span class="number">0</span>) {
+                    result.add(Arrays.asList(nums[i], nums[left], nums[right]));
+
+                    <span class="comment">// Skip duplicates</span>
+                    <span class="keyword">while</span> (left &lt; right &amp;&amp; nums[left] == nums[left + <span class="number">1</span>]) left++;
+                    <span class="keyword">while</span> (left &lt; right &amp;&amp; nums[right] == nums[right - <span class="number">1</span>]) right--;
+
+                    left++;
+                    right--;
+                } <span class="keyword">else if</span> (sum &lt; <span class="number">0</span>) {
+                    left++;
+                } <span class="keyword">else</span> {
+                    right--;
+                }
+            }
+        }
+        <span class="keyword">return</span> result;
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        <span class="type">int</span>[] nums = {-<span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, -<span class="number">1</span>, -<span class="number">4</span>};
+        System.out.println(threeSum(nums));
+        <span class="comment">// [[-1, -1, 2], [-1, 0, 1]]</span>
+    }
+}</code></pre>
+    </div>
+  </div>
+
+  <!-- SECTION 9: Edge Cases -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Case</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Input</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Output</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Why</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Less than 3 elements</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1, 2]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Can't form a triplet</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All zeros</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[0, 0, 0, 0]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[[0,0,0]]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Only one unique triplet</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All positive</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1, 2, 3, 4]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Can't sum to 0</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Many duplicates</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[-1,-1,-1,2,2]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[[-1,-1,2]]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Dedup logic handles it</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No valid triplet</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[-1, 0, 3]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">-1+0+3 = 2 ≠ 0</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 10: Common Mistakes -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Forgetting to sort first</b>
+          <p style="color:#e44d26;">❌ Two pointer only works on sorted arrays. Without sort, results are wrong.</p>
+        </li>
+        <li style="margin-top:10px;"><b>Wrong duplicate skip condition</b>
+          <p style="color:#e44d26;">❌ <code>if (nums[i] == nums[i+1]) continue</code> — skips valid first occurrences</p>
+          <p style="color:#4caf50;">✅ <code>if (i > 0 && nums[i] == nums[i-1]) continue</code> — skips only repeats</p>
+        </li>
+        <li style="margin-top:10px;"><b>Not moving both pointers after finding a triplet</b>
+          <p style="color:#e44d26;">❌ Only doing <code>left++</code> or only <code>right--</code> → infinite loop or missed results</p>
+          <p style="color:#4caf50;">✅ After skipping duplicates, move BOTH <code>left++</code> and <code>right--</code></p>
+        </li>
+        <li style="margin-top:10px;"><b>Using HashSet for dedup instead of skip logic</b>
+          <p style="color:#888;">Works but adds O(n) space and is slower. The skip approach is cleaner and O(1) space.</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 11: When to Use This Pattern -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Signals to पहचान (identify) this pattern:</b></p>
+      <ul>
+        <li>✅ "Find triplets with sum = X"</li>
+        <li>✅ "3Sum" / "Three number sum"</li>
+        <li>✅ "Find all unique combinations of k numbers" (generalize to kSum)</li>
+        <li>✅ Any problem reducible to "fix one, two-pointer the rest"</li>
+      </ul>
+      <p style="margin-top:10px;"><b>The kSum generalization:</b></p>
+<pre><code><span class="comment">// Pattern for any kSum:</span>
+2Sum → Two Pointer                    O(n)
+3Sum → Fix 1 + Two Pointer            O(n²)
+4Sum → Fix 1 + Fix 1 + Two Pointer    O(n³)
+kSum → Fix (k-2) + Two Pointer        O(n^(k-1))</code></pre>
+    </div>
+  </div>
+
+  <!-- SECTION 12: When NOT to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ When you need indices from the original unsorted array (sorting destroys indices)</li>
+        <li>❌ When k is very large (kSum with k=10 → O(n⁹) — need different approach)</li>
+        <li>❌ When the target changes per query (pre-processing might help)</li>
+        <li>❌ "Closest sum to target" — similar approach but comparison logic changes (3Sum Closest — LC #16)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 13: Key Takeaway -->
+  <div class="takeaway">
+    💡 "3Sum = Fix one + Two Sum. kSum = Fix (k-2) + Two Sum. Reduce to what you already know."
+  </div>
+
+  <!-- SECTION 14: Bridge to Next Problem -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Ab tak humne two pointer ke do flavors master kiye:</p>
+      <ul>
+        <li>#5: Two arrays, both forward (merge)</li>
+        <li>#6: One array, opposite ends (pair sum)</li>
+        <li>#7: Fix one + opposite ends (3Sum)</li>
+      </ul>
+      <p style="margin-top:10px;">Ab ek completely different pattern aata hai: <b>Sliding Window</b>.</p>
+      <p style="margin-top:8px;">Two pointer mein pointers independent move karte hain. Sliding window mein ek <b>fixed-size ya variable-size window</b> array pe slide karti hai.</p>
+      <p style="margin-top:8px;">Problem #8: <b>Longest Streak of Active Users</b> — find maximum sum subarray of size k.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Two Pointer (pair/triplet finding) → Sliding Window (subarray processing) — new paradigm!</p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem6.html">← Problem #6</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(7)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem8.html">Problem #8 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "dsa-roadmap-progress";
+const PROBLEM_NUM = 7;
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+
+function saveProgress(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function toggleDone(num) {
+  const prog = loadProgress();
+  if (prog[num] === "done") { delete prog[num]; }
+  else { prog[num] = "done"; }
+  saveProgress(prog);
+  updateUI();
+}
+
+function updateUI() {
+  const prog = loadProgress();
+  const btn = document.getElementById("mark-done-btn");
+  if (prog[PROBLEM_NUM] === "done") {
+    btn.textContent = "✔ Completed";
+    btn.classList.add("completed");
+  } else {
+    btn.textContent = "☐ Mark as Done";
+    btn.classList.remove("completed");
+  }
+  updateReadProgress();
+}
+
+function updateReadProgress() {
+  const prog = loadProgress();
+  if (prog[PROBLEM_NUM] === "done") {
+    document.getElementById("section-pct").textContent = "100%";
+    document.getElementById("section-bar").style.width = "100%";
+    return;
+  }
+  const sections = document.querySelectorAll(".section, .takeaway");
+  const total = sections.length;
+  if (total === 0) return;
+  let visible = 0;
+  sections.forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    if (rect.top < window.innerHeight) visible++;
+  });
+  const pct = Math.min(100, Math.round((visible / total) * 100));
+  document.getElementById("section-pct").textContent = pct + "%";
+  document.getElementById("section-bar").style.width = pct + "%";
+}
+
+window.addEventListener("scroll", updateReadProgress);
+updateUI();
+</script>
+</body>
+</html>

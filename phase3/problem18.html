@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#18 — First Non-Repeating Char in Live Stream | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 3: Intermediate</span>
+    <span class="problem-id">Problem #18 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #18: First Non-Repeating Char in Live Stream</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#18 — First Non-Repeating Char in Live Stream</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Queue + HashMap</p>
+
+  <!-- SECTION 0: Real-World Scenario -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek live chat app bana rahe ho. Characters ek-ek karke stream mein aa rahe hain:</p>
+      <p style="margin-top:8px;">Stream: <code>a → a → b → c → b → d</code></p>
+      <p>Har character aane ke baad, batao: <b>"Abhi tak ka first non-repeating character kaunsa hai?"</b></p>
+      <table style="width:100%;font-size:12px;margin-top:10px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">After receiving</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Stream so far</th>
+            <th style="background:#22223a;color:#888;padding:8px;">First non-repeating</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Why</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">a</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"a"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">a</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Only char, count=1</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">a</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"aa"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">null</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">a repeated, nothing unique</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">b</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"aab"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">b</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">a repeated, b unique → b is first</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">c</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"aabc"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">b</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">b came before c, both unique, b is first</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">b</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"aabcb"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">c</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">a,b repeated → c is first unique</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">d</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"aabcbd"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">c</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">c still first unique (came before d)</td></tr>
+        </tbody>
+      </table>
+      <p style="color:#888;font-size:11px;margin-top:8px;">This is LeetCode #387 variant (stream version). Also appears as "First Unique Character in a String".</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Problem Understanding -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Two versions of this problem:</b></p>
+      <table style="width:100%;font-size:12px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Version</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Input</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Best Approach</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Static (LC #387)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Full string given</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">HashMap frequency count + scan</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Stream (this problem)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Chars arrive one by one</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Queue + HashMap</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;"><b>Why Queue?</b></p>
+      <ul>
+        <li>We need the <b>first</b> (earliest) non-repeating character</li>
+        <li>"First" = the one that arrived earliest = FIFO order</li>
+        <li>Queue maintains arrival order — front = earliest candidate</li>
+        <li>HashMap tracks frequency — tells us if a character is still unique</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Stack vs Queue — when to use which:</b></p>
+      <ul>
+        <li><b>Stack (LIFO)</b>: "most recent" — brackets (#15), next greater (#16), span (#17)</li>
+        <li><b>Queue (FIFO)</b>: "earliest/first" — this problem, BFS (later), task scheduling</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Brute Force Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Static version (full string):</b></p>
+<pre><code><span class="comment">// Simple: count frequencies, then scan for first with count=1 — O(n)</span>
+<span class="type">int</span>[] count = <span class="keyword">new</span> <span class="type">int</span>[<span class="number">26</span>];
+<span class="keyword">for</span> (<span class="type">char</span> c : s.toCharArray()) count[c - <span class="string">'a'</span>]++;
+<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; s.length(); i++) {
+    <span class="keyword">if</span> (count[s.charAt(i) - <span class="string">'a'</span>] == <span class="number">1</span>) <span class="keyword">return</span> i;
+}
+<span class="keyword">return</span> -<span class="number">1</span>;</code></pre>
+      <p>Two passes, O(n). Perfect for static input.</p>
+
+      <p style="margin-top:12px;"><b>But for streaming:</b></p>
+      <ul>
+        <li>After each new character, we'd need to re-scan the entire string to find the first unique → O(n) per query</li>
+        <li>For n characters total → O(n²)</li>
+      </ul>
+      <p style="color:#ffc107;margin-top:8px;">🤔 Kya hum ek Queue maintain kar sakte hain of "candidates" (potentially unique chars), aur front se expired ones hata sakte hain?</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Optimization Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Key Insight — The Waiting Room Analogy:</b></p>
+      <p>Imagine a doctor's waiting room. Patients arrive and sit in order.</p>
+      <ul>
+        <li>New patient arrives → sits at the back of the queue, marked as "first visit"</li>
+        <li>Same patient arrives again → marked as "repeat visitor" (in the frequency map)</li>
+        <li>Doctor calls: "Next unique patient please!" → check front of queue</li>
+        <li>If front patient is a repeat visitor → remove them, check next one</li>
+        <li>First non-repeat at the front = the answer</li>
+      </ul>
+
+      <p style="margin-top:12px;"><b>Two data structures working together:</b></p>
+      <ul>
+        <li><b>Queue</b>: maintains arrival order of characters (candidates for "first unique")</li>
+        <li><b>HashMap/int[26]</b>: tracks frequency count of each character</li>
+      </ul>
+
+      <p style="margin-top:12px;"><b>On each new character:</b></p>
+      <ol>
+        <li>Increment its count in the frequency map</li>
+        <li>Add it to the queue (if first time)</li>
+        <li>While queue front has count > 1 → remove from front (it's no longer unique)</li>
+        <li>Queue front = first non-repeating character (or queue empty = none)</li>
+      </ol>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>Queue (FIFO order) + HashMap (frequency tracking) — lazy cleanup from front</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Final Approach -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach (Pattern-Based)</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Pattern:</b> Queue + HashMap (Lazy Cleanup)</p>
+      <p style="margin-top:10px;"><b>Algorithm for stream processing:</b></p>
+      <ol>
+        <li>Maintain <code>Queue&lt;Character&gt;</code> and <code>int[26] count</code></li>
+        <li>On each new character <code>c</code>:
+          <ul>
+            <li><code>count[c]++</code></li>
+            <li><code>queue.add(c)</code></li>
+            <li>While queue not empty AND <code>count[queue.peek()] > 1</code>: <code>queue.poll()</code></li>
+          </ul>
+        </li>
+        <li>Answer = <code>queue.isEmpty() ? null : queue.peek()</code></li>
+      </ol>
+      <p style="margin-top:10px;color:#888;font-size:11px;">💡 "Lazy cleanup" = we don't remove chars from queue when they become repeated. We only clean up when they reach the front. This keeps the logic simple.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Step-by-Step Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Stream:</b> <code>a, a, b, c, b, d</code></p>
+      <table style="width:100%;font-size:10px;margin-top:10px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Input</th>
+            <th style="background:#22223a;color:#888;padding:5px;">count update</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Queue after add</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Cleanup (front count>1?)</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Queue after cleanup</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Answer (front)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">a</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">a:1</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">[a]</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">a count=1, stop</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">[a]</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">a</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">a</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">a:2</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">[a, a]</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#ffc107;">a count=2 → poll, a count=2 → poll</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">[]</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#e44d26;">null</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">b</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">b:1</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">[b]</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">b count=1, stop</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">[b]</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">b</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">c</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">c:1</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">[b, c]</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">b count=1, stop</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">[b, c]</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">b</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">b</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">b:2</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">[b, c, b]</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#ffc107;">b count=2 → poll. c count=1, stop</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">[c, b]</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">c</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">d</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">d:1</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">[c, b, d]</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">c count=1, stop</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">[c, b, d]</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">c</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#4caf50;"><b>Answers: [a, null, b, b, c, c]</b> ✓</p>
+      <p style="color:#888;font-size:11px;">Notice: 'b' stays in the queue at position 2 even after becoming repeated. It only gets cleaned when it reaches the front (lazy cleanup).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Internal Mechanics -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Why "lazy cleanup" works:</b></p>
+      <ul>
+        <li>We only care about the FRONT of the queue (the answer)</li>
+        <li>Repeated chars in the middle/back don't affect the answer</li>
+        <li>When they eventually reach the front, we clean them up then</li>
+        <li>Total cleanup across all operations = O(n) (each char added once, removed at most once)</li>
+      </ul>
+
+      <p style="margin-top:12px;"><b>What is a Queue in Java?</b></p>
+      <ul>
+        <li><b>FIFO</b> — First In, First Out</li>
+        <li><code>add(x)</code> / <code>offer(x)</code> — add to back: O(1)</li>
+        <li><code>poll()</code> — remove from front: O(1)</li>
+        <li><code>peek()</code> — look at front without removing: O(1)</li>
+        <li>In Java: <code>Queue&lt;Character&gt; q = new LinkedList&lt;&gt;()</code></li>
+      </ul>
+
+      <p style="margin-top:12px;"><b>Stack vs Queue summary:</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">Aspect</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Stack</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Queue</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Order</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">LIFO (Last In First Out)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">FIFO (First In First Out)</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Access</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Top only</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Front (remove) + Back (add)</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Use when</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">"Most recent" matters</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">"Earliest/first" matters</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Java class</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;"><code>ArrayDeque</code></td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;"><code>LinkedList</code> or <code>ArrayDeque</code></td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Problems</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">#15-17</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">#18, BFS (#31-32)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Complexity Analysis -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Stream version (per character):</b></p>
+      <div class="complexity-row">
+        <div class="complexity-tag">
+          <span class="label">Time (amortized):</span>
+          <span class="value">O(1)</span>
+        </div>
+        <div class="complexity-tag">
+          <span class="label">Space:</span>
+          <span class="value">O(n)</span>
+        </div>
+      </div>
+      <p style="margin-top:10px;"><b>Total for n characters:</b> O(n) time, O(n) space.</p>
+      <p style="margin-top:6px;color:#888;font-size:11px;">Each character enters the queue once and leaves at most once → amortized O(1) per operation. Space bounded by unique characters (at most 26 for lowercase).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Java Implementation -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Stream version (Queue + HashMap):</b></p>
+<pre><code><span class="keyword">import</span> java.util.*;
+
+<span class="keyword">public class</span> <span class="type">FirstNonRepeatingStream</span> {
+
+    <span class="keyword">private</span> Queue&lt;Character&gt; queue = <span class="keyword">new</span> LinkedList&lt;&gt;();
+    <span class="keyword">private</span> <span class="type">int</span>[] count = <span class="keyword">new</span> <span class="type">int</span>[<span class="number">26</span>];
+
+    <span class="keyword">public</span> Character <span class="type">add</span>(<span class="type">char</span> c) {
+        count[c - <span class="string">'a'</span>]++;
+        queue.add(c);
+
+        <span class="comment">// Lazy cleanup: remove repeated chars from front</span>
+        <span class="keyword">while</span> (!queue.isEmpty() &amp;&amp; count[queue.peek() - <span class="string">'a'</span>] &gt; <span class="number">1</span>) {
+            queue.poll();
+        }
+
+        <span class="keyword">return</span> queue.isEmpty() ? <span class="keyword">null</span> : queue.peek();
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        FirstNonRepeatingStream stream = <span class="keyword">new</span> FirstNonRepeatingStream();
+        <span class="type">char</span>[] input = {<span class="string">'a'</span>,<span class="string">'a'</span>,<span class="string">'b'</span>,<span class="string">'c'</span>,<span class="string">'b'</span>,<span class="string">'d'</span>};
+        <span class="keyword">for</span> (<span class="type">char</span> c : input) {
+            System.out.println(<span class="string">"After '"</span> + c + <span class="string">"': "</span> + stream.add(c));
+        }
+        <span class="comment">// a, null, b, b, c, c</span>
+    }
+}</code></pre>
+
+      <p style="margin-top:14px;"><b>Static version (LC #387 — full string, find index):</b></p>
+<pre><code><span class="keyword">public static int</span> <span class="type">firstUniqChar</span>(String s) {
+    <span class="type">int</span>[] count = <span class="keyword">new</span> <span class="type">int</span>[<span class="number">26</span>];
+    <span class="keyword">for</span> (<span class="type">char</span> c : s.toCharArray()) count[c - <span class="string">'a'</span>]++;
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; s.length(); i++) {
+        <span class="keyword">if</span> (count[s.charAt(i) - <span class="string">'a'</span>] == <span class="number">1</span>) <span class="keyword">return</span> i;
+    }
+    <span class="keyword">return</span> -<span class="number">1</span>;
+}</code></pre>
+      <p style="margin-top:6px;color:#888;font-size:11px;">💡 Static version doesn't need a queue — two passes with int[26] is enough. Queue is only needed for streaming/online processing.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 9: Edge Cases -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Case</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Stream</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Answer</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Why</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All same</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>a,a,a</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">a, null, null</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">After first 'a' it's unique, then repeated</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All unique</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>a,b,c</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">a, a, a</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">First char stays first unique</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single char</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>x</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">x</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Only one char, it's unique</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All repeated</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>a,b,a,b</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">a, a, b, null</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Eventually everything repeats</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 10: Common Mistakes -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Removing from queue immediately when count becomes 2</b>
+          <p style="color:#e44d26;">❌ Searching and removing from middle of queue is O(n)</p>
+          <p style="color:#4caf50;">✅ Lazy cleanup — only remove from front. Middle elements get cleaned when they reach front.</p>
+        </li>
+        <li style="margin-top:10px;"><b>Not adding duplicate chars to queue</b>
+          <p style="color:#888;">It's fine to add them — they'll be cleaned up lazily. Alternatively, only add if count == 1 (first occurrence).</p>
+        </li>
+        <li style="margin-top:10px;"><b>Using Queue for the static version</b>
+          <p style="color:#888;">Overkill. Static version just needs two passes with int[26]. Queue is for streaming only.</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 11: When to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Signals to पहचान (identify):</b></p>
+      <ul>
+        <li>✅ "First non-repeating" / "First unique" in a stream</li>
+        <li>✅ "Maintain order of arrival" + "filter by some condition"</li>
+        <li>✅ Online/streaming data processing with FIFO requirement</li>
+        <li>✅ "Sliding window" problems that need a deque (double-ended queue)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Queue appears again in:</b></p>
+      <ul>
+        <li>BFS traversal (Problems #30-32) — the primary use of Queue in DSA</li>
+        <li>Task scheduling / Round Robin</li>
+        <li>Sliding window maximum (Monotonic Deque)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 12: When NOT to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ Static string (full input given) — just use two-pass frequency count, no queue needed</li>
+        <li>❌ "Most recent unique" — that's LIFO (Stack), not FIFO (Queue)</li>
+        <li>❌ "K-th non-repeating" — queue gives first, not k-th (need modification)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 13: Key Takeaway -->
+  <div class="takeaway">
+    💡 "First unique in a stream = Queue (FIFO order) + HashMap (frequency). Lazy cleanup from front — don't search the middle."
+  </div>
+
+  <!-- SECTION 14: Bridge to Next Problem -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Ab tum Stack (LIFO) aur Queue (FIFO) dono samajh gaye.</p>
+      <p style="margin-top:10px;">Next problem mein dono ko <b>combine</b> karenge ek powerful data structure mein:</p>
+      <p style="margin-top:8px;"><b>LRU Cache</b> — a cache that evicts the Least Recently Used item when full.</p>
+      <ul>
+        <li>HashMap for O(1) lookup</li>
+        <li>Doubly Linked List for O(1) insertion/deletion (maintains usage order)</li>
+        <li>Together: O(1) get + O(1) put — the holy grail of cache design</li>
+      </ul>
+      <p style="margin-top:8px;">This is a top system design + DSA crossover question — asked at every FAANG company.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Queue (FIFO ordering) → HashMap + Doubly Linked List (LRU Cache — custom ordering with O(1) ops)</p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem17.html">← Problem #17</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(18)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem19.html">Problem #19 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "dsa-roadmap-progress";
+const PROBLEM_NUM = 18;
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+
+function saveProgress(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function toggleDone(num) {
+  const prog = loadProgress();
+  if (prog[num] === "done") { delete prog[num]; }
+  else { prog[num] = "done"; }
+  saveProgress(prog);
+  updateUI();
+}
+
+function updateUI() {
+  const prog = loadProgress();
+  const btn = document.getElementById("mark-done-btn");
+  if (prog[PROBLEM_NUM] === "done") {
+    btn.textContent = "✔ Completed";
+    btn.classList.add("completed");
+  } else {
+    btn.textContent = "☐ Mark as Done";
+    btn.classList.remove("completed");
+  }
+  updateReadProgress();
+}
+
+function updateReadProgress() {
+  const prog = loadProgress();
+  if (prog[PROBLEM_NUM] === "done") {
+    document.getElementById("section-pct").textContent = "100%";
+    document.getElementById("section-bar").style.width = "100%";
+    return;
+  }
+  const sections = document.querySelectorAll(".section, .takeaway");
+  const total = sections.length;
+  if (total === 0) return;
+  let visible = 0;
+  sections.forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    if (rect.top < window.innerHeight) visible++;
+  });
+  const pct = Math.min(100, Math.round((visible / total) * 100));
+  document.getElementById("section-pct").textContent = pct + "%";
+  document.getElementById("section-bar").style.width = pct + "%";
+}
+
+window.addEventListener("scroll", updateReadProgress);
+updateUI();
+</script>
+</body>
+</html>

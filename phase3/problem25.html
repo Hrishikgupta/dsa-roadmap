@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#25 — Count Inversions in a Ranking List | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 3: Intermediate</span>
+    <span class="problem-id">Problem #25 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #25: Count Inversions in a Ranking List</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#25 — Count Inversions in a Ranking List</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Modified Merge Sort</p>
+
+  <!-- SECTION 0: Real-World Scenario -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek movie recommendation engine bana rahe ho. Do users ke movie rankings compare karne hain:</p>
+      <ul>
+        <li>User A ranks movies: <code>[2, 4, 1, 3, 5]</code> (movie 2 is #1 favorite, movie 4 is #2, etc.)</li>
+        <li>Sorted order would be: <code>[1, 2, 3, 4, 5]</code></li>
+      </ul>
+      <p style="margin-top:8px;"><b>"Kitne pairs of movies are out of order?"</b> — this measures how "unsorted" the list is.</p>
+      <p style="margin-top:8px;">An <b>inversion</b> = a pair (i, j) where i &lt; j but arr[i] &gt; arr[j].</p>
+      <ul>
+        <li>(2,1): 2 > 1 ✓ inversion</li>
+        <li>(4,1): 4 > 1 ✓ inversion</li>
+        <li>(4,3): 4 > 3 ✓ inversion</li>
+      </ul>
+      <p style="color:#4caf50;margin-top:8px;">Answer: <b>3 inversions</b></p>
+      <p style="color:#888;font-size:11px;margin-top:4px;">Classic interview problem. Used in collaborative filtering (recommendation systems) to measure similarity between rankings.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Problem Understanding -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Count the number of pairs (i, j) where <code>i &lt; j</code> and <code>arr[i] &gt; arr[j]</code></li>
+        <li>Sorted array = 0 inversions. Reverse sorted = n(n-1)/2 inversions (maximum).</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Input → Output:</b></p>
+      <ul>
+        <li>Input: <code>int[] arr</code></li>
+        <li>Output: <code>long</code> — count of inversions (can be very large, use long)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Connection to Problem #24:</b></p>
+      <ul>
+        <li>Merge Sort sorts the array by fixing inversions</li>
+        <li>Every time we pick from the RIGHT half before the LEFT half during merge → that's an inversion!</li>
+        <li>We can COUNT inversions during the merge step without extra cost</li>
+      </ul>
+      <p style="margin-top:8px;color:#6c63ff;font-size:12px;">💡 This is the "extract info during merge" technique — the merge step does double duty: sort + count.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Brute Force Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="comment">// Brute Force — O(n²)</span>
+<span class="type">long</span> count = <span class="number">0</span>;
+<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) {
+    <span class="keyword">for</span> (<span class="type">int</span> j = i + <span class="number">1</span>; j &lt; n; j++) {
+        <span class="keyword">if</span> (arr[i] &gt; arr[j]) count++;
+    }
+}
+<span class="keyword">return</span> count;</code></pre>
+      <p>O(n²) — checks every pair. For n = 100,000 → 5 billion comparisons.</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 Merge Sort already compares elements during merge. Can we piggyback the inversion count onto that comparison?</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Optimization Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Key Insight — When does an inversion get counted during merge?</b></p>
+      <p>During merge of left half <code>L</code> and right half <code>R</code>:</p>
+      <ul>
+        <li>If <code>L[i] &lt;= R[j]</code> → no inversion, pick from L. Normal.</li>
+        <li>If <code>L[i] &gt; R[j]</code> → <b>inversion!</b> Pick from R.</li>
+      </ul>
+      <p style="margin-top:8px;"><b>But how many inversions?</b></p>
+      <ul>
+        <li>If <code>L[i] &gt; R[j]</code>, then ALL remaining elements in L (from i to end) are also &gt; R[j]</li>
+        <li>Why? Because L is sorted! If L[i] &gt; R[j], then L[i+1], L[i+2], ... are all ≥ L[i] &gt; R[j]</li>
+        <li>So inversions contributed = <code>mid - i + 1</code> (remaining elements in left half)</li>
+      </ul>
+<pre><code><span class="comment">// During merge, when picking from right:</span>
+<span class="keyword">if</span> (left[i] &gt; right[j]) {
+    count += (mid - i + <span class="number">1</span>);  <span class="comment">// ALL remaining left elements form inversions with right[j]</span>
+    temp[k++] = right[j++];
+}</code></pre>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>Modified Merge Sort — add one line to the merge step to count inversions. Same O(n log n).</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Final Approach -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach (Pattern-Based)</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Algorithm:</b> Exactly Merge Sort (#24), with one addition in the merge step.</p>
+      <ol>
+        <li>Split array in half, recursively count inversions in each half</li>
+        <li>During merge: when <code>left[i] &gt; right[j]</code>, add <code>(mid - i + 1)</code> to count</li>
+        <li>Total inversions = left inversions + right inversions + split inversions (from merge)</li>
+      </ol>
+      <p style="margin-top:10px;"><b>Three types of inversions:</b></p>
+      <ul>
+        <li><b>Left inversions:</b> both elements in left half → counted by recursive call on left</li>
+        <li><b>Right inversions:</b> both elements in right half → counted by recursive call on right</li>
+        <li><b>Split inversions:</b> one element in left, one in right → counted during merge</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Step-by-Step Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Input:</b> <code>[2, 4, 1, 3, 5]</code></p>
+<pre><code><span class="comment">Split:</span>
+[2, 4, 1, 3, 5]
+    /         \
+[2, 4]     [1, 3, 5]
+ / \        /     \
+[2][4]    [1]   [3, 5]
+                 / \
+               [3] [5]
+
+<span style="color:#4caf50;">Merge (bottom-up) with inversion counting:</span>
+
+<span class="comment">Merge [3],[5] → [3,5]</span>
+  3 &lt; 5 → pick 3 (no inversion). 5 remaining → pick 5.
+  <span style="color:#4caf50;">Split inversions: 0</span>
+
+<span class="comment">Merge [1],[3,5] → [1,3,5]</span>
+  1 &lt; 3 → pick 1 (no inversion). Copy [3,5].
+  <span style="color:#4caf50;">Split inversions: 0</span>
+
+<span class="comment">Merge [2],[4] → [2,4]</span>
+  2 &lt; 4 → pick 2 (no inversion). Copy [4].
+  <span style="color:#4caf50;">Split inversions: 0</span>
+
+<span class="comment">Merge [2,4],[1,3,5] → [1,2,3,4,5]</span>
+  <span style="color:#e44d26;">2 &gt; 1 → pick 1. Inversions += (2-0) = 2</span> <span class="comment">(both 2 and 4 &gt; 1)</span>
+  2 &lt; 3 → pick 2. No inversion.
+  <span style="color:#e44d26;">4 &gt; 3 → pick 3. Inversions += (2-1) = 1</span> <span class="comment">(only 4 &gt; 3)</span>
+  4 &lt; 5 → pick 4. No inversion.
+  Copy [5].
+  <span style="color:#4caf50;">Split inversions: 2 + 1 = 3</span></code></pre>
+      <p style="margin-top:10px;color:#4caf50;"><b>Total: 0 + 0 + 0 + 0 + 3 = 3 inversions</b> ✓</p>
+      <p style="color:#888;font-size:11px;">The key moment: when merging [2,4] with [1,3,5], picking 1 before 2 means BOTH 2 and 4 are inverted with 1 → count += 2 (remaining left elements).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Internal Mechanics -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Why <code>mid - i + 1</code> works:</b></p>
+<pre><code><span class="comment">Left half (sorted): [2, 4, 7, 9]   i points to 4</span>
+<span class="comment">Right half (sorted): [3, ...]       j points to 3</span>
+
+<span class="comment">4 &gt; 3 → inversion!</span>
+<span class="comment">But also: 7 &gt; 3 and 9 &gt; 3 (everything after i in left)</span>
+<span class="comment">Count = elements from i to end of left = mid - i + 1 = 3</span></code></pre>
+      <p style="margin-top:8px;">This works because the left half is SORTED. If L[i] &gt; R[j], then L[i], L[i+1], ..., L[mid] are ALL &gt; R[j].</p>
+
+      <p style="margin-top:14px;"><b>The "extract info during merge" technique:</b></p>
+      <p>Merge Sort's merge step compares elements from two sorted halves. You can piggyback ANY cross-half counting onto this comparison:</p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Problem</th>
+            <th style="background:#22223a;color:#888;padding:5px;">What to count during merge</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Count Inversions (this)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">When right picked before left → count remaining left</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Reverse Pairs (LC #493)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Count pairs where arr[i] > 2×arr[j]</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Count Smaller After Self (LC #315)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">For each element, count smaller elements to its right</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:6px;color:#888;font-size:11px;">All solved with the same modified merge sort template. Learn this one, solve them all.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Complexity Analysis -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag">
+          <span class="label">Time:</span>
+          <span class="value">O(n log n)</span>
+        </div>
+        <div class="complexity-tag">
+          <span class="label">Space:</span>
+          <span class="value">O(n)</span>
+        </div>
+      </div>
+      <p style="margin-top:10px;">Same as Merge Sort — the inversion counting adds O(1) per merge comparison. No extra asymptotic cost.</p>
+      <table style="width:100%;font-size:12px;margin-top:10px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Approach</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Brute Force (all pairs)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">O(n²)</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Modified Merge Sort</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(n log n)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Java Implementation -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">public class</span> <span class="type">CountInversions</span> {
+
+    <span class="keyword">public static long</span> <span class="type">countInversions</span>(<span class="type">int</span>[] arr) {
+        <span class="keyword">return</span> mergeSort(arr, <span class="number">0</span>, arr.length - <span class="number">1</span>);
+    }
+
+    <span class="keyword">private static long</span> <span class="type">mergeSort</span>(<span class="type">int</span>[] arr, <span class="type">int</span> left, <span class="type">int</span> right) {
+        <span class="keyword">if</span> (left &gt;= right) <span class="keyword">return</span> <span class="number">0</span>;
+
+        <span class="type">int</span> mid = left + (right - left) / <span class="number">2</span>;
+        <span class="type">long</span> count = <span class="number">0</span>;
+
+        count += mergeSort(arr, left, mid);
+        count += mergeSort(arr, mid + <span class="number">1</span>, right);
+        count += merge(arr, left, mid, right);
+
+        <span class="keyword">return</span> count;
+    }
+
+    <span class="keyword">private static long</span> <span class="type">merge</span>(<span class="type">int</span>[] arr, <span class="type">int</span> left, <span class="type">int</span> mid, <span class="type">int</span> right) {
+        <span class="type">int</span>[] temp = <span class="keyword">new</span> <span class="type">int</span>[right - left + <span class="number">1</span>];
+        <span class="type">int</span> i = left, j = mid + <span class="number">1</span>, k = <span class="number">0</span>;
+        <span class="type">long</span> inversions = <span class="number">0</span>;
+
+        <span class="keyword">while</span> (i &lt;= mid &amp;&amp; j &lt;= right) {
+            <span class="keyword">if</span> (arr[i] &lt;= arr[j]) {
+                temp[k++] = arr[i++];
+            } <span class="keyword">else</span> {
+                inversions += (mid - i + <span class="number">1</span>); <span class="comment">// THE KEY LINE</span>
+                temp[k++] = arr[j++];
+            }
+        }
+
+        <span class="keyword">while</span> (i &lt;= mid) temp[k++] = arr[i++];
+        <span class="keyword">while</span> (j &lt;= right) temp[k++] = arr[j++];
+
+        System.arraycopy(temp, <span class="number">0</span>, arr, left, temp.length);
+        <span class="keyword">return</span> inversions;
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        <span class="type">int</span>[] arr = {<span class="number">2</span>, <span class="number">4</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>};
+        System.out.println(countInversions(arr)); <span class="comment">// 3</span>
+    }
+}</code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 Literally one line added to Merge Sort (#24): <code>inversions += (mid - i + 1)</code>. Everything else is identical.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 9: Edge Cases -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Case</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Input</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Inversions</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Why</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Sorted</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,2,3,4]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No pair out of order</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Reverse sorted</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[4,3,2,1]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">6</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">n(n-1)/2 = 4×3/2 = 6 (maximum)</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No pairs possible</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Two elements</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[2,1]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">One swap needed</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Large n</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">n=100,000 reversed</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">~5×10⁹</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Use <code>long</code>, not <code>int</code>!</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 10: Common Mistakes -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Using <code>int</code> instead of <code>long</code> for count</b>
+          <p style="color:#e44d26;">❌ Max inversions = n(n-1)/2. For n=100,000 → ~5 billion → overflows int</p>
+          <p style="color:#4caf50;">✅ Always use <code>long</code> for inversion count</p>
+        </li>
+        <li style="margin-top:10px;"><b>Counting inversions without sorting</b>
+          <p style="color:#e44d26;">❌ Just counting without actually sorting → subsequent merge steps get wrong counts</p>
+          <p style="color:#4caf50;">✅ The array MUST be sorted during the process — counting depends on sorted halves</p>
+        </li>
+        <li style="margin-top:10px;"><b>Wrong inversion count formula</b>
+          <p style="color:#e44d26;">❌ <code>inversions++</code> (counting one at a time) → misses bulk inversions</p>
+          <p style="color:#4caf50;">✅ <code>inversions += (mid - i + 1)</code> — ALL remaining left elements are inverted with current right element</p>
+        </li>
+        <li style="margin-top:10px;"><b>Forgetting to sum all three sources</b>
+          <p style="color:#4caf50;">✅ Total = left inversions + right inversions + split inversions (from merge)</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 11: When to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Signals to पहचान (identify):</b></p>
+      <ul>
+        <li>✅ "Count inversions" / "Count out-of-order pairs"</li>
+        <li>✅ "How many swaps to sort?" (bubble sort swaps = inversions)</li>
+        <li>✅ "Count pairs (i,j) where i &lt; j and arr[i] &gt; k × arr[j]" (Reverse Pairs)</li>
+        <li>✅ "For each element, count smaller elements to its right"</li>
+        <li>✅ Any cross-pair counting that can be decomposed into left/right/split</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 12: When NOT to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ "Count pairs with sum = target" — that's Two Sum (#6), not inversions</li>
+        <li>❌ Non-comparison-based counting — modified merge sort only works for comparison-based pair counting</li>
+        <li>❌ When you need the actual pairs, not just the count — merge sort gives count, not the pairs themselves</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 13: Key Takeaway -->
+  <div class="takeaway">
+    💡 "Modified Merge Sort = Merge Sort + one extra line. When right element is picked before left → inversions += remaining left elements. O(n log n) counting for free."
+  </div>
+
+  <!-- SECTION 14: Bridge to Next Problem -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>🎉 Phase 3 Complete!</b></p>
+      <p style="margin-top:8px;">Recap of Phase 3:</p>
+      <ul>
+        <li>#15-17: Stack — matching pairs, monotonic stack (next/previous greater)</li>
+        <li>#18: Queue — FIFO processing, first non-repeating</li>
+        <li>#19: LRU Cache — HashMap + Doubly Linked List</li>
+        <li>#20-23: Recursion — trust the function, include/exclude, permutations, multi-branch</li>
+        <li>#24-25: Divide & Conquer — merge sort, modified merge sort</li>
+      </ul>
+      <p style="margin-top:12px;">Phase 4 begins: <b>Trees, Graphs, and Backtracking</b>.</p>
+      <p style="margin-top:8px;">Problem #26: <b>Company Org Chart — Max Depth</b> — your first Tree problem. Recursion (#20) meets a new data structure.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Phase 3 (Stack, Queue, Recursion, D&C) complete → Phase 4 (Trees, Graphs, Backtracking) begins!</p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem24.html">← Problem #24</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(25)">☐ Mark as Done</button>
+    <a class="nav-btn" href="../phase4/problem26.html">Problem #26 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "dsa-roadmap-progress";
+const PROBLEM_NUM = 25;
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+
+function saveProgress(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function toggleDone(num) {
+  const prog = loadProgress();
+  if (prog[num] === "done") { delete prog[num]; }
+  else { prog[num] = "done"; }
+  saveProgress(prog);
+  updateUI();
+}
+
+function updateUI() {
+  const prog = loadProgress();
+  const btn = document.getElementById("mark-done-btn");
+  if (prog[PROBLEM_NUM] === "done") {
+    btn.textContent = "✔ Completed";
+    btn.classList.add("completed");
+  } else {
+    btn.textContent = "☐ Mark as Done";
+    btn.classList.remove("completed");
+  }
+  updateReadProgress();
+}
+
+function updateReadProgress() {
+  const prog = loadProgress();
+  if (prog[PROBLEM_NUM] === "done") {
+    document.getElementById("section-pct").textContent = "100%";
+    document.getElementById("section-bar").style.width = "100%";
+    return;
+  }
+  const sections = document.querySelectorAll(".section, .takeaway");
+  const total = sections.length;
+  if (total === 0) return;
+  let visible = 0;
+  sections.forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    if (rect.top < window.innerHeight) visible++;
+  });
+  const pct = Math.min(100, Math.round((visible / total) * 100));
+  document.getElementById("section-pct").textContent = pct + "%";
+  document.getElementById("section-bar").style.width = pct + "%";
+}
+
+window.addEventListener("scroll", updateReadProgress);
+updateUI();
+</script>
+</body>
+</html>

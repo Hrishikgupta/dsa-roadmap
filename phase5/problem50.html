@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#50 — Longest Palindromic Substring | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 5: Mastery</span>
+    <span class="problem-id">Problem #50 of 50 🎉</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #50: Longest Palindromic Substring</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#50 — Longest Palindromic Substring 🏆</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: DP / Expand Around Center</p>
+
+  <!-- SECTION 0 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">THE FINALE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek text editor bana rahe ho with a "find palindrome" feature:</p>
+<pre><code><span class="comment">Input: "babad"</span>
+<span class="comment">Palindromes: "b","a","bab","aba","d"</span>
+<span style="color:#4caf50;">Longest: "bab" or "aba" (length 3)</span>
+
+<span class="comment">Input: "cbbd"</span>
+<span style="color:#4caf50;">Longest: "bb" (length 2)</span></code></pre>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #5 — Longest Palindromic Substring. The FINAL problem of our 50-problem roadmap.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Find the longest substring (contiguous) that is a palindrome</li>
+        <li>Palindrome = reads same forwards and backwards</li>
+        <li>Return the actual substring, not just length</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Three approaches:</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Approach</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Time</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Space</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Idea</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Brute Force</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#e44d26;">O(n³)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">O(1)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Check every substring</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Expand Around Center</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(n²)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(1)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Expand from each center</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">DP</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">O(n²)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#ffc107;">O(n²)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">dp[i][j] = is s[i..j] palindrome?</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;">Expand Around Center is the best — O(n²) time with O(1) space. Simpler than DP too.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Check every substring:</b> O(n²) substrings × O(n) palindrome check = O(n³).</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 Key insight: every palindrome has a CENTER. Expand outward from each possible center. If chars match → keep expanding. If not → stop.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization — Expand Around Center</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Two types of palindrome centers:</b></p>
+      <ul>
+        <li><b>Odd length:</b> center is one character. "aba" → center at 'b'</li>
+        <li><b>Even length:</b> center is between two characters. "abba" → center between 'b','b'</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Algorithm:</b></p>
+      <ol>
+        <li>For each index i (0 to n-1):
+          <ul>
+            <li>Expand from center (i, i) → odd-length palindromes</li>
+            <li>Expand from center (i, i+1) → even-length palindromes</li>
+          </ul>
+        </li>
+        <li>Expand: while left ≥ 0 AND right &lt; n AND s[left] == s[right] → expand (left--, right++)</li>
+        <li>Track the longest palindrome found</li>
+      </ol>
+<pre><code><span class="type">int</span> expand(String s, <span class="type">int</span> left, <span class="type">int</span> right) {
+    <span class="keyword">while</span> (left &gt;= <span class="number">0</span> &amp;&amp; right &lt; s.length()
+           &amp;&amp; s.charAt(left) == s.charAt(right)) {
+        left--;
+        right++;
+    }
+    <span class="keyword">return</span> right - left - <span class="number">1</span>; <span class="comment">// length of palindrome</span>
+}</code></pre>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>Expand Around Center — for each of 2n-1 centers, expand outward while chars match. O(n²) time, O(1) space.</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>s = "babad"</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Center</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Type</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Expand</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Palindrome</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Length</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">i=0</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">odd</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">(0,0) → can't expand left</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">"b"</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">1</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">i=1</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">odd</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">(1,1)→(0,2): b==b ✓ →(-1,3): stop</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">"bab"</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">3</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">i=2</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">odd</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">(2,2)→(1,3): a==a ✓ →(0,4): b≠d ✗</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">"aba"</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">3</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">i=3</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">odd</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">(3,3)→(2,4): b≠d ✗</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">"a"</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">1</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">even</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;" colspan="4" style="color:#888;">All even centers: no adjacent equal chars → length 0</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#4caf50;"><b>Result: "bab" (or "aba") — length 3</b> ✓</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Why 2n-1 centers?</b></p>
+      <ul>
+        <li>n characters = n odd centers (each character)</li>
+        <li>n-1 gaps between characters = n-1 even centers</li>
+        <li>Total: n + (n-1) = 2n-1 centers</li>
+        <li>Each center expands at most O(n) → total O(n × n) = O(n²)</li>
+      </ul>
+      <p style="margin-top:12px;"><b>DP approach (alternative):</b></p>
+<pre><code><span class="comment">dp[i][j] = true if s[i..j] is palindrome</span>
+<span class="comment">dp[i][i] = true (single char)</span>
+<span class="comment">dp[i][i+1] = (s[i] == s[i+1]) (two chars)</span>
+<span class="comment">dp[i][j] = dp[i+1][j-1] && s[i]==s[j] (expand from inner)</span></code></pre>
+      <p style="color:#888;font-size:11px;">DP uses O(n²) space. Expand Around Center uses O(1). Both O(n²) time. Expand is preferred.</p>
+      <p style="margin-top:12px;"><b>This problem combines skills from the entire roadmap:</b></p>
+      <ul>
+        <li>Two Pointer (#6) — left and right expanding outward</li>
+        <li>String processing (#10-12) — substring operations</li>
+        <li>DP (#39-48) — alternative dp[i][j] approach</li>
+        <li>Optimization thinking — brute O(n³) → expand O(n²) → Manacher's O(n)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag"><span class="label">Time:</span><span class="value">O(n²)</span></div>
+        <div class="complexity-tag"><span class="label">Space:</span><span class="value">O(1)</span></div>
+      </div>
+      <p style="margin-top:10px;">2n-1 centers × O(n) expansion each. O(1) extra space (just tracking start and maxLen).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">public class</span> <span class="type">LongestPalindrome</span> {
+
+    <span class="keyword">public static</span> String <span class="type">longestPalindrome</span>(String s) {
+        <span class="type">int</span> start = <span class="number">0</span>, maxLen = <span class="number">0</span>;
+
+        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; s.length(); i++) {
+            <span class="type">int</span> odd  = expand(s, i, i);     <span class="comment">// odd-length</span>
+            <span class="type">int</span> even = expand(s, i, i + <span class="number">1</span>); <span class="comment">// even-length</span>
+            <span class="type">int</span> len = Math.max(odd, even);
+
+            <span class="keyword">if</span> (len &gt; maxLen) {
+                maxLen = len;
+                start = i - (len - <span class="number">1</span>) / <span class="number">2</span>;
+            }
+        }
+        <span class="keyword">return</span> s.substring(start, start + maxLen);
+    }
+
+    <span class="keyword">private static int</span> <span class="type">expand</span>(String s, <span class="type">int</span> left, <span class="type">int</span> right) {
+        <span class="keyword">while</span> (left &gt;= <span class="number">0</span> &amp;&amp; right &lt; s.length()
+               &amp;&amp; s.charAt(left) == s.charAt(right)) {
+            left--;
+            right++;
+        }
+        <span class="keyword">return</span> right - left - <span class="number">1</span>;
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        System.out.println(longestPalindrome(<span class="string">"babad"</span>)); <span class="comment">// "bab"</span>
+        System.out.println(longestPalindrome(<span class="string">"cbbd"</span>));  <span class="comment">// "bb"</span>
+    }
+}</code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 <code>start = i - (len-1)/2</code> — calculates the start index of the palindrome from its center and length. Works for both odd and even.</p>
+    </div>
+  </div>
+
+  <!-- Remaining -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead><tr><th style="background:#22223a;color:#888;padding:8px;">Input</th><th style="background:#22223a;color:#888;padding:8px;">Output</th><th style="background:#22223a;color:#888;padding:8px;">Note</th></tr></thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"a"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"a"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single char is palindrome</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"ac"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"a"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No 2-char palindrome</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"racecar"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"racecar"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Entire string is palindrome</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"aaa"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"aaa"</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All same chars</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Forgetting even-length palindromes</b>
+          <p style="color:#e44d26;">❌ Only expanding (i,i) → misses "bb", "abba"</p>
+          <p style="color:#4caf50;">✅ Must expand BOTH (i,i) for odd AND (i,i+1) for even</p>
+        </li>
+        <li style="margin-top:10px;"><b>Wrong start index calculation</b>
+          <p style="color:#4caf50;">✅ <code>start = i - (len-1)/2</code> — integer division handles both odd and even correctly</p>
+        </li>
+        <li style="margin-top:10px;"><b>Returning length instead of actual substring</b>
+          <p style="color:#4caf50;">✅ Track start and maxLen, return <code>s.substring(start, start+maxLen)</code></p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use / 12. When NOT</span>
+      <span class="sec-num">STEP 11-12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Use when:</b> ✅ "Longest palindromic substring" ✅ "Count palindromic substrings" (LC #647 — same expand technique) ✅ "Palindrome partitioning" (uses palindrome checking as subroutine)</p>
+      <p style="margin-top:8px;"><b>Don't use when:</b> ❌ "Longest palindromic SUBSEQUENCE" (not substring — use LCS of s and reverse(s)) ❌ Need O(n) — use Manacher's algorithm (advanced, rarely asked)</p>
+    </div>
+  </div>
+
+  <div class="takeaway">
+    💡 "Expand Around Center: for each of 2n-1 centers (odd + even), expand outward while chars match. O(n²) time, O(1) space. The cleanest palindrome solution."
+  </div>
+
+  <!-- THE GRAND FINALE -->
+  <div class="section" style="border:2px solid #6c63ff;">
+    <div class="section-header" style="background:linear-gradient(135deg,#6c63ff,#48c6ef);" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🏆</span>
+      <span class="sec-title">🎉 ROADMAP COMPLETE — What You've Mastered</span>
+      <span class="sec-num">FINALE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p style="font-size:14px;color:#4caf50;"><b>Congratulations! You've completed all 50 problems.</b></p>
+      <p style="margin-top:12px;"><b>Your DSA toolkit:</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Phase</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Problems</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Patterns Mastered</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">1: Foundation</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">#1-5</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Linear scan, HashMap, Prefix Sum, Reversal, Two-pointer merge</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">2: Core</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">#6-14</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Two Pointer (4 variants), Sliding Window (4 variants), Frequency comparison</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">3: Intermediate</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">#15-25</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Stack, Monotonic Stack, Queue, LRU Cache, Recursion (4 patterns), Divide & Conquer</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">4: Advanced</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">#26-38</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Tree DFS/BFS, Graph DFS/BFS, Topological Sort, Cycle Detection, Backtracking</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">5: Mastery</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">#39-50</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">DP: Fibonacci, Grid, Include/Exclude, LIS, Knapsack, LCS, Edit Distance, Interval, Word Break, Palindrome</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:14px;color:#6c63ff;font-size:13px;"><b>Ab tum koi bhi unseen problem dekh ke pattern identify kar sakte ho — brute force se optimized tak ka poora thinking pipeline tumhare andar build ho chuka hai. 🚀</b></p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem49.html">← Problem #49</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(50)">☐ Mark as Done</button>
+    <a class="nav-btn" href="../dsa-roadmap.html">📋 Back to Roadmap</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY="dsa-roadmap-progress";const PROBLEM_NUM=50;
+function loadProgress(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{};}catch{return{};}}
+function saveProgress(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}
+function toggleDone(n){const p=loadProgress();if(p[n]==="done")delete p[n];else p[n]="done";saveProgress(p);updateUI();}
+function updateUI(){const p=loadProgress(),btn=document.getElementById("mark-done-btn");if(p[PROBLEM_NUM]==="done"){btn.textContent="✔ Completed";btn.classList.add("completed");}else{btn.textContent="☐ Mark as Done";btn.classList.remove("completed");}updateReadProgress();}
+function updateReadProgress(){const p=loadProgress();if(p[PROBLEM_NUM]==="done"){document.getElementById("section-pct").textContent="100%";document.getElementById("section-bar").style.width="100%";return;}const s=document.querySelectorAll(".section, .takeaway"),t=s.length;if(t===0)return;let v=0;s.forEach(sec=>{if(sec.getBoundingClientRect().top<window.innerHeight)v++;});const pct=Math.min(100,Math.round((v/t)*100));document.getElementById("section-pct").textContent=pct+"%";document.getElementById("section-bar").style.width=pct+"%";}
+window.addEventListener("scroll",updateReadProgress);updateUI();
+</script>
+</body>
+</html>

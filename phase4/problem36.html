@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#36 — Solving a Sudoku Puzzle | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 4: Advanced</span>
+    <span class="problem-id">Problem #36 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #36: Solving a Sudoku Puzzle</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#36 — Solving a Sudoku Puzzle</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Backtracking (Constraint-Based)</p>
+
+  <!-- SECTION 0 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek Sudoku solver app bana rahe ho. 9×9 grid, kuch numbers filled, baaki empty ('.'):</p>
+<pre><code><span class="comment">5 3 .  . 7 .  . . .
+6 . .  1 9 5  . . .
+. 9 8  . . .  . 6 .
+
+8 . .  . 6 .  . . 3
+4 . .  8 . 3  . . 1
+7 . .  . 2 .  . . 6
+
+. 6 .  . . .  2 8 .
+. . .  4 1 9  . . 5
+. . .  . 8 .  . 7 9</span></code></pre>
+      <p style="margin-top:8px;">Rules: Each row, column, and 3×3 box must contain 1-9 exactly once.</p>
+      <p>Strategy: Try a number → check valid → if stuck, <b>undo and try next</b> → backtracking!</p>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #37 — Sudoku Solver. The classic backtracking problem.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding — What is Backtracking?</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Backtracking = Recursion + constraint checking + undo on failure</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">Aspect</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Recursion (#21-23)</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Backtracking (#36-38)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Goal</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Generate ALL possibilities</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Find ONE valid solution (or all valid)</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Constraints</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">None — explore everything</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Check before going deeper (prune)</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Pruning</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">No</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Yes — skip invalid branches early</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;color:#6c63ff;font-size:12px;">💡 Backtracking = recursion with "if invalid, don't go deeper" (pruning). Much faster than brute force.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Try all 9 digits in every empty cell, check board at end. 9^(empty cells) ≈ 9⁵⁰ ≈ 10⁴⁷. Impossible.</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 But most choices are invalid early. CHECK constraints immediately after placing → prune entire branches. That's backtracking — fail fast, try next.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. The Universal Backtracking Template</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="type">boolean</span> backtrack(state):
+    <span class="keyword">if</span> goal reached → <span class="keyword">return true</span>
+
+    <span class="keyword">for</span> each choice:
+        <span class="keyword">if</span> isValid(choice):     <span class="comment">// 1. CONSTRAINT CHECK (prune)</span>
+            make choice             <span class="comment">// 2. PLACE</span>
+            <span class="keyword">if</span> backtrack(next) → <span class="keyword">return true</span>  <span class="comment">// 3. RECURSE</span>
+            undo choice             <span class="comment">// 4. UNDO (backtrack)</span>
+
+    <span class="keyword">return false</span>                <span class="comment">// 5. DEAD END</span></code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">This template solves Sudoku (#36), N-Queens (#37), Word Search (#38), and many more. Only choices and constraints change.</p>
+
+      <p style="margin-top:12px;"><b>For Sudoku specifically:</b></p>
+      <ul>
+        <li><b>Choices:</b> digits '1' to '9' for each empty cell</li>
+        <li><b>Constraints:</b> number not in same row, column, or 3×3 box</li>
+        <li><b>Goal:</b> no empty cells left</li>
+        <li><b>3×3 box index:</b> <code>boxRow = 3*(row/3)</code>, <code>boxCol = 3*(col/3)</code></li>
+      </ul>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>Backtracking = for each choice: check → place → recurse → undo if failed.</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Simplified 4×4 Sudoku (2×2 boxes):</b></p>
+<pre><code><span class="comment">1 .  . .
+. .  1 .
+. 1  . .
+. .  . 1</span></code></pre>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Step</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Cell</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Try</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Valid?</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">(0,1)</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">✓</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Place 2, recurse</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">(0,2)</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">✓</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Place 3, recurse</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">...</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">later</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#e44d26;">dead end</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#ffc107;">BACKTRACK! Undo, try different number</td></tr>
+        </tbody>
+      </table>
+      <p style="color:#888;font-size:11px;margin-top:8px;">When no valid number works for a cell → return false → previous cell undoes its choice and tries next number. That's the "undo and retry" of backtracking.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Why backtracking is fast enough:</b></p>
+      <ul>
+        <li>Brute force: 9⁵⁰ ≈ 10⁴⁷</li>
+        <li>Backtracking with pruning: typically ~10,000 operations for standard Sudoku</li>
+        <li>Constraint checking eliminates most branches immediately</li>
+      </ul>
+      <p style="margin-top:12px;"><b>Backtracking problems in this roadmap:</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">#</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Problem</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Choices</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Constraints</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">36</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Sudoku</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Digits 1-9</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Row, col, box uniqueness</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">37</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">N-Queens</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Column per row</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Col/diag/anti-diag</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">38</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Word Search</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">4 directions</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Char match + not visited</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag"><span class="label">Time:</span><span class="value">O(9^m)</span></div>
+        <div class="complexity-tag"><span class="label">Space:</span><span class="value">O(m)</span></div>
+      </div>
+      <p style="margin-top:10px;">m = empty cells. Worst case 9 choices per cell. In practice, pruning makes it MUCH faster.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">public class</span> <span class="type">SudokuSolver</span> {
+
+    <span class="keyword">public void</span> <span class="type">solveSudoku</span>(<span class="type">char</span>[][] board) {
+        solve(board);
+    }
+
+    <span class="keyword">private boolean</span> <span class="type">solve</span>(<span class="type">char</span>[][] board) {
+        <span class="keyword">for</span> (<span class="type">int</span> r = <span class="number">0</span>; r &lt; <span class="number">9</span>; r++) {
+            <span class="keyword">for</span> (<span class="type">int</span> c = <span class="number">0</span>; c &lt; <span class="number">9</span>; c++) {
+                <span class="keyword">if</span> (board[r][c] != <span class="string">'.'</span>) <span class="keyword">continue</span>;
+
+                <span class="keyword">for</span> (<span class="type">char</span> num = <span class="string">'1'</span>; num &lt;= <span class="string">'9'</span>; num++) {
+                    <span class="keyword">if</span> (isValid(board, r, c, num)) {
+                        board[r][c] = num;          <span class="comment">// place</span>
+                        <span class="keyword">if</span> (solve(board)) <span class="keyword">return true</span>; <span class="comment">// recurse</span>
+                        board[r][c] = <span class="string">'.'</span>;          <span class="comment">// undo</span>
+                    }
+                }
+                <span class="keyword">return false</span>; <span class="comment">// no valid number → backtrack</span>
+            }
+        }
+        <span class="keyword">return true</span>; <span class="comment">// all cells filled → solved!</span>
+    }
+
+    <span class="keyword">private boolean</span> <span class="type">isValid</span>(<span class="type">char</span>[][] board, <span class="type">int</span> r, <span class="type">int</span> c, <span class="type">char</span> num) {
+        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">9</span>; i++) {
+            <span class="keyword">if</span> (board[r][i] == num) <span class="keyword">return false</span>;  <span class="comment">// row</span>
+            <span class="keyword">if</span> (board[i][c] == num) <span class="keyword">return false</span>;  <span class="comment">// col</span>
+            <span class="type">int</span> br = <span class="number">3</span>*(r/<span class="number">3</span>) + i/<span class="number">3</span>, bc = <span class="number">3</span>*(c/<span class="number">3</span>) + i%<span class="number">3</span>;
+            <span class="keyword">if</span> (board[br][bc] == num) <span class="keyword">return false</span>; <span class="comment">// box</span>
+        }
+        <span class="keyword">return true</span>;
+    }
+}</code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 The <code>return false</code> after the num loop is the backtracking trigger — "tried all 9, none worked, go back."</p>
+    </div>
+  </div>
+
+  <!-- Remaining sections -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead><tr><th style="background:#22223a;color:#888;padding:8px;">Case</th><th style="background:#22223a;color:#888;padding:8px;">Note</th></tr></thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Already solved</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No empty cells → return true immediately</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Nearly empty</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">More backtracking, but pruning keeps it fast</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Invalid board</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No solution → solve returns false</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Multiple solutions</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Finds first one (returns true on first success)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Forgetting to undo</b>
+          <p style="color:#e44d26;">❌ No <code>board[r][c] = '.'</code> → board stays modified for wrong branches</p>
+          <p style="color:#4caf50;">✅ Always undo after failed recursion</p>
+        </li>
+        <li style="margin-top:10px;"><b>Wrong 3×3 box calculation</b>
+          <p style="color:#4caf50;">✅ Box start: <code>3*(r/3)</code>, <code>3*(c/3)</code>. Iterate with <code>i/3</code> and <code>i%3</code> offsets.</p>
+        </li>
+        <li style="margin-top:10px;"><b>Not returning false after trying all 9 numbers</b>
+          <p style="color:#4caf50;">✅ <code>return false</code> after the for-loop triggers backtracking to previous cell</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use / 12. When NOT</span>
+      <span class="sec-num">STEP 11-12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Use:</b> ✅ "Solve a puzzle" (Sudoku, crossword) ✅ "Find valid configuration" (N-Queens, graph coloring) ✅ "Generate all valid ___" (parentheses, IP addresses) ✅ Choices + constraints + explore/undo</p>
+      <p style="margin-top:8px;"><b>Don't use:</b> ❌ Optimization (min/max) → usually DP ❌ No constraints to prune → degenerates to brute force ❌ Overlapping subproblems → use DP with memoization</p>
+    </div>
+  </div>
+
+  <div class="takeaway">
+    💡 "Backtracking = recursion + constraint check + undo. Try → check → recurse → undo if failed. The constraint check (pruning) is what makes it fast."
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Sudoku: backtracking with grid constraints (row/col/box).</p>
+      <p style="margin-top:8px;">Next: <b>N-Queens</b> — place N queens so no two attack each other. Same template, different constraints (col/diagonal/anti-diagonal). Teaches diagonal tracking with <code>row-col</code> and <code>row+col</code>.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Backtracking with grid constraints (Sudoku) → Backtracking with placement constraints (N-Queens)</p>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem35.html">← Problem #35</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(36)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem37.html">Problem #37 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY="dsa-roadmap-progress";const PROBLEM_NUM=36;
+function loadProgress(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{};}catch{return{};}}
+function saveProgress(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}
+function toggleDone(n){const p=loadProgress();if(p[n]==="done")delete p[n];else p[n]="done";saveProgress(p);updateUI();}
+function updateUI(){const p=loadProgress(),btn=document.getElementById("mark-done-btn");if(p[PROBLEM_NUM]==="done"){btn.textContent="✔ Completed";btn.classList.add("completed");}else{btn.textContent="☐ Mark as Done";btn.classList.remove("completed");}updateReadProgress();}
+function updateReadProgress(){const p=loadProgress();if(p[PROBLEM_NUM]==="done"){document.getElementById("section-pct").textContent="100%";document.getElementById("section-bar").style.width="100%";return;}const s=document.querySelectorAll(".section, .takeaway"),t=s.length;if(t===0)return;let v=0;s.forEach(sec=>{if(sec.getBoundingClientRect().top<window.innerHeight)v++;});const pct=Math.min(100,Math.round((v/t)*100));document.getElementById("section-pct").textContent=pct+"%";document.getElementById("section-bar").style.width=pct+"%";}
+window.addEventListener("scroll",updateReadProgress);updateUI();
+</script>
+</body>
+</html>

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#38 — Word Search in a Grid | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 4: Advanced</span>
+    <span class="problem-id">Problem #38 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #38: Word Search in a Grid</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#38 — Word Search in a Grid</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Backtracking + DFS on Grid</p>
+
+  <!-- SECTION 0 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek word puzzle game bana rahe ho (like Boggle). Grid mein letters hain:</p>
+<pre><code><span class="comment">A B C E
+S F C S
+A D E E</span>
+
+<span class="comment">Find "ABCCED":</span>
+<span style="color:#4caf50;">A → B → C → C → E → D</span>  ✓ (path exists!)
+
+<span class="comment">Find "SEE":</span>
+<span style="color:#4caf50;">S → E → E</span>  ✓
+
+<span class="comment">Find "ABCB":</span>
+<span style="color:#e44d26;">A → B → C → B?</span>  ✗ (can't revisit B!)</code></pre>
+      <p style="margin-top:8px;">Rules: Start anywhere, move to adjacent cells (up/down/left/right), can't revisit same cell in one path.</p>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #79 — Word Search. Combines grid DFS (#31) with backtracking (#36).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given a 2D grid of characters and a word, determine if the word exists in the grid</li>
+        <li>Word is formed by sequentially adjacent cells (horizontal/vertical)</li>
+        <li>Same cell cannot be used more than once in a single path</li>
+      </ul>
+      <p style="margin-top:10px;"><b>This combines two patterns:</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">From</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Pattern</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Used Here</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">#31</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Grid DFS (4-directional)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Explore adjacent cells</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">#36</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Backtracking (undo)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Mark visited → explore → UNMARK (allow reuse in other paths)</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;"><b>Key difference from #31 (Islands):</b></p>
+      <ul>
+        <li>#31: Mark visited permanently (sink the island). Never undo.</li>
+        <li>#38: Mark visited temporarily. UNDO after exploring (backtrack). Same cell can be used in different paths.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Approach:</b> For each cell that matches the first character, start a DFS. At each step, check if current cell matches the next character. If yes → continue. If no → backtrack.</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 This IS the optimal approach — there's no way to avoid exploring paths. Backtracking with pruning (wrong character = stop immediately) makes it efficient enough.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Algorithm:</b></p>
+<pre><code><span class="type">boolean</span> dfs(board, row, col, word, index):
+    <span class="keyword">if</span> index == word.length → <span class="keyword">return true</span>  <span class="comment">// all chars matched!</span>
+
+    <span class="keyword">if</span> out of bounds || board[row][col] != word[index]:
+        <span class="keyword">return false</span>  <span class="comment">// PRUNE: wrong char or out of grid</span>
+
+    <span class="type">char</span> temp = board[row][col]
+    board[row][col] = <span class="string">'#'</span>  <span class="comment">// MARK visited (temporary)</span>
+
+    <span class="type">boolean</span> found = dfs(row-<span class="number">1</span>,col,...) || dfs(row+<span class="number">1</span>,col,...)
+                 || dfs(row,col-<span class="number">1</span>,...) || dfs(row,col+<span class="number">1</span>,...)
+
+    board[row][col] = temp  <span class="comment">// UNMARK (backtrack!)</span>
+    <span class="keyword">return</span> found</code></pre>
+      <p style="margin-top:10px;"><b>The "temporary marking" trick:</b></p>
+      <ul>
+        <li>Replace cell with '#' (or any non-letter) to mark as "in current path"</li>
+        <li>After exploring all 4 directions → restore original character</li>
+        <li>This prevents revisiting in the CURRENT path but allows reuse in OTHER paths</li>
+        <li>No separate visited array needed — modify grid in-place, then undo</li>
+      </ul>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>Grid DFS + Backtracking — mark temporarily, explore 4 directions, unmark. Character matching = pruning.</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Two-level structure:</b></p>
+      <ol>
+        <li><b>Outer:</b> Scan grid for cells matching <code>word[0]</code> → start DFS from each</li>
+        <li><b>Inner (DFS):</b> At each cell, check character match → mark → recurse 4 directions → unmark</li>
+      </ol>
+      <p style="margin-top:8px;">Short-circuit with <code>||</code>: if any direction returns true, stop immediately (word found).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Grid:</b> [["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], <b>word = "SEE"</b></p>
+<pre><code><span class="comment">Scan for 'S': found at (1,0) and (1,3)</span>
+
+<span class="comment">Try (1,3) = 'S' ✓ (index 0 matched)</span>
+  Mark (1,3) as '#'
+  <span class="comment">Try neighbors for 'E' (index 1):</span>
+    (0,3)='E' ✓ → mark '#'
+      <span class="comment">Try neighbors for 'E' (index 2):</span>
+        (0,2)='C' ✗
+        (1,3)='#' ✗ (visited!)
+        <span style="color:#e44d26;">No match → backtrack, unmark (0,3)='E'</span>
+    (2,3)='E' ✓ → mark '#'
+      <span class="comment">Try neighbors for 'E' (index 2):</span>
+        (2,2)='E' ✓ → <span style="color:#4caf50;">index 3 == word.length → FOUND!</span>
+      <span class="comment">Unmark (2,3)='E'</span>
+  <span class="comment">Unmark (1,3)='S'</span>
+
+<span style="color:#4caf50;">Path: (1,3)S → (2,3)E → (2,2)E ✓</span></code></pre>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Permanent vs Temporary marking:</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">Problem</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Marking</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Why</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">#31 Islands</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Permanent (sink to '0')</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Once counted, never need again</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">#38 Word Search</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Temporary (mark '#', then restore)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Cell might be needed in a different path</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:12px;"><b>Phase 4 backtracking summary:</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">#</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Problem</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Choices</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Constraint</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Undo what?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">36</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Sudoku</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Digits 1-9</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Row/col/box unique</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Cell value</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">37</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">N-Queens</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Column per row</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Col/diag/anti-diag</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Cell + 3 sets</td></tr>
+          <tr><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">38</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Word Search</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">4 directions</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Char match + not visited</td><td style="padding:3px 5px;border-bottom:1px solid #2a2a4a;">Cell character</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag"><span class="label">Time:</span><span class="value">O(m·n·3^L)</span></div>
+        <div class="complexity-tag"><span class="label">Space:</span><span class="value">O(L)</span></div>
+      </div>
+      <p style="margin-top:10px;">m×n starting cells. At each step, 3 directions (can't go back where we came from). L = word length. Space = recursion depth = L.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">public class</span> <span class="type">WordSearch</span> {
+
+    <span class="keyword">public boolean</span> <span class="type">exist</span>(<span class="type">char</span>[][] board, String word) {
+        <span class="type">int</span> m = board.length, n = board[<span class="number">0</span>].length;
+        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; m; i++)
+            <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; n; j++)
+                <span class="keyword">if</span> (dfs(board, i, j, word, <span class="number">0</span>, m, n)) <span class="keyword">return true</span>;
+        <span class="keyword">return false</span>;
+    }
+
+    <span class="keyword">private boolean</span> <span class="type">dfs</span>(<span class="type">char</span>[][] board, <span class="type">int</span> r, <span class="type">int</span> c,
+                          String word, <span class="type">int</span> idx, <span class="type">int</span> m, <span class="type">int</span> n) {
+        <span class="keyword">if</span> (idx == word.length()) <span class="keyword">return true</span>;
+        <span class="keyword">if</span> (r &lt; <span class="number">0</span> || r &gt;= m || c &lt; <span class="number">0</span> || c &gt;= n
+            || board[r][c] != word.charAt(idx)) <span class="keyword">return false</span>;
+
+        <span class="type">char</span> temp = board[r][c];
+        board[r][c] = <span class="string">'#'</span>; <span class="comment">// mark visited</span>
+
+        <span class="type">boolean</span> found = dfs(board, r-<span class="number">1</span>, c, word, idx+<span class="number">1</span>, m, n)
+                     || dfs(board, r+<span class="number">1</span>, c, word, idx+<span class="number">1</span>, m, n)
+                     || dfs(board, r, c-<span class="number">1</span>, word, idx+<span class="number">1</span>, m, n)
+                     || dfs(board, r, c+<span class="number">1</span>, word, idx+<span class="number">1</span>, m, n);
+
+        board[r][c] = temp; <span class="comment">// BACKTRACK — restore</span>
+        <span class="keyword">return</span> found;
+    }
+}</code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 The <code>||</code> short-circuits: if any direction finds the word, we stop immediately. The backtrack (restore) still happens because Java evaluates the assignment before returning.</p>
+    </div>
+  </div>
+
+  <!-- Remaining sections -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead><tr><th style="background:#22223a;color:#888;padding:8px;">Case</th><th style="background:#22223a;color:#888;padding:8px;">Result</th><th style="background:#22223a;color:#888;padding:8px;">Note</th></tr></thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single char word</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">true if char exists</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Base case: idx == 1 after first match</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Word longer than grid cells</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">false</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Can't form word without revisiting</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Word needs same cell twice</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">false</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"ABCB" on grid where B appears once</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1×1 grid</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">true if word is that char</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Smallest grid</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All same characters</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Depends on path length</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">"AAAA" on grid of A's — needs 4 adjacent A's</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Not restoring the cell after DFS (permanent marking)</b>
+          <p style="color:#e44d26;">❌ Cell stays '#' → other starting points can't use it → misses valid paths</p>
+          <p style="color:#4caf50;">✅ Always restore: <code>board[r][c] = temp</code> after exploring</p>
+        </li>
+        <li style="margin-top:10px;"><b>Checking index AFTER bounds/character check</b>
+          <p style="color:#e44d26;">❌ <code>if (board[r][c] != word[idx])</code> before <code>if (idx == word.length())</code> → index out of bounds</p>
+          <p style="color:#4caf50;">✅ Check <code>idx == word.length()</code> FIRST (base case before validation)</p>
+        </li>
+        <li style="margin-top:10px;"><b>Using a separate visited array instead of in-place marking</b>
+          <p style="color:#888;">Works but uses O(m×n) extra space. In-place '#' marking is cleaner and O(1) extra.</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>✅ "Word search in grid" / "Path exists in grid matching pattern"</li>
+        <li>✅ "Find path with specific sequence" in a matrix</li>
+        <li>✅ Any grid problem where you need to explore paths and undo visited state</li>
+        <li>✅ "Word Search II" (LC #212) — same but with Trie optimization for multiple words</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ "Shortest path" in grid — use BFS (#32), not DFS backtracking</li>
+        <li>❌ "Count connected components" — use permanent marking (#31), not temporary</li>
+        <li>❌ Very long words on large grids — exponential worst case, may TLE</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="takeaway">
+    💡 "Word Search = Grid DFS + Backtracking. Mark cell temporarily ('#'), explore 4 directions, restore after. Character mismatch = instant prune."
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>🎉 Phase 4 Complete!</b></p>
+      <p style="margin-top:8px;">Recap of Phase 4:</p>
+      <ul>
+        <li>#26-28: Tree DFS — depth, balanced, LCA</li>
+        <li>#29-30: Tree BFS — serialize, right view</li>
+        <li>#31-35: Graphs — islands, shortest path, topo sort, cycle detection, weighted paths</li>
+        <li>#36-38: Backtracking — Sudoku, N-Queens, Word Search</li>
+      </ul>
+      <p style="margin-top:12px;">Phase 5 begins: <b>Dynamic Programming — the final boss.</b></p>
+      <p style="margin-top:8px;">Problem #39: <b>Climbing Stairs — How Many Ways?</b> — the gentlest intro to DP. It's just Fibonacci with a story.</p>
+      <p style="margin-top:8px;">DP = recursion + memoization. You already know recursion (#20-23). Now we add "remember what you've already computed" to avoid redundant work.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Phase 4 (Trees, Graphs, Backtracking) complete → Phase 5 (Dynamic Programming) begins!</p>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem37.html">← Problem #37</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(38)">☐ Mark as Done</button>
+    <a class="nav-btn" href="../phase5/problem39.html">Problem #39 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY="dsa-roadmap-progress";const PROBLEM_NUM=38;
+function loadProgress(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{};}catch{return{};}}
+function saveProgress(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}
+function toggleDone(n){const p=loadProgress();if(p[n]==="done")delete p[n];else p[n]="done";saveProgress(p);updateUI();}
+function updateUI(){const p=loadProgress(),btn=document.getElementById("mark-done-btn");if(p[PROBLEM_NUM]==="done"){btn.textContent="✔ Completed";btn.classList.add("completed");}else{btn.textContent="☐ Mark as Done";btn.classList.remove("completed");}updateReadProgress();}
+function updateReadProgress(){const p=loadProgress();if(p[PROBLEM_NUM]==="done"){document.getElementById("section-pct").textContent="100%";document.getElementById("section-bar").style.width="100%";return;}const s=document.querySelectorAll(".section, .takeaway"),t=s.length;if(t===0)return;let v=0;s.forEach(sec=>{if(sec.getBoundingClientRect().top<window.innerHeight)v++;});const pct=Math.min(100,Math.round((v/t)*100));document.getElementById("section-pct").textContent=pct+"%";document.getElementById("section-bar").style.width=pct+"%";}
+window.addEventListener("scroll",updateReadProgress);updateUI();
+</script>
+</body>
+</html>

@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#6 — Pair of Items That Hit Target Budget | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 2: Core Patterns</span>
+    <span class="problem-id">Problem #6 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #6: Pair of Items That Hit Target Budget</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#6 — Pair of Items That Hit Target Budget</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Two Pointer (Pair Sum on Sorted Array)</p>
+
+  <!-- SECTION 0: Real-World Scenario -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek office supplies store mein ho. Boss ne ₹9 ka budget diya hai aur bola:</p>
+      <p><b>"Exactly do items kharido jinki total cost ₹9 ho."</b></p>
+      <p>Available items (sorted by price): <code>[1, 2, 3, 4, 5, 6, 7, 8]</code></p>
+      <p style="margin-top:8px;">Possible pairs: (1,8), (2,7), (3,6), (4,5) — all sum to 9.</p>
+      <p>But tumhe sirf <b>ek pair</b> return karna hai — aur efficiently.</p>
+      <p style="color:#4caf50;margin-top:8px;">💡 Array sorted hai — kya hum bina har pair check kiye answer nikal sakte hain?</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Problem Understanding -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given a <b>sorted</b> array and a target sum, find two numbers that add up to the target</li>
+        <li>Return their indices (1-indexed in LeetCode's "Two Sum II")</li>
+        <li>Exactly one solution is guaranteed</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Input → Output:</b></p>
+      <ul>
+        <li>Input: <code>int[] numbers</code> (sorted), <code>int target</code></li>
+        <li>Output: <code>int[]</code> — indices of the two numbers</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Two versions of this problem:</b></p>
+      <table style="width:100%;font-size:12px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Version</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Input</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Best Approach</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Two Sum (unsorted) — LC #1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Unsorted array</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">HashMap (Problem #2 pattern)</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Two Sum II (sorted) — LC #167</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Sorted array</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Two Pointer (this problem)</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;"><b>Connection to Problem #5:</b></p>
+      <ul>
+        <li>#5 used two pointers on <b>two separate arrays</b>, both moving forward</li>
+        <li>#6 uses two pointers on <b>one array</b>, moving from opposite ends inward</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Brute Force Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Approach 1: Check every pair — O(n²)</b></p>
+<pre><code><span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) {
+    <span class="keyword">for</span> (<span class="type">int</span> j = i + <span class="number">1</span>; j &lt; n; j++) {
+        <span class="keyword">if</span> (nums[i] + nums[j] == target) <span class="keyword">return new</span> <span class="type">int</span>[]{i, j};
+    }
+}</code></pre>
+      <p>Works but O(n²). Doesn't use the sorted property at all.</p>
+
+      <p style="margin-top:12px;"><b>Approach 2: HashMap — O(n) time, O(n) space</b></p>
+<pre><code>HashMap&lt;Integer, Integer&gt; map = <span class="keyword">new</span> HashMap&lt;&gt;();
+<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) {
+    <span class="type">int</span> complement = target - nums[i];
+    <span class="keyword">if</span> (map.containsKey(complement)) <span class="keyword">return new</span> <span class="type">int</span>[]{map.get(complement), i};
+    map.put(nums[i], i);
+}</code></pre>
+      <p>O(n) time but O(n) space. Still doesn't use sorted property.</p>
+
+      <p style="color:#ffc107;margin-top:10px;">🤔 Array sorted hai — kya hum O(n) time AND O(1) space mein kar sakte hain?</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Optimization Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Key Insight — The Weighing Scale Analogy:</b></p>
+      <p>Imagine a weighing scale. You need exactly 9 kg. You have sorted weights: [1,2,3,4,5,6,7,8].</p>
+      <ul>
+        <li>Start with the lightest (1) and heaviest (8): 1 + 8 = 9 ✓ Done!</li>
+        <li>But what if target was 11? 1 + 8 = 9 → too small → need heavier left side → move left pointer right</li>
+        <li>What if target was 5? 1 + 8 = 9 → too big → need lighter right side → move right pointer left</li>
+      </ul>
+
+      <p style="margin-top:12px;"><b>The logic:</b></p>
+      <ul>
+        <li><code>sum == target</code> → found it!</li>
+        <li><code>sum &lt; target</code> → sum chhota hai, bada karna hai → left pointer aage badhao (bigger number)</li>
+        <li><code>sum &gt; target</code> → sum bada hai, chhota karna hai → right pointer peeche lao (smaller number)</li>
+      </ul>
+
+      <p style="margin-top:10px;"><b>Why this works:</b></p>
+      <ul>
+        <li>Array sorted hai, so left pointer badhane se sum BADHEGA</li>
+        <li>Right pointer ghatane se sum GHATEGA</li>
+        <li>Har step mein hum ek element permanently eliminate kar rahe hain</li>
+        <li>At most n steps → O(n)</li>
+      </ul>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern identified: <b>Two Pointer — opposite ends, shrink inward based on sum comparison</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Final Approach -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach (Pattern-Based)</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Pattern Name:</b> Two Pointer — Opposite Ends (Pair Sum)</p>
+      <p><b>Pre-requisite:</b> Array MUST be sorted. If not, sort first O(n log n) or use HashMap.</p>
+      <p style="margin-top:10px;"><b>Algorithm:</b></p>
+      <ol>
+        <li><code>left = 0</code>, <code>right = n - 1</code></li>
+        <li>While <code>left &lt; right</code>:
+          <ul>
+            <li><code>sum = nums[left] + nums[right]</code></li>
+            <li>If <code>sum == target</code> → return {left, right}</li>
+            <li>If <code>sum &lt; target</code> → <code>left++</code></li>
+            <li>If <code>sum &gt; target</code> → <code>right--</code></li>
+          </ul>
+        </li>
+        <li>No pair found → return empty (shouldn't happen if guaranteed)</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Step-by-Step Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Input:</b> <code>nums = [2, 3, 5, 8, 11, 15]</code>, <code>target = 13</code></p>
+      <table style="width:100%;font-size:12px;margin-top:10px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Step</th>
+            <th style="background:#22223a;color:#888;padding:8px;">left</th>
+            <th style="background:#22223a;color:#888;padding:8px;">right</th>
+            <th style="background:#22223a;color:#888;padding:8px;">nums[L]</th>
+            <th style="background:#22223a;color:#888;padding:8px;">nums[R]</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Sum</th>
+            <th style="background:#22223a;color:#888;padding:8px;">vs Target</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">5</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">15</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">17</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">17 > 13</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">right-- → 4</td>
+          </tr>
+          <tr>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">0</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">4</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">11</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">13</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">13 == 13 ✓</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">FOUND! return {0, 4}</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#4caf50;"><b>Result: indices [0, 4] → values (2, 11) → sum = 13 ✓</b></p>
+      <p style="color:#888;font-size:11px;margin-top:6px;">Only 2 steps to find the answer in a 6-element array. Brute force would check up to 15 pairs.</p>
+
+      <p style="margin-top:16px;"><b>Another example — target = 10:</b></p>
+      <table style="width:100%;font-size:12px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Step</th>
+            <th style="background:#22223a;color:#888;padding:8px;">L</th>
+            <th style="background:#22223a;color:#888;padding:8px;">R</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Sum</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">0(2)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">5(15)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">17</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">too big → R--</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">0(2)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">4(11)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">13</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">too big → R--</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">0(2)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">3(8)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">10</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">FOUND {0,3}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Internal Mechanics -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Why we never miss the answer:</b></p>
+      <p>Proof by elimination — when we move a pointer, we're safely discarding impossible pairs:</p>
+      <ul>
+        <li>When <code>sum &gt; target</code> and we do <code>right--</code>:
+          <ul>
+            <li>We're saying: "nums[right] paired with ANY remaining left element will be too big"</li>
+            <li>Why? Because left can only move right (bigger), making sum even bigger</li>
+            <li>So nums[right] can never be part of the answer → safe to eliminate</li>
+          </ul>
+        </li>
+        <li>When <code>sum &lt; target</code> and we do <code>left++</code>:
+          <ul>
+            <li>We're saying: "nums[left] paired with ANY remaining right element will be too small"</li>
+            <li>Why? Because right can only move left (smaller), making sum even smaller</li>
+            <li>So nums[left] can never be part of the answer → safe to eliminate</li>
+          </ul>
+        </li>
+      </ul>
+      <p style="margin-top:10px;"><b>Each step eliminates exactly one element → at most n steps → O(n).</b></p>
+
+      <p style="margin-top:14px;"><b>Comparison of all three approaches:</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">Approach</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Time</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Space</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Needs Sorted?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Brute Force</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#e44d26;">O(n²)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(1)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">No</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">HashMap</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(n)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#ffc107;">O(n)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">No</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Two Pointer</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(n)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(1)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#ffc107;">Yes</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;color:#888;font-size:11px;">Two Pointer wins when input is sorted. HashMap wins when it's not (and you can't sort).</p>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Complexity Analysis -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag">
+          <span class="label">Time:</span>
+          <span class="value">O(n)</span>
+        </div>
+        <div class="complexity-tag">
+          <span class="label">Space:</span>
+          <span class="value">O(1)</span>
+        </div>
+      </div>
+      <p style="margin-top:10px;">Each pointer moves at most n times total. No extra data structures. Best possible for this problem.</p>
+      <p style="margin-top:8px;color:#888;font-size:11px;">If array is unsorted and you sort first: O(n log n) + O(n) = O(n log n). Still better than O(n²) brute force.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Java Implementation -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Two Pointer (sorted array):</b></p>
+<pre><code><span class="keyword">public class</span> <span class="type">TwoSumSorted</span> {
+
+    <span class="keyword">public static int</span>[] <span class="type">twoSum</span>(<span class="type">int</span>[] nums, <span class="type">int</span> target) {
+        <span class="type">int</span> left = <span class="number">0</span>, right = nums.length - <span class="number">1</span>;
+
+        <span class="keyword">while</span> (left &lt; right) {
+            <span class="type">int</span> sum = nums[left] + nums[right];
+            <span class="keyword">if</span> (sum == target) {
+                <span class="keyword">return new</span> <span class="type">int</span>[]{left, right};
+            } <span class="keyword">else if</span> (sum &lt; target) {
+                left++;
+            } <span class="keyword">else</span> {
+                right--;
+            }
+        }
+        <span class="keyword">return new</span> <span class="type">int</span>[]{}; <span class="comment">// no pair found</span>
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        <span class="type">int</span>[] nums = {<span class="number">2</span>, <span class="number">3</span>, <span class="number">5</span>, <span class="number">8</span>, <span class="number">11</span>, <span class="number">15</span>};
+        <span class="type">int</span>[] result = twoSum(nums, <span class="number">13</span>);
+        System.out.println(result[<span class="number">0</span>] + <span class="string">", "</span> + result[<span class="number">1</span>]); <span class="comment">// 0, 4</span>
+    }
+}</code></pre>
+
+      <p style="margin-top:14px;"><b>Bonus: HashMap approach (unsorted array — LC #1):</b></p>
+<pre><code><span class="keyword">public static int</span>[] <span class="type">twoSumUnsorted</span>(<span class="type">int</span>[] nums, <span class="type">int</span> target) {
+    HashMap&lt;Integer, Integer&gt; map = <span class="keyword">new</span> HashMap&lt;&gt;();
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; nums.length; i++) {
+        <span class="type">int</span> complement = target - nums[i];
+        <span class="keyword">if</span> (map.containsKey(complement)) {
+            <span class="keyword">return new</span> <span class="type">int</span>[]{map.get(complement), i};
+        }
+        map.put(nums[i], i);
+    }
+    <span class="keyword">return new</span> <span class="type">int</span>[]{};
+}</code></pre>
+      <p style="margin-top:6px;color:#888;font-size:11px;">💡 Interview tip: Always ask "Is the array sorted?" — it changes the optimal approach entirely.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 9: Edge Cases -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Case</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Input</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Target</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Output</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Two elements</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1, 4]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">{0, 1}</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Minimum valid input</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Negatives</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[-3, -1, 0, 2, 5]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">-1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">{0, 3}</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">-3 + 2 = -1 ✓</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Duplicates</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1, 1, 3, 5]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">{0, 1}</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Same value, different indices</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Pair at extremes</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1, 2, 3, 4, 5]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">6</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">{0, 4}</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Found on first step</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Pair in middle</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1, 2, 3, 4, 5]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">{0, 3} or {1, 2}</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Multiple valid pairs possible</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 10: Common Mistakes -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Using two pointers on an unsorted array</b>
+          <p style="color:#e44d26;">❌ Two pointer pair sum ONLY works on sorted arrays</p>
+          <p style="color:#4caf50;">✅ If unsorted → use HashMap approach or sort first</p>
+        </li>
+        <li style="margin-top:10px;"><b>Using <code>left &lt;= right</code> instead of <code>left &lt; right</code></b>
+          <p style="color:#e44d26;">❌ When left == right, you're using the same element twice</p>
+          <p style="color:#4caf50;">✅ Strict <code>&lt;</code> ensures two different elements</p>
+        </li>
+        <li style="margin-top:10px;"><b>Integer overflow on sum</b>
+          <p style="color:#e44d26;">❌ <code>nums[left] + nums[right]</code> can overflow if values are near Integer.MAX_VALUE</p>
+          <p style="color:#4caf50;">✅ Use <code>long sum = (long)nums[left] + nums[right]</code> for safety</p>
+        </li>
+        <li style="margin-top:10px;"><b>Returning 1-indexed vs 0-indexed</b>
+          <p style="color:#888;">LeetCode #167 (Two Sum II) expects 1-indexed. Read the problem carefully.</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 11: When to Use This Pattern -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Signals to पहचान (identify) this pattern:</b></p>
+      <ul>
+        <li>✅ "Find pair with given sum" on sorted array</li>
+        <li>✅ "Two numbers that add to target"</li>
+        <li>✅ Any problem where you need to find two elements satisfying a condition on a sorted array</li>
+        <li>✅ "Pair with minimum/maximum difference" on sorted array</li>
+        <li>✅ Problem says "sorted" + "pair" → two pointer is almost always the answer</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Decision tree:</b></p>
+<pre><code><span class="comment">Find pair with sum = target?</span>
+├── Array sorted? → <span style="color:#4caf50;">Two Pointer O(n), O(1)</span>
+├── Array unsorted, can sort? → Sort + Two Pointer O(n log n)
+└── Need original indices? → <span style="color:#ffc107;">HashMap O(n), O(n)</span></code></pre>
+    </div>
+  </div>
+
+  <!-- SECTION 12: When NOT to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ Array is unsorted and you need original indices (sorting destroys index info → use HashMap)</li>
+        <li>❌ Finding ALL pairs (not just one) — two pointer finds one, need modification for all</li>
+        <li>❌ Three numbers (3Sum) — need two pointer inside a loop (that's Problem #7!)</li>
+        <li>❌ Target is a product/XOR instead of sum — different math, different approach</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 13: Key Takeaway -->
+  <div class="takeaway">
+    💡 "Sorted array + pair sum = Two Pointers from opposite ends. Sum bada? Right ghatao. Sum chhota? Left badhao."
+  </div>
+
+  <!-- SECTION 14: Bridge to Next Problem -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Ab tum 2 numbers ka pair find kar sakte ho in O(n).</p>
+      <p style="margin-top:8px;">Next question: <b>"Agar 2 nahi, 3 numbers chahiye jinki sum = target?"</b></p>
+      <p style="margin-top:8px;">Brute force: O(n³). But agar tum ek number fix karo aur baaki do ke liye two pointer lagao? → O(n²).</p>
+      <p style="margin-top:8px;">That's Problem #7: <b>Triplet Combo for Gift Packing (3Sum)</b> — two pointer inside a loop.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Two pointer for 2 numbers → Fix one + two pointer for 3 numbers (natural extension)</p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons">
+    <a class="nav-btn" href="../phase1/problem5.html">← Problem #5</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(6)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem7.html">Problem #7 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "dsa-roadmap-progress";
+const PROBLEM_NUM = 6;
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+
+function saveProgress(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function toggleDone(num) {
+  const prog = loadProgress();
+  if (prog[num] === "done") { delete prog[num]; }
+  else { prog[num] = "done"; }
+  saveProgress(prog);
+  updateUI();
+}
+
+function updateUI() {
+  const prog = loadProgress();
+  const btn = document.getElementById("mark-done-btn");
+  if (prog[PROBLEM_NUM] === "done") {
+    btn.textContent = "✔ Completed";
+    btn.classList.add("completed");
+  } else {
+    btn.textContent = "☐ Mark as Done";
+    btn.classList.remove("completed");
+  }
+  updateReadProgress();
+}
+
+function updateReadProgress() {
+  const prog = loadProgress();
+  if (prog[PROBLEM_NUM] === "done") {
+    document.getElementById("section-pct").textContent = "100%";
+    document.getElementById("section-bar").style.width = "100%";
+    return;
+  }
+  const sections = document.querySelectorAll(".section, .takeaway");
+  const total = sections.length;
+  if (total === 0) return;
+  let visible = 0;
+  sections.forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    if (rect.top < window.innerHeight) visible++;
+  });
+  const pct = Math.min(100, Math.round((visible / total) * 100));
+  document.getElementById("section-pct").textContent = pct + "%";
+  document.getElementById("section-bar").style.width = pct + "%";
+}
+
+window.addEventListener("scroll", updateReadProgress);
+updateUI();
+</script>
+</body>
+</html>

@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#16 — Next Warmer Day Forecast | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 3: Intermediate</span>
+    <span class="problem-id">Problem #16 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #16: Next Warmer Day Forecast</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#16 — Next Warmer Day Forecast</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Monotonic Stack</p>
+
+  <!-- SECTION 0: Real-World Scenario -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek weather app bana rahe ho. User ko har din ke liye batana hai:</p>
+      <p><b>"Kitne din baad agle warmer day aayega?"</b></p>
+      <p style="margin-top:8px;">Temperatures: <code>[73, 74, 75, 71, 69, 72, 76, 73]</code></p>
+      <p style="margin-top:8px;">Expected output: <code>[1, 1, 4, 2, 1, 1, 0, 0]</code></p>
+      <ul>
+        <li>Day 0 (73°): next warmer = Day 1 (74°) → <b>1 day</b></li>
+        <li>Day 2 (75°): next warmer = Day 6 (76°) → <b>4 days</b></li>
+        <li>Day 6 (76°): no warmer day after → <b>0</b></li>
+      </ul>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #739 — Daily Temperatures. The classic Monotonic Stack introduction.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Problem Understanding -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>For each element, find the distance to the <b>next greater element</b> to its right</li>
+        <li>If no greater element exists, answer is 0</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Input → Output:</b></p>
+      <ul>
+        <li>Input: <code>int[] temperatures</code></li>
+        <li>Output: <code>int[] result</code> — days until warmer temperature (0 if none)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>This is the "Next Greater Element" (NGE) family:</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">Variant</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Question</th>
+            <th style="background:#22223a;color:#888;padding:7px;">LeetCode</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Next Greater Element</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Next element to the right that is larger</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">#496, #503</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Daily Temperatures</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Days until next warmer (distance, not value)</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">#739 (this)</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Next Smaller Element</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Next element to the right that is smaller</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Various</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Stock Span</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">How many consecutive days before with ≤ price</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">#901 (Problem #17)</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;color:#6c63ff;font-size:12px;">All solved with the same tool: <b>Monotonic Stack</b>.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Brute Force Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>First instinct:</b> For each day, scan right until you find a warmer day.</p>
+<pre><code><span class="comment">// Brute Force — O(n²)</span>
+<span class="type">int</span>[] result = <span class="keyword">new</span> <span class="type">int</span>[n];
+<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) {
+    <span class="keyword">for</span> (<span class="type">int</span> j = i + <span class="number">1</span>; j &lt; n; j++) {
+        <span class="keyword">if</span> (temps[j] &gt; temps[i]) {
+            result[i] = j - i;
+            <span class="keyword">break</span>;
+        }
+    }
+}</code></pre>
+      <p>O(n²) worst case (descending temperatures — every day scans to the end).</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 Observation: Jab hum right se left process karein, toh ek stack mein "waiting" elements rakh sakte hain. Jab koi bada element aaye, toh saare chhote elements ka answer mil jaata hai ek saath.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Optimization Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Key Insight — The Queue at a Ticket Counter Analogy:</b></p>
+      <p>Imagine people standing in a line, each holding a sign with their temperature. A new person arrives:</p>
+      <ul>
+        <li>If the new person is <b>taller</b> (warmer) than people at the back of the line:</li>
+        <li>Those shorter people say: "Found my answer! This person is my next warmer day." They leave.</li>
+        <li>The new person joins the back of the line and waits.</li>
+      </ul>
+      <p style="margin-top:8px;">The line always stays in <b>decreasing order</b> (tallest at front, shortest at back). That's a <b>Monotonic Decreasing Stack</b>.</p>
+
+      <p style="margin-top:12px;"><b>What is a Monotonic Stack?</b></p>
+      <ul>
+        <li>A stack where elements are always in sorted order (increasing or decreasing)</li>
+        <li>When a new element violates the order → pop elements until order is restored</li>
+        <li>Each popped element gets its answer (the new element is its "next greater/smaller")</li>
+      </ul>
+
+      <p style="margin-top:12px;"><b>For "Next Greater Element":</b></p>
+      <ul>
+        <li>Maintain a <b>decreasing stack</b> (top = smallest waiting element)</li>
+        <li>New element arrives → pop all elements smaller than it (they found their answer)</li>
+        <li>Push new element onto stack (it's now waiting for ITS next greater)</li>
+      </ul>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>Monotonic Decreasing Stack — pop smaller elements when a bigger one arrives</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Final Approach -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach (Pattern-Based)</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Pattern:</b> Monotonic Decreasing Stack (stores indices)</p>
+      <p style="margin-top:10px;"><b>Algorithm:</b></p>
+      <ol>
+        <li>Create empty stack (stores <b>indices</b>, not values)</li>
+        <li>Create result array initialized to 0</li>
+        <li>For <code>i = 0</code> to <code>n - 1</code>:
+          <ul>
+            <li>While stack not empty AND <code>temps[i] &gt; temps[stack.peek()]</code>:
+              <ul>
+                <li><code>prevIndex = stack.pop()</code></li>
+                <li><code>result[prevIndex] = i - prevIndex</code> (distance to next warmer)</li>
+              </ul>
+            </li>
+            <li><code>stack.push(i)</code></li>
+          </ul>
+        </li>
+        <li>Remaining elements in stack → no warmer day → result stays 0</li>
+      </ol>
+      <p style="margin-top:10px;color:#888;font-size:11px;">💡 We store INDICES in the stack (not values) because we need to calculate distance. We look up values via <code>temps[stack.peek()]</code>.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Step-by-Step Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Input:</b> <code>temps = [73, 74, 75, 71, 69, 72, 76, 73]</code></p>
+      <table style="width:100%;font-size:10px;margin-top:10px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">i</th>
+            <th style="background:#22223a;color:#888;padding:5px;">temp</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Stack top temp</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Pop?</th>
+            <th style="background:#22223a;color:#888;padding:5px;">result updated</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Stack after (indices)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">0</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">73</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">empty</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;"><code>[0]</code></td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">74</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">73</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Pop 0 (74&gt;73)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">result[0]=1-0=1</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;"><code>[1]</code></td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">75</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">74</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Pop 1 (75&gt;74)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">result[1]=2-1=1</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;"><code>[2]</code></td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">71</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">75</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">No (71&lt;75)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;"><code>[2, 3]</code></td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">4</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">69</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">71</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">No (69&lt;71)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;"><code>[2, 3, 4]</code></td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">72</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">69,71</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Pop 4 (72&gt;69), Pop 3 (72&gt;71)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">result[4]=1, result[3]=2</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;"><code>[2, 5]</code></td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">6</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">76</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">72,75</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Pop 5 (76&gt;72), Pop 2 (76&gt;75)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">result[5]=1, result[2]=4</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;"><code>[6]</code></td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">7</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">73</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">76</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">No (73&lt;76)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;"><code>[6, 7]</code></td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;">Remaining in stack: indices 6, 7 → result stays 0 (no warmer day).</p>
+      <p style="margin-top:6px;color:#4caf50;"><b>Result: [1, 1, 4, 2, 1, 1, 0, 0]</b> ✓</p>
+      <p style="color:#888;font-size:11px;">Notice step 5: one new element (72) resolved TWO waiting elements (69 and 71) at once. That's the power of monotonic stack.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Internal Mechanics -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Why it's called "Monotonic":</b></p>
+      <ul>
+        <li>The stack always maintains a <b>monotonic order</b> (strictly decreasing in this case)</li>
+        <li>New element either fits the order (push) or breaks it (pop until order restored, then push)</li>
+        <li>At any point, stack bottom → top = decreasing temperatures</li>
+      </ul>
+
+      <p style="margin-top:12px;"><b>Why it's O(n) despite the inner while loop:</b></p>
+      <ul>
+        <li>Each element is pushed exactly once and popped at most once</li>
+        <li>Total pushes = n, total pops ≤ n</li>
+        <li>Total operations = 2n = O(n)</li>
+        <li>Same amortized argument as variable sliding window (#9)</li>
+      </ul>
+
+      <p style="margin-top:12px;"><b>Monotonic Stack variants:</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">Stack Order</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Pop When</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Finds</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Example</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Decreasing</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">New &gt; top</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Next Greater Element</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">This problem</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Increasing</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">New &lt; top</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Next Smaller Element</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Histogram area</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Complexity Analysis -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag">
+          <span class="label">Time:</span>
+          <span class="value">O(n)</span>
+        </div>
+        <div class="complexity-tag">
+          <span class="label">Space:</span>
+          <span class="value">O(n)</span>
+        </div>
+      </div>
+      <p style="margin-top:10px;">Each element pushed once, popped at most once = O(2n) = O(n). Stack holds at most n elements.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Java Implementation -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">import</span> java.util.ArrayDeque;
+<span class="keyword">import</span> java.util.Arrays;
+<span class="keyword">import</span> java.util.Deque;
+
+<span class="keyword">public class</span> <span class="type">DailyTemperatures</span> {
+
+    <span class="keyword">public static int</span>[] <span class="type">dailyTemperatures</span>(<span class="type">int</span>[] temps) {
+        <span class="type">int</span> n = temps.length;
+        <span class="type">int</span>[] result = <span class="keyword">new</span> <span class="type">int</span>[n];
+        Deque&lt;Integer&gt; stack = <span class="keyword">new</span> ArrayDeque&lt;&gt;(); <span class="comment">// stores indices</span>
+
+        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) {
+            <span class="keyword">while</span> (!stack.isEmpty() &amp;&amp; temps[i] &gt; temps[stack.peek()]) {
+                <span class="type">int</span> prevIdx = stack.pop();
+                result[prevIdx] = i - prevIdx;
+            }
+            stack.push(i);
+        }
+
+        <span class="keyword">return</span> result; <span class="comment">// remaining indices stay 0</span>
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        <span class="type">int</span>[] temps = {<span class="number">73</span>,<span class="number">74</span>,<span class="number">75</span>,<span class="number">71</span>,<span class="number">69</span>,<span class="number">72</span>,<span class="number">76</span>,<span class="number">73</span>};
+        System.out.println(Arrays.toString(dailyTemperatures(temps)));
+        <span class="comment">// [1, 1, 4, 2, 1, 1, 0, 0]</span>
+    }
+}</code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 Core logic is just 5 lines inside the for loop. Monotonic stack problems have beautifully concise code.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 9: Edge Cases -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Case</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Input</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Output</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Why</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Ascending</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,2,3,4]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,1,1,0]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Each day's next is immediately after</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Descending</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[4,3,2,1]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[0,0,0,0]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No warmer day for anyone</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All same</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[5,5,5,5]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[0,0,0,0]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Equal is NOT warmer (strictly greater)</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Single element</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[42]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[0]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No next day exists</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">V-shape</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[5,1,5]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[0,1,0]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Only middle element has a warmer day</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 10: Common Mistakes -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Storing values instead of indices in the stack</b>
+          <p style="color:#e44d26;">❌ Can't calculate distance without knowing the index</p>
+          <p style="color:#4caf50;">✅ Always store indices. Look up values via <code>temps[stack.peek()]</code></p>
+        </li>
+        <li style="margin-top:10px;"><b>Using <code>&gt;=</code> instead of <code>&gt;</code></b>
+          <p style="color:#e44d26;">❌ "Next warmer" means strictly greater. Equal temperature is NOT warmer.</p>
+          <p style="color:#4caf50;">✅ Use <code>temps[i] > temps[stack.peek()]</code> (strict)</p>
+        </li>
+        <li style="margin-top:10px;"><b>Forgetting that remaining stack elements get 0</b>
+          <p style="color:#4caf50;">✅ Initialize result array to 0. Elements that stay in stack never get updated → naturally 0.</p>
+        </li>
+        <li style="margin-top:10px;"><b>Processing right-to-left instead of left-to-right</b>
+          <p style="color:#888;">Both work, but left-to-right is more intuitive: "I arrive, I resolve everyone waiting who is smaller than me."</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 11: When to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Signals to पहचान (identify):</b></p>
+      <ul>
+        <li>✅ "Next greater element" / "Next smaller element"</li>
+        <li>✅ "Previous greater/smaller element"</li>
+        <li>✅ "How many days until X happens"</li>
+        <li>✅ "Stock span" / "Stock price" problems</li>
+        <li>✅ "Largest rectangle in histogram"</li>
+        <li>✅ Any problem where each element needs to find the nearest element satisfying a comparison</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Quick decision:</b></p>
+<pre><code><span class="comment">Need "next greater to the right"?</span>
+→ Monotonic <span style="color:#4caf50;">Decreasing</span> Stack, scan left→right
+
+<span class="comment">Need "next smaller to the right"?</span>
+→ Monotonic <span style="color:#ffc107;">Increasing</span> Stack, scan left→right
+
+<span class="comment">Need "previous greater to the left"?</span>
+→ Monotonic <span style="color:#4caf50;">Decreasing</span> Stack, scan left→right (answer = stack top after push)</code></pre>
+    </div>
+  </div>
+
+  <!-- SECTION 12: When NOT to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ "K-th nearest greater element" — monotonic stack finds the 1st, not k-th</li>
+        <li>❌ "Global maximum/minimum" — just scan once, no stack needed</li>
+        <li>❌ "Sliding window maximum" — needs a Monotonic Deque (double-ended), not just stack</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 13: Key Takeaway -->
+  <div class="takeaway">
+    💡 "Next Greater Element = Monotonic Decreasing Stack. New element aaya jo bada hai? Pop all smaller ones — unka answer mil gaya."
+  </div>
+
+  <!-- SECTION 14: Bridge to Next Problem -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Ab tum "Next Greater Element" (forward-looking) solve kar sakte ho.</p>
+      <p style="margin-top:10px;">Next problem mein direction flip hoga — <b>backward-looking</b>:</p>
+      <p style="margin-top:8px;"><b>"Stock Span: Aaj se peeche kitne consecutive days mein price aaj se kam ya equal tha?"</b></p>
+      <ul>
+        <li>This is "Previous Greater Element" — same monotonic stack, but we look at what's LEFT of us</li>
+        <li>The answer is the distance to the previous element that was GREATER than current</li>
+      </ul>
+      <p style="color:#6c63ff;margin-top:12px;">→ Next Greater (forward) → Previous Greater (backward) — same tool, different direction</p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem15.html">← Problem #15</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(16)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem17.html">Problem #17 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "dsa-roadmap-progress";
+const PROBLEM_NUM = 16;
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+
+function saveProgress(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function toggleDone(num) {
+  const prog = loadProgress();
+  if (prog[num] === "done") { delete prog[num]; }
+  else { prog[num] = "done"; }
+  saveProgress(prog);
+  updateUI();
+}
+
+function updateUI() {
+  const prog = loadProgress();
+  const btn = document.getElementById("mark-done-btn");
+  if (prog[PROBLEM_NUM] === "done") {
+    btn.textContent = "✔ Completed";
+    btn.classList.add("completed");
+  } else {
+    btn.textContent = "☐ Mark as Done";
+    btn.classList.remove("completed");
+  }
+  updateReadProgress();
+}
+
+function updateReadProgress() {
+  const prog = loadProgress();
+  if (prog[PROBLEM_NUM] === "done") {
+    document.getElementById("section-pct").textContent = "100%";
+    document.getElementById("section-bar").style.width = "100%";
+    return;
+  }
+  const sections = document.querySelectorAll(".section, .takeaway");
+  const total = sections.length;
+  if (total === 0) return;
+  let visible = 0;
+  sections.forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    if (rect.top < window.innerHeight) visible++;
+  });
+  const pct = Math.min(100, Math.round((visible / total) * 100));
+  document.getElementById("section-pct").textContent = pct + "%";
+  document.getElementById("section-bar").style.width = pct + "%";
+}
+
+window.addEventListener("scroll", updateReadProgress);
+updateUI();
+</script>
+</body>
+</html>

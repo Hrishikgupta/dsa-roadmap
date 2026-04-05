@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#8 — Longest Streak of Active Users | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 2: Core Patterns</span>
+    <span class="problem-id">Problem #8 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #8: Longest Streak of Active Users</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#8 — Longest Streak of Active Users</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Sliding Window (Fixed Size)</p>
+
+  <!-- SECTION 0: Real-World Scenario -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek social media app ke analytics team mein ho. Tumhare paas last 10 days ka daily active user count hai:</p>
+      <p><code>[120, 95, 180, 200, 160, 140, 210, 190, 170, 150]</code></p>
+      <p>Boss bola: <b>"Find the best 3-day streak — which consecutive 3 days had the maximum total active users?"</b></p>
+      <p style="margin-top:8px;">Possible 3-day windows:</p>
+      <ul>
+        <li>[120, 95, 180] = 395</li>
+        <li>[95, 180, 200] = 475</li>
+        <li>[180, 200, 160] = 540</li>
+        <li>... and so on</li>
+      </ul>
+      <p style="color:#4caf50;margin-top:8px;">💡 Har window ke liye poora sum recalculate karna padega? Ya pichle window se reuse kar sakte hain?</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Problem Understanding -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given an array and a window size <code>k</code>, find the maximum sum of any <code>k</code> consecutive elements</li>
+        <li>This is the "Maximum Sum Subarray of Size K" problem</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Input → Output:</b></p>
+      <ul>
+        <li>Input: <code>int[] nums</code>, <code>int k</code></li>
+        <li>Output: <code>int</code> — maximum sum of k consecutive elements</li>
+      </ul>
+      <p style="margin-top:10px;"><b>How is this different from Prefix Sum (#3)?</b></p>
+      <table style="width:100%;font-size:12px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Aspect</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Prefix Sum (#3)</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Sliding Window (#8)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Query type</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Any range (l, r)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Fixed-size k consecutive</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Pre-computation</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Build prefix array first</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No pre-computation needed</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Space</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">O(n) for prefix array</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(1) — just track window sum</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Best for</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Multiple random queries</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Scanning all windows of size k</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;color:#888;font-size:11px;">You COULD solve this with prefix sum, but sliding window is more elegant and uses O(1) space.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Brute Force Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>First instinct:</b> For each starting position, sum k elements.</p>
+<pre><code><span class="comment">// Brute Force — O(n × k)</span>
+<span class="type">int</span> maxSum = Integer.MIN_VALUE;
+<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt;= n - k; i++) {
+    <span class="type">int</span> sum = <span class="number">0</span>;
+    <span class="keyword">for</span> (<span class="type">int</span> j = i; j &lt; i + k; j++) {
+        sum += nums[j];
+    }
+    maxSum = Math.max(maxSum, sum);
+}</code></pre>
+      <p><b>Problem:</b> O(n × k). If n = 100,000 and k = 50,000 → 5 billion operations.</p>
+      <p style="margin-top:8px;"><b>The waste:</b> Window [95, 180, 200] and window [180, 200, 160] share two elements (180, 200). We're re-adding them unnecessarily.</p>
+      <p style="color:#ffc107;margin-top:8px;">🤔 Jab window ek step right slide karti hai, sirf ek element naya aata hai aur ek purana jaata hai. Baaki same hain!</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Optimization Thinking -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Key Insight — The Train Window Analogy:</b></p>
+      <p>Imagine looking out of a train window. The window is fixed size (k seats wide).</p>
+      <ul>
+        <li>As the train moves forward by 1 seat:</li>
+        <li>One new thing enters the window from the right</li>
+        <li>One old thing exits the window from the left</li>
+        <li>Everything in the middle stays the same</li>
+      </ul>
+
+      <p style="margin-top:12px;"><b>Translated to code:</b></p>
+<pre><code><span class="comment">// Window slides right by 1:</span>
+newSum = oldSum + nums[entering] - nums[leaving]
+
+<span class="comment">// Entering = right edge of new window</span>
+<span class="comment">// Leaving  = left edge of old window</span></code></pre>
+      <p style="margin-top:8px;">Instead of recalculating k additions, we do <b>1 addition + 1 subtraction</b> = O(1) per slide.</p>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern identified: <b>Sliding Window (Fixed Size) — maintain a running sum, slide by add/remove</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Final Approach -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach (Pattern-Based)</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Pattern Name:</b> Sliding Window — Fixed Size</p>
+      <p><b>Why this pattern fits:</b></p>
+      <ul>
+        <li>We're looking at ALL contiguous subarrays of a fixed size k</li>
+        <li>Adjacent windows overlap by k-1 elements — massive reuse opportunity</li>
+        <li>Only need to track a running aggregate (sum, max, count, etc.)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Algorithm:</b></p>
+      <ol>
+        <li>Compute sum of first k elements (first window)</li>
+        <li>Set <code>maxSum = windowSum</code></li>
+        <li>For <code>i = k</code> to <code>n - 1</code>:
+          <ul>
+            <li><code>windowSum += nums[i] - nums[i - k]</code> (add new, remove old)</li>
+            <li><code>maxSum = Math.max(maxSum, windowSum)</code></li>
+          </ul>
+        </li>
+        <li>Return maxSum</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Step-by-Step Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Input:</b> <code>nums = [2, 1, 5, 1, 3, 2]</code>, <code>k = 3</code></p>
+
+      <p style="margin-top:10px;"><b>Step 1: First window</b></p>
+      <p><code>[<span style="color:#6c63ff;">2, 1, 5</span>, 1, 3, 2]</code> → windowSum = 2+1+5 = <b>8</b>, maxSum = <b>8</b></p>
+
+      <p style="margin-top:12px;"><b>Step 2: Slide window</b></p>
+      <table style="width:100%;font-size:12px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Slide</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Window</th>
+            <th style="background:#22223a;color:#888;padding:8px;">+ New</th>
+            <th style="background:#22223a;color:#888;padding:8px;">- Old</th>
+            <th style="background:#22223a;color:#888;padding:8px;">windowSum</th>
+            <th style="background:#22223a;color:#888;padding:8px;">maxSum</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">init</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[<span style="color:#6c63ff;">2,1,5</span>,1,3,2]</code></td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">—</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">—</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#6c63ff;">8</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">8</td>
+          </tr>
+          <tr>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[2,<span style="color:#6c63ff;">1,5,1</span>,3,2]</code></td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">+1</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">-2</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">8+1-2 = 7</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">8</td>
+          </tr>
+          <tr>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[2,1,<span style="color:#6c63ff;">5,1,3</span>,2]</code></td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">+3</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">-1</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">7+3-1 = 9</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">9 ✓</td>
+          </tr>
+          <tr>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[2,1,5,<span style="color:#6c63ff;">1,3,2</span>]</code></td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">+2</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">-5</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">9+2-5 = 6</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">9</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#4caf50;"><b>Result: maxSum = 9</b> (window [5, 1, 3])</p>
+      <p style="color:#888;font-size:11px;">4 windows checked with only 3 add/subtract operations (after initial sum). Brute force would do 4 × 3 = 12 additions.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Internal Mechanics -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Why sliding window is O(n) not O(n × k):</b></p>
+<pre><code><span class="comment">// Brute force: each window recalculates from scratch</span>
+Window 1: a + b + c           <span class="comment">// 3 ops</span>
+Window 2:     b + c + d       <span class="comment">// 3 ops (b,c recalculated!)</span>
+Window 3:         c + d + e   <span class="comment">// 3 ops (c,d recalculated!)</span>
+Total: n × k operations
+
+<span class="comment">// Sliding window: reuse previous sum</span>
+Window 1: a + b + c           <span class="comment">// k ops (only first time)</span>
+Window 2: prev + d - a        <span class="comment">// 2 ops</span>
+Window 3: prev + e - b        <span class="comment">// 2 ops</span>
+Total: k + 2(n-k) = O(n) operations</code></pre>
+
+      <p style="margin-top:12px;"><b>Sliding Window vs Two Pointer — what's the difference?</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">Aspect</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Two Pointer</th>
+            <th style="background:#22223a;color:#888;padding:7px;">Sliding Window</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Focus</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Two specific elements</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">A range/subarray</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Movement</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Pointers move independently</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Window slides as a unit (fixed) or expands/shrinks (variable)</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Tracks</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Pair relationship</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Aggregate of window (sum, count, max)</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Example</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Pair sum, 3Sum</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Max sum subarray, longest substring</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;color:#888;font-size:11px;">Sliding window IS technically two pointers (left and right edge of window), but the mental model is different — you think in terms of "window" not "two elements".</p>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Complexity Analysis -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag">
+          <span class="label">Time:</span>
+          <span class="value">O(n)</span>
+        </div>
+        <div class="complexity-tag">
+          <span class="label">Space:</span>
+          <span class="value">O(1)</span>
+        </div>
+      </div>
+      <table style="width:100%;font-size:12px;margin-top:12px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Approach</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Time</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Space</th>
+            <th style="background:#22223a;color:#888;padding:8px;">n=100K, k=50K</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Brute Force</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">O(n×k)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">O(1)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">5,000,000,000</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Prefix Sum</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(n)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#ffc107;">O(n)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">100,000</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Sliding Window</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(n)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">O(1)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">100,000</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:6px;color:#888;font-size:11px;">Same time as prefix sum, but O(1) space. Sliding window wins for single-pass fixed-size problems.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Java Implementation -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">public class</span> <span class="type">MaxSumSubarrayK</span> {
+
+    <span class="keyword">public static int</span> <span class="type">maxSumOfK</span>(<span class="type">int</span>[] nums, <span class="type">int</span> k) {
+        <span class="type">int</span> windowSum = <span class="number">0</span>;
+
+        <span class="comment">// Build first window</span>
+        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; k; i++) {
+            windowSum += nums[i];
+        }
+
+        <span class="type">int</span> maxSum = windowSum;
+
+        <span class="comment">// Slide the window</span>
+        <span class="keyword">for</span> (<span class="type">int</span> i = k; i &lt; nums.length; i++) {
+            windowSum += nums[i] - nums[i - k];
+            maxSum = Math.max(maxSum, windowSum);
+        }
+
+        <span class="keyword">return</span> maxSum;
+    }
+
+    <span class="keyword">public static void</span> <span class="type">main</span>(String[] args) {
+        <span class="type">int</span>[] users = {<span class="number">120</span>, <span class="number">95</span>, <span class="number">180</span>, <span class="number">200</span>, <span class="number">160</span>, <span class="number">140</span>, <span class="number">210</span>, <span class="number">190</span>, <span class="number">170</span>, <span class="number">150</span>};
+        System.out.println(maxSumOfK(users, <span class="number">3</span>)); <span class="comment">// 570 (210+190+170)</span>
+    }
+}</code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 Notice how clean this is — no nested loops, no extra arrays. Just one variable tracking the window sum.</p>
+
+      <p style="margin-top:14px;"><b>Variant: Return the average instead of sum</b></p>
+<pre><code><span class="comment">// Just divide by k at the end</span>
+<span class="keyword">public static double</span> <span class="type">maxAvgOfK</span>(<span class="type">int</span>[] nums, <span class="type">int</span> k) {
+    <span class="comment">// ... same sliding window logic ...</span>
+    <span class="keyword">return</span> (<span class="type">double</span>) maxSum / k;
+}</code></pre>
+      <p style="color:#888;font-size:11px;">This is LeetCode #643 — Maximum Average Subarray I.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 9: Edge Cases -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:8px;">Case</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Input</th>
+            <th style="background:#22223a;color:#888;padding:8px;">k</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Output</th>
+            <th style="background:#22223a;color:#888;padding:8px;">Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">k = n</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[1,2,3]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">6</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Only one window = entire array</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">k = 1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[3,1,4,1,5]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Degenerates to finding max element</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All negative</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[-3,-1,-4]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">-4</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Least negative sum = [-3,-1]</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All same</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;"><code>[5,5,5,5]</code></td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">10</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">All windows have same sum</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Large values</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">10⁵ elements</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">10⁴</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">—</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Use <code>long</code> to avoid overflow</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 10: Common Mistakes -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Off-by-one in the sliding formula</b>
+          <p style="color:#e44d26;">❌ <code>nums[i - k + 1]</code> instead of <code>nums[i - k]</code></p>
+          <p style="color:#4caf50;">✅ When <code>i</code> is the new right edge, the element leaving is at <code>i - k</code></p>
+          <p style="color:#888;font-size:11px;">Dry run with k=2: when i=2, leaving element is at index 0 = 2-2 ✓</p>
+        </li>
+        <li style="margin-top:10px;"><b>Forgetting to initialize maxSum with first window</b>
+          <p style="color:#e44d26;">❌ <code>maxSum = 0</code> → wrong for all-negative arrays</p>
+          <p style="color:#4caf50;">✅ <code>maxSum = windowSum</code> (first window's sum)</p>
+        </li>
+        <li style="margin-top:10px;"><b>Not validating k &lt;= n</b>
+          <p style="color:#4caf50;">✅ Add a guard: <code>if (k > nums.length) return -1;</code></p>
+        </li>
+        <li style="margin-top:10px;"><b>Confusing fixed vs variable window</b>
+          <p style="color:#888;">Fixed window: size never changes, just slides. Variable window: size grows/shrinks based on a condition (that's Problem #9).</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- SECTION 11: When to Use This Pattern -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Signals to पहचान (identify) this pattern:</b></p>
+      <ul>
+        <li>✅ "Maximum/minimum sum of k consecutive elements"</li>
+        <li>✅ "Average of subarrays of size k"</li>
+        <li>✅ "Find all subarrays of size k with property X"</li>
+        <li>✅ Problem mentions "consecutive", "contiguous", "subarray" + fixed size</li>
+        <li>✅ "Sliding window maximum" (needs deque — advanced variant)</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Fixed window template:</b></p>
+<pre><code><span class="comment">// Generic fixed-size sliding window</span>
+<span class="comment">// 1. Build first window of size k</span>
+<span class="comment">// 2. For each new element entering:</span>
+<span class="comment">//    a. Add new element to window state</span>
+<span class="comment">//    b. Remove oldest element from window state</span>
+<span class="comment">//    c. Update answer</span></code></pre>
+    </div>
+  </div>
+
+  <!-- SECTION 12: When NOT to Use -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ Window size is NOT fixed — use variable-size sliding window (Problem #9)</li>
+        <li>❌ Elements are not contiguous (e.g., "pick any k elements") — that's a different problem (sorting/heap)</li>
+        <li>❌ You need the actual subarray, not just the aggregate — need to track start index too</li>
+        <li>❌ "Maximum subarray sum" without fixed k — that's Kadane's algorithm (different pattern)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 13: Key Takeaway -->
+  <div class="takeaway">
+    💡 "Fixed-size window sliding karti hai toh sirf ek element aata hai, ek jaata hai. Poora recalculate mat karo — add/remove karo."
+  </div>
+
+  <!-- SECTION 14: Bridge to Next Problem -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Ab tum fixed-size window slide kar sakte ho in O(n).</p>
+      <p style="margin-top:8px;">But what if window size fixed nahi hai? <b>"Find the smallest subarray whose sum is ≥ target"</b> — window size depends on the data.</p>
+      <ul>
+        <li>Window chhoti hai aur sum target se kam? → Expand (right badhao)</li>
+        <li>Sum target se zyada ho gaya? → Shrink (left badhao)</li>
+      </ul>
+      <p style="margin-top:8px;">That's the <b>Variable-Size Sliding Window</b> — Problem #9: Shortest Refueling Stop on Highway.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Fixed window (size given) → Variable window (size depends on condition) — harder but more powerful!</p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem7.html">← Problem #7</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(8)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem9.html">Problem #9 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "dsa-roadmap-progress";
+const PROBLEM_NUM = 8;
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+
+function saveProgress(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function toggleDone(num) {
+  const prog = loadProgress();
+  if (prog[num] === "done") { delete prog[num]; }
+  else { prog[num] = "done"; }
+  saveProgress(prog);
+  updateUI();
+}
+
+function updateUI() {
+  const prog = loadProgress();
+  const btn = document.getElementById("mark-done-btn");
+  if (prog[PROBLEM_NUM] === "done") {
+    btn.textContent = "✔ Completed";
+    btn.classList.add("completed");
+  } else {
+    btn.textContent = "☐ Mark as Done";
+    btn.classList.remove("completed");
+  }
+  updateReadProgress();
+}
+
+function updateReadProgress() {
+  const prog = loadProgress();
+  if (prog[PROBLEM_NUM] === "done") {
+    document.getElementById("section-pct").textContent = "100%";
+    document.getElementById("section-bar").style.width = "100%";
+    return;
+  }
+  const sections = document.querySelectorAll(".section, .takeaway");
+  const total = sections.length;
+  if (total === 0) return;
+  let visible = 0;
+  sections.forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    if (rect.top < window.innerHeight) visible++;
+  });
+  const pct = Math.min(100, Math.round((visible / total) * 100));
+  document.getElementById("section-pct").textContent = pct + "%";
+  document.getElementById("section-bar").style.width = pct + "%";
+}
+
+window.addEventListener("scroll", updateReadProgress);
+updateUI();
+</script>
+</body>
+</html>

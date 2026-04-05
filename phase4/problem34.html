@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#34 — Detect a Cycle in Task Dependencies | DSA Roadmap</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+
+<div class="topnav">
+  <a href="../dsa-roadmap.html">📋 DSA Roadmap</a>
+  <div class="nav-links">
+    <span class="problem-id">Phase 4: Advanced</span>
+    <span class="problem-id">Problem #34 of 50</span>
+  </div>
+</div>
+
+<div class="problem-progress">
+  <div class="label-row">
+    <span>📖 Problem #34: Detect a Cycle in Task Dependencies</span>
+    <span class="pct" id="section-pct">0%</span>
+  </div>
+  <div class="prog-bar-outer">
+    <div class="prog-bar-inner" id="section-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="content">
+  <h1 style="font-size:22px;color:#6c63ff;margin:20px 0 4px;">#34 — Detect a Cycle in Task Dependencies</h1>
+  <p style="color:#ff7043;font-size:13px;margin-bottom:20px;">🔖 Pattern: Cycle Detection (DFS 3-Color)</p>
+
+  <!-- SECTION 0 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Real-World Scenario</span>
+      <span class="sec-num">START HERE</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Tum ek CI/CD pipeline design kar rahe ho. Tasks ke dependencies hain:</p>
+<pre><code><span class="comment">No cycle (valid):        Cycle (deadlock!):</span>
+<span class="comment">  Build → Test → Deploy     Build → Test</span>
+<span class="comment">                               ↑       ↓</span>
+<span class="comment">                              Lint ← Deploy</span>
+<span class="comment">                           (circular dependency = deadlock)</span></code></pre>
+      <p style="margin-top:8px;">Question: <b>"Kya is dependency graph mein cycle hai? Agar hai toh pipeline deadlock ho jayega."</b></p>
+      <p style="color:#888;font-size:11px;margin-top:4px;">This is LeetCode #207 — Course Schedule (can you finish all courses?). Also applies to deadlock detection in OS.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">1. Problem Understanding</span>
+      <span class="sec-num">STEP 1</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>What exactly is being asked?</b></p>
+      <ul>
+        <li>Given a directed graph, determine if it contains a cycle</li>
+        <li>If cycle exists → tasks can't all be completed (deadlock)</li>
+        <li>If no cycle → valid DAG, topological order exists</li>
+      </ul>
+      <p style="margin-top:10px;"><b>Two approaches to detect cycles:</b></p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:7px;">Method</th>
+            <th style="background:#22223a;color:#888;padding:7px;">How</th>
+            <th style="background:#22223a;color:#888;padding:7px;">From Problem</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">Kahn's BFS</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">If processed < n → cycle</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">#33 (implicit)</td></tr>
+          <tr><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">DFS 3-Color</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;">If we visit a node currently being processed → cycle</td><td style="padding:5px 7px;border-bottom:1px solid #2a2a4a;color:#4caf50;">This problem</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;"><b>The 3-Color System:</b></p>
+      <ul>
+        <li><span style="color:#888;">⚪ WHITE (0)</span> = unvisited — haven't touched this node yet</li>
+        <li><span style="color:#ffc107;">🟡 GRAY (1)</span> = in progress — currently exploring this node's subtree (on the DFS stack)</li>
+        <li><span style="color:#4caf50;">🟢 BLACK (2)</span> = done — fully explored, all descendants processed</li>
+      </ul>
+      <p style="margin-top:8px;color:#e44d26;"><b>Cycle = visiting a GRAY node from another GRAY node.</b> It means we've found a back edge — a path that loops back to a node still being processed.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">💪</span>
+      <span class="sec-title">2. Brute Force Thinking</span>
+      <span class="sec-num">STEP 2</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Why simple "visited" boolean isn't enough:</b></p>
+      <ul>
+        <li>With just visited=true/false, you can't distinguish between:</li>
+        <li>"I'm currently exploring this node's path" (GRAY) — revisiting = CYCLE</li>
+        <li>"I already fully explored this node" (BLACK) — revisiting = just a cross edge, NOT a cycle</li>
+      </ul>
+<pre><code><span class="comment">Example: A → B → D, A → C → D</span>
+<span class="comment">When exploring A→C→D, D is already visited (from A→B→D path)</span>
+<span class="comment">But this is NOT a cycle — D is BLACK (fully done)</span>
+<span class="comment">With just boolean visited, we'd wrongly report a cycle</span></code></pre>
+      <p style="color:#ffc107;margin-top:8px;">🤔 We need THREE states, not two. That's why it's called "3-color" DFS.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚡</span>
+      <span class="sec-title">3. Optimization Thinking</span>
+      <span class="sec-num">STEP 3</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>DFS 3-Color Algorithm:</b></p>
+<pre><code><span class="type">boolean</span> hasCycle(node):
+    <span class="keyword">if</span> color[node] == GRAY → <span class="keyword">return true</span>   <span class="comment">// CYCLE! back edge found</span>
+    <span class="keyword">if</span> color[node] == BLACK → <span class="keyword">return false</span>  <span class="comment">// already done, skip</span>
+
+    color[node] = GRAY  <span class="comment">// start processing</span>
+
+    <span class="keyword">for</span> neighbor <span class="keyword">in</span> graph[node]:
+        <span class="keyword">if</span> hasCycle(neighbor) → <span class="keyword">return true</span>
+
+    color[node] = BLACK  <span class="comment">// done processing</span>
+    <span class="keyword">return false</span></code></pre>
+      <p style="margin-top:10px;"><b>The lifecycle of a node:</b></p>
+      <ul>
+        <li>⚪ WHITE → 🟡 GRAY (start DFS on this node)</li>
+        <li>🟡 GRAY → explore all neighbors recursively</li>
+        <li>🟡 GRAY → 🟢 BLACK (all neighbors done, backtrack)</li>
+        <li>If during exploration we hit a 🟡 GRAY node → we've looped back → <b>CYCLE!</b></li>
+      </ul>
+      <p style="color:#4caf50;margin-top:10px;">💡 Pattern: <b>DFS 3-Color — WHITE→GRAY→BLACK. Hitting GRAY from GRAY = cycle (back edge).</b></p>
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">4. Final Approach</span>
+      <span class="sec-num">STEP 4</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Algorithm:</b></p>
+      <ol>
+        <li>Initialize all nodes as WHITE (0)</li>
+        <li>For each WHITE node: start DFS</li>
+        <li>DFS: mark GRAY → explore neighbors → if any returns cycle → propagate true</li>
+        <li>After all neighbors done → mark BLACK → return false</li>
+        <li>If any DFS returns true → graph has cycle</li>
+      </ol>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 Must start DFS from EVERY unvisited node — graph might be disconnected. A cycle could be in any component.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Dry Run -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔍</span>
+      <span class="sec-title">5. Step-by-Step Dry Run</span>
+      <span class="sec-num">STEP 5</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Graph with cycle:</b> 0→1, 1→2, 2→0 (triangle cycle)</p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:6px;">Step</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Action</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Colors [0,1,2]</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">DFS(0): mark GRAY</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[<span style="color:#ffc107;">G</span>,W,W]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">—</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">→ DFS(1): mark GRAY</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[<span style="color:#ffc107;">G</span>,<span style="color:#ffc107;">G</span>,W]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">—</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">3</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">→→ DFS(2): mark GRAY</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[<span style="color:#ffc107;">G</span>,<span style="color:#ffc107;">G</span>,<span style="color:#ffc107;">G</span>]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">—</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#e44d26;">4</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#e44d26;">→→→ Visit 0: color is GRAY!</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[<span style="color:#ffc107;">G</span>,<span style="color:#ffc107;">G</span>,<span style="color:#ffc107;">G</span>]</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;color:#e44d26;">CYCLE DETECTED! ✗</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;color:#e44d26;"><b>Cycle found: 0→1→2→0</b> (all three were GRAY when we looped back to 0)</p>
+
+      <p style="margin-top:14px;"><b>Graph without cycle:</b> 0→1, 0→2, 1→3, 2→3</p>
+      <table style="width:100%;font-size:11px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:6px;">Step</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Action</th>
+            <th style="background:#22223a;color:#888;padding:6px;">Colors</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">1-4</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">DFS(0)→DFS(1)→DFS(3)→3 has no neighbors→BLACK</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[G,G,W,<span style="color:#4caf50;">B</span>]</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">5</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">Back to 1→BLACK</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[G,<span style="color:#4caf50;">B</span>,W,<span style="color:#4caf50;">B</span>]</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">6</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">DFS(2)→visit 3: BLACK→skip</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[G,B,<span style="color:#ffc107;">G</span>,B]</td></tr>
+          <tr><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">7</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">2→BLACK, 0→BLACK</td><td style="padding:4px 6px;border-bottom:1px solid #2a2a4a;">[<span style="color:#4caf50;">B</span>,<span style="color:#4caf50;">B</span>,<span style="color:#4caf50;">B</span>,<span style="color:#4caf50;">B</span>]</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;color:#4caf50;">All nodes BLACK, no GRAY→GRAY encounter → <b>No cycle</b> ✓</p>
+      <p style="color:#888;font-size:11px;">Step 6: node 3 is BLACK (already fully explored from path 0→1→3). Visiting a BLACK node = safe, not a cycle.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6-14 -->
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">6. Internal Mechanics</span>
+      <span class="sec-num">STEP 6</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p><b>Edge types in DFS:</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Edge type</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Target color</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Meaning</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Cycle?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Tree edge</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">WHITE</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Unvisited → explore it</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">No</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#e44d26;">Back edge</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#ffc107;">GRAY</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Still being processed → loop!</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#e44d26;">YES!</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Cross/Forward edge</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">BLACK</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Already fully done → skip</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">No</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:12px;"><b>Kahn's (#33) vs DFS 3-Color (#34):</b></p>
+      <table style="width:100%;font-size:10px;margin-top:8px;">
+        <thead>
+          <tr>
+            <th style="background:#22223a;color:#888;padding:5px;">Aspect</th>
+            <th style="background:#22223a;color:#888;padding:5px;">Kahn's BFS</th>
+            <th style="background:#22223a;color:#888;padding:5px;">DFS 3-Color</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Detects cycle</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Implicitly (count < n)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Explicitly (back edge)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Gives topo order</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Yes (naturally)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Yes (reverse post-order)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Can find the cycle</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#e44d26;">No (just knows it exists)</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#4caf50;">Yes (trace GRAY nodes)</td></tr>
+          <tr><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Undirected graphs</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;color:#e44d26;">Doesn't work</td><td style="padding:4px 5px;border-bottom:1px solid #2a2a4a;">Needs modification (parent tracking)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">7. Complexity Analysis</span>
+      <span class="sec-num">STEP 7</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="complexity-row">
+        <div class="complexity-tag"><span class="label">Time:</span><span class="value">O(V + E)</span></div>
+        <div class="complexity-tag"><span class="label">Space:</span><span class="value">O(V + E)</span></div>
+      </div>
+      <p style="margin-top:10px;">Each node visited once (WHITE→GRAY→BLACK). Each edge checked once. Graph storage = O(V+E).</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">☕</span>
+      <span class="sec-title">8. Java Implementation</span>
+      <span class="sec-num">STEP 8</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+<pre><code><span class="keyword">import</span> java.util.*;
+
+<span class="keyword">public class</span> <span class="type">CycleDetection</span> {
+
+    <span class="keyword">public static boolean</span> <span class="type">canFinish</span>(<span class="type">int</span> n, <span class="type">int</span>[][] prereqs) {
+        List&lt;List&lt;Integer&gt;&gt; graph = <span class="keyword">new</span> ArrayList&lt;&gt;();
+        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) graph.add(<span class="keyword">new</span> ArrayList&lt;&gt;());
+        <span class="keyword">for</span> (<span class="type">int</span>[] p : prereqs) graph.get(p[<span class="number">1</span>]).add(p[<span class="number">0</span>]);
+
+        <span class="type">int</span>[] color = <span class="keyword">new</span> <span class="type">int</span>[n]; <span class="comment">// 0=WHITE, 1=GRAY, 2=BLACK</span>
+
+        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) {
+            <span class="keyword">if</span> (color[i] == <span class="number">0</span> &amp;&amp; hasCycle(graph, i, color)) {
+                <span class="keyword">return false</span>; <span class="comment">// cycle found → can't finish</span>
+            }
+        }
+        <span class="keyword">return true</span>; <span class="comment">// no cycle → can finish all courses</span>
+    }
+
+    <span class="keyword">private static boolean</span> <span class="type">hasCycle</span>(List&lt;List&lt;Integer&gt;&gt; graph,
+                                      <span class="type">int</span> node, <span class="type">int</span>[] color) {
+        <span class="keyword">if</span> (color[node] == <span class="number">1</span>) <span class="keyword">return true</span>;  <span class="comment">// GRAY → cycle!</span>
+        <span class="keyword">if</span> (color[node] == <span class="number">2</span>) <span class="keyword">return false</span>; <span class="comment">// BLACK → done, skip</span>
+
+        color[node] = <span class="number">1</span>; <span class="comment">// mark GRAY</span>
+
+        <span class="keyword">for</span> (<span class="type">int</span> next : graph.get(node)) {
+            <span class="keyword">if</span> (hasCycle(graph, next, color)) <span class="keyword">return true</span>;
+        }
+
+        color[node] = <span class="number">2</span>; <span class="comment">// mark BLACK</span>
+        <span class="keyword">return false</span>;
+    }
+}</code></pre>
+      <p style="margin-top:8px;color:#888;font-size:11px;">💡 <code>canFinish</code> returns true if NO cycle (can finish all courses). The DFS helper returns true if cycle IS found.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🧪</span>
+      <span class="sec-title">9. Edge Cases</span>
+      <span class="sec-num">STEP 9</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;font-size:12px;">
+        <thead><tr><th style="background:#22223a;color:#888;padding:8px;">Case</th><th style="background:#22223a;color:#888;padding:8px;">Has cycle?</th><th style="background:#22223a;color:#888;padding:8px;">Note</th></tr></thead>
+        <tbody>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Self-loop: 0→0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">Yes</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Node visits itself (GRAY→GRAY)</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Two-node cycle: 0→1→0</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">Yes</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Mutual dependency</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">No edges</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">No</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Isolated nodes, no cycle possible</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">DAG (tree-like)</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#4caf50;">No</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Valid dependency graph</td></tr>
+          <tr><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Disconnected with cycle in one component</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;color:#e44d26;">Yes</td><td style="padding:6px 8px;border-bottom:1px solid #2a2a4a;">Must check ALL components</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">⚠️</span>
+      <span class="sec-title">10. Common Mistakes</span>
+      <span class="sec-num">STEP 10</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ol>
+        <li><b>Using boolean visited instead of 3 colors</b>
+          <p style="color:#e44d26;">❌ Can't distinguish GRAY (in-progress) from BLACK (done) → false positives</p>
+          <p style="color:#4caf50;">✅ Use int[n] with 0/1/2 for WHITE/GRAY/BLACK</p>
+        </li>
+        <li style="margin-top:10px;"><b>Not starting DFS from every unvisited node</b>
+          <p style="color:#e44d26;">❌ Cycle might be in a disconnected component you never visited</p>
+          <p style="color:#4caf50;">✅ Loop through all nodes: <code>if (color[i] == 0) dfs(i)</code></p>
+        </li>
+        <li style="margin-top:10px;"><b>Forgetting to mark BLACK after processing</b>
+          <p style="color:#e44d26;">❌ Node stays GRAY forever → false cycle detection on cross edges</p>
+          <p style="color:#4caf50;">✅ <code>color[node] = 2</code> after all neighbors are done</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🔑</span>
+      <span class="sec-title">11. When to Use This Pattern</span>
+      <span class="sec-num">STEP 11</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>✅ "Detect cycle in directed graph"</li>
+        <li>✅ "Can all tasks be completed?" (Course Schedule LC #207)</li>
+        <li>✅ "Deadlock detection" in operating systems</li>
+        <li>✅ "Is this a valid DAG?"</li>
+        <li>✅ When you need to FIND the cycle (trace GRAY nodes), not just detect it</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🚫</span>
+      <span class="sec-title">12. When NOT to Use</span>
+      <span class="sec-num">STEP 12</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <ul>
+        <li>❌ Undirected graph cycle detection — use Union-Find or simple DFS with parent tracking</li>
+        <li>❌ Just need topological order (no cycle info) — Kahn's BFS (#33) is simpler</li>
+        <li>❌ "Shortest cycle" — needs BFS from each node, not DFS coloring</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="takeaway">
+    💡 "Cycle in directed graph = DFS 3-color. WHITE→GRAY→BLACK. If you visit a GRAY node → back edge → CYCLE. If you visit BLACK → already done → safe."
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+      <span class="sec-icon">🌉</span>
+      <span class="sec-title">14. Bridge to Next Problem</span>
+      <span class="sec-num">NEXT</span>
+      <span class="sec-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <p>Ab tak graph problems:</p>
+      <ul>
+        <li>#31: Grid DFS (connected components)</li>
+        <li>#32: Grid BFS (shortest path)</li>
+        <li>#33: Topological Sort (dependency ordering)</li>
+        <li>#34: Cycle Detection (3-color DFS)</li>
+      </ul>
+      <p style="margin-top:10px;">Next: <b>"Cheapest Flight Within K Stops"</b> — shortest path but with WEIGHTED edges and a constraint (max K stops). BFS alone won't work — need Dijkstra variant or modified BFS.</p>
+      <p style="color:#6c63ff;margin-top:12px;">→ Unweighted shortest path (BFS) → Weighted shortest path with constraints (Dijkstra/BFS variant)</p>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <a class="nav-btn" href="problem33.html">← Problem #33</a>
+    <button class="nav-btn mark-done" id="mark-done-btn" onclick="toggleDone(34)">☐ Mark as Done</button>
+    <a class="nav-btn" href="problem35.html">Problem #35 →</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY="dsa-roadmap-progress";const PROBLEM_NUM=34;
+function loadProgress(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{};}catch{return{};}}
+function saveProgress(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}
+function toggleDone(n){const p=loadProgress();if(p[n]==="done")delete p[n];else p[n]="done";saveProgress(p);updateUI();}
+function updateUI(){const p=loadProgress(),btn=document.getElementById("mark-done-btn");if(p[PROBLEM_NUM]==="done"){btn.textContent="✔ Completed";btn.classList.add("completed");}else{btn.textContent="☐ Mark as Done";btn.classList.remove("completed");}updateReadProgress();}
+function updateReadProgress(){const p=loadProgress();if(p[PROBLEM_NUM]==="done"){document.getElementById("section-pct").textContent="100%";document.getElementById("section-bar").style.width="100%";return;}const s=document.querySelectorAll(".section, .takeaway"),t=s.length;if(t===0)return;let v=0;s.forEach(sec=>{if(sec.getBoundingClientRect().top<window.innerHeight)v++;});const pct=Math.min(100,Math.round((v/t)*100));document.getElementById("section-pct").textContent=pct+"%";document.getElementById("section-bar").style.width=pct+"%";}
+window.addEventListener("scroll",updateReadProgress);updateUI();
+</script>
+</body>
+</html>
