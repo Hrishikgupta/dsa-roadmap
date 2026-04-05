@@ -263,3 +263,45 @@ code {
 
   .nav-btn { font-size: 12px; padding: 8px 14px; }
 }
+
+
+/* Practice Links Section */
+.practice-links {
+  background: #16213e;
+  border: 1px solid #2a2a4a;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+.practice-links h3 {
+  font-size: 14px;
+  color: #6c63ff;
+  margin-bottom: 10px;
+}
+.practice-links .links-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.practice-links .link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+.practice-links .link-btn:hover { filter: brightness(1.2); transform: translateY(-1px); }
+.link-lc { background: #1a1a2e; color: #ffa116; border-color: #ffa116 !important; }
+.link-gfg { background: #1a1a2e; color: #2f8d46; border-color: #2f8d46 !important; }
+.link-nc { background: #1a1a2e; color: #48c6ef; border-color: #48c6ef !important; }
+.link-hr { background: #1a1a2e; color: #1ba94c; border-color: #1ba94c !important; }
+.link-cf { background: #1a1a2e; color: #1890ff; border-color: #1890ff !important; }
+
+@media (max-width: 480px) {
+  .practice-links .link-btn { font-size: 11px; padding: 6px 10px; }
+}
